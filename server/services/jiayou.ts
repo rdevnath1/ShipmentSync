@@ -219,4 +219,28 @@ export class JiayouService {
       throw new Error('Failed to get channel info from Jiayou');
     }
   }
+
+  async checkPostalCodeCoverage(channelCode: string, postCode: string, dimensions: any, weight: number): Promise<any> {
+    try {
+      const response = await axios.post(
+        `${this.baseUrl}/outerApi/costCal`,
+        {
+          channelCode: [channelCode],
+          length: dimensions.length,
+          width: dimensions.width,
+          height: dimensions.height,
+          weight: weight,
+          postCode: postCode,
+          iso2: "US",
+          fromAddressId: "JFK"
+        },
+        { headers: { 'apikey': this.apiKey } }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error('Error checking postal code coverage:', error);
+      throw new Error('Failed to check postal code coverage');
+    }
+  }
 }

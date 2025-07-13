@@ -297,6 +297,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Check postal code coverage
+  app.post("/api/jiayou/check-coverage", async (req, res) => {
+    try {
+      const { channelCode, postCode, dimensions, weight } = req.body;
+      
+      const coverage = await jiayouService.checkPostalCodeCoverage(
+        channelCode || "US001",
+        postCode,
+        dimensions || { length: 10, width: 10, height: 2 },
+        weight || 0.2
+      );
+      
+      res.json(coverage);
+    } catch (error) {
+      console.error("Error checking coverage:", error);
+      res.status(500).json({ error: "Failed to check coverage" });
+    }
+  });
+
   // Print label
   app.post("/api/labels/print", async (req, res) => {
     try {
