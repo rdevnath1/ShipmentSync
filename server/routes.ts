@@ -76,10 +76,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/shipments/create", async (req, res) => {
     try {
       const { orderId, channelCode, serviceType, weight, dimensions } = req.body;
+      console.log("Create shipment request:", { orderId, channelCode, serviceType, weight, dimensions });
 
       // Get order details
       const order = await storage.getOrder(orderId);
+      console.log("Found order:", order);
       if (!order) {
+        console.log("Order not found, available orders:", await storage.getAllOrders());
         return res.status(404).json({ error: "Order not found" });
       }
 

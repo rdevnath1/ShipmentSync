@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,7 +39,7 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
   const form = useForm<CreateShipmentForm>({
     resolver: zodResolver(createShipmentSchema),
     defaultValues: {
-      orderId: order?.id || 0,
+      orderId: 0,
       channelCode: "CA002",
       serviceType: "standard",
       weight: 1,
@@ -51,8 +51,17 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
     },
   });
 
+  // Update form when order changes
+  useEffect(() => {
+    if (order) {
+      form.setValue("orderId", order.id);
+      console.log("Setting order ID:", order.id);
+    }
+  }, [order, form]);
+
   const createShipmentMutation = useMutation({
     mutationFn: async (data: CreateShipmentForm) => {
+      console.log("Sending shipment data:", data);
       const response = await apiRequest("POST", "/api/shipments/create", data);
       return response.json();
     },
@@ -75,6 +84,7 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
   });
 
   const onSubmit = (data: CreateShipmentForm) => {
+    console.log("Form submitted with data:", data);
     createShipmentMutation.mutate(data);
   };
 
@@ -87,6 +97,9 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create New Shipment</DialogTitle>
+          <DialogDescription>
+            Create a new shipment for order #{order.orderNumber}
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
