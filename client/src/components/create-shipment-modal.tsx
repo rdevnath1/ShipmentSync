@@ -1,0 +1,245 @@
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+
+const createShipmentSchema = z.object({
+  orderId: z.number(),
+  channelCode: z.string().min(1, "Channel code is required"),
+  serviceType: z.string().min(1, "Service type is required"),
+  weight: z.number().min(0.1, "Weight must be greater than 0"),
+  dimensions: z.object({
+    length: z.number().min(1, "Length is required"),
+    width: z.number().min(1, "Width is required"),
+    height: z.number().min(1, "Height is required"),
+  }),
+});
+
+type CreateShipmentForm = z.infer<typeof createShipmentSchema>;
+
+interface CreateShipmentModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  order: any;
+}
+
+export default function CreateShipmentModal({ isOpen, onClose, order }: CreateShipmentModalProps) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const form = useForm<CreateShipmentForm>({
+    resolver: zodResolver(createShipmentSchema),
+    defaultValues: {
+      orderId: order?.id || 0,
+      channelCode: "CA002",
+      serviceType: "standard",
+      weight: 1,
+      dimensions: {
+        length: 10,
+        width: 10,
+        height: 10,
+      },
+    },
+  });
+
+  const createShipmentMutation = useMutation({
+    mutationFn: async (data: CreateShipmentForm) => {
+      const response = await apiRequest("POST", "/api/shipments/create", data);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Success",
+        description: data.message,
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/shipments"] });
+      onClose();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create shipment",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const onSubmit = (data: CreateShipmentForm) => {
+    createShipmentMutation.mutate(data);
+  };
+
+  if (!order) return null;
+
+  const shippingAddress = order.shippingAddress as any;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Create New Shipment</DialogTitle>
+        </DialogHeader>
+
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <Label htmlFor="orderId">Order ID</Label>
+              <Input
+                id="orderId"
+                value={`#${order.orderNumber}`}
+                disabled
+              />
+            </div>
+            <div>
+              <Label htmlFor="serviceType">Shipping Service</Label>
+              <Select
+                value={form.watch("serviceType")}
+                onValueChange={(value) => form.setValue("serviceType", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select service" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="express">Jiayou Express</SelectItem>
+                  <SelectItem value="standard">Jiayou Standard</SelectItem>
+                  <SelectItem value="economy">Jiayou Economy</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="border-t border-slate-200 pt-6">
+            <h4 className="text-md font-medium text-slate-800 mb-4">Recipient Information</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label>Name</Label>
+                <Input value={shippingAddress?.name || ""} disabled />
+              </div>
+              <div>
+                <Label>Phone</Label>
+                <Input value={shippingAddress?.phone || ""} disabled />
+              </div>
+              <div className="md:col-span-2">
+                <Label>Address</Label>
+                <Textarea
+                  value={`${shippingAddress?.street1 || ""} ${shippingAddress?.street2 || ""}`}
+                  disabled
+                  rows={3}
+                />
+              </div>
+              <div>
+                <Label>City</Label>
+                <Input value={shippingAddress?.city || ""} disabled />
+              </div>
+              <div>
+                <Label>Postal Code</Label>
+                <Input value={shippingAddress?.postalCode || ""} disabled />
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-slate-200 pt-6">
+            <h4 className="text-md font-medium text-slate-800 mb-4">Package Details</h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="weight">Weight (kg)</Label>
+                <Input
+                  id="weight"
+                  type="number"
+                  step="0.1"
+                  {...form.register("weight", { valueAsNumber: true })}
+                />
+                {form.formState.errors.weight && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {form.formState.errors.weight.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <Label htmlFor="length">Length (cm)</Label>
+                <Input
+                  id="length"
+                  type="number"
+                  {...form.register("dimensions.length", { valueAsNumber: true })}
+                />
+                {form.formState.errors.dimensions?.length && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {form.formState.errors.dimensions.length.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <Label htmlFor="width">Width (cm)</Label>
+                <Input
+                  id="width"
+                  type="number"
+                  {...form.register("dimensions.width", { valueAsNumber: true })}
+                />
+                {form.formState.errors.dimensions?.width && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {form.formState.errors.dimensions.width.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <Label htmlFor="height">Height (cm)</Label>
+                <Input
+                  id="height"
+                  type="number"
+                  {...form.register("dimensions.height", { valueAsNumber: true })}
+                />
+                {form.formState.errors.dimensions?.height && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {form.formState.errors.dimensions.height.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <Label htmlFor="channelCode">Channel Code</Label>
+                <Select
+                  value={form.watch("channelCode")}
+                  onValueChange={(value) => form.setValue("channelCode", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select channel" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="CA002">CA002 - Canada Express</SelectItem>
+                    <SelectItem value="US001">US001 - US Standard</SelectItem>
+                    <SelectItem value="UK001">UK001 - UK Express</SelectItem>
+                  </SelectContent>
+                </Select>
+                {form.formState.errors.channelCode && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {form.formState.errors.channelCode.message}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end space-x-3 pt-6 border-t border-slate-200">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={createShipmentMutation.isPending}
+            >
+              {createShipmentMutation.isPending ? "Creating..." : "Create Shipment"}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
