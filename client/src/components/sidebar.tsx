@@ -28,12 +28,12 @@ export default function Sidebar() {
             <Truck className="text-white" size={20} />
           </div>
           <div>
-            <h1 className="text-xl font-semibold text-slate-800">Jiayou SMS</h1>
+            <h1 className="text-xl font-semibold text-slate-800">Quikpik
+</h1>
             <p className="text-sm text-slate-500">Shipment Management</p>
           </div>
         </div>
       </div>
-      
       <div className="px-4 pb-4">
         <ul className="space-y-2">
           {navItems.map(({ path, icon: Icon, label }) => {
