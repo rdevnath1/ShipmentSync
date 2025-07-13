@@ -72,6 +72,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get available Jiayou channel codes
+  app.get("/api/jiayou/channels", async (req, res) => {
+    try {
+      const channels = await jiayouService.getChannelCodes();
+      res.json(channels);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch channel codes" });
+    }
+  });
+
   // Create shipment with Jiayou
   app.post("/api/shipments/create", async (req, res) => {
     try {
@@ -89,9 +99,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const shippingAddress = order.shippingAddress as any;
       const items = order.items as any[];
 
+      // Prepare item list - use default item if no items in order
+      const apiOrderItemList = items.length > 0 ? items.map(item => ({
+        ename: item.name,
+        sku: item.sku,
+        price: item.unitPrice,
+        quantity: item.quantity,
+        weight: item.weight?.value || 0.1,
+        unitCode: "PCE",
+      })) : [
+        {
+          ename: "General Merchandise",
+          sku: "DEFAULT-001",
+          price: 10.00,
+          quantity: 1,
+          weight: weight || 1,
+          unitCode: "PCE",
+        }
+      ];
+
+      // Determine channel code based on country
+      const defaultChannelCode = shippingAddress.country === "CA" ? "CA002" : 
+                                 shippingAddress.country === "US" ? "US001" : 
+                                 "CA002";
+
       // Prepare Jiayou order data
       const jiayouOrderData = {
-        channelCode: channelCode || "CA002",
+        channelCode: channelCode || defaultChannelCode,
         referenceNo: order.orderNumber,
         productType: 1,
         pweight: weight || 1,
@@ -117,18 +151,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         shipperPhone: "13800138000",
         currencyCode: "USD",
         returnLabel: "1",
-        apiOrderItemList: items.map(item => ({
-          ename: item.name,
-          sku: item.sku,
-          price: item.unitPrice,
-          quantity: item.quantity,
-          weight: item.weight?.value || 0.1,
-          unitCode: "PCE",
-        })),
+        apiOrderItemList,
       };
 
       // Create order with Jiayou
+      console.log("Sending to Jiayou API:", JSON.stringify(jiayouOrderData, null, 2));
       const jiayouResponse = await jiayouService.createOrder(jiayouOrderData);
+      console.log("Jiayou API response:", jiayouResponse);
 
       if (jiayouResponse.code !== 1) {
         return res.status(400).json({ error: jiayouResponse.message });
