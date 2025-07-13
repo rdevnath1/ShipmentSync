@@ -7,6 +7,7 @@ import {
   Route, 
   Settings 
 } from "lucide-react";
+import logoPath from "@assets/logo_1752442395960.png";
 
 const navItems = [
   { path: "/", icon: LayoutDashboard, label: "Dashboard" },
@@ -21,16 +22,15 @@ export default function Sidebar() {
   const [location] = useLocation();
 
   return (
-    <nav className="bg-white border-r border-slate-200 w-64 fixed h-full left-0 top-0 overflow-y-auto">
+    <nav className="bg-background border-r border-border w-64 fixed h-full left-0 top-0 overflow-y-auto">
       <div className="p-6">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-            <Truck className="text-white" size={20} />
+          <div className="w-10 h-10 flex items-center justify-center">
+            <img src={logoPath} alt="Quikpik Logo" className="w-8 h-8" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold text-slate-800">Quikpik
-</h1>
-            <p className="text-sm text-slate-500">Shipment Management</p>
+            <h1 className="text-xl font-semibold text-foreground">Quikpik</h1>
+            <p className="text-sm text-muted-foreground">Shipment Management</p>
           </div>
         </div>
       </div>
@@ -42,8 +42,8 @@ export default function Sidebar() {
               <li key={path}>
                 <Link href={path} className={`flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors ${
                   isActive 
-                    ? "text-blue-600 bg-blue-50" 
-                    : "text-slate-600 hover:text-blue-600 hover:bg-blue-50"
+                    ? "text-primary bg-accent" 
+                    : "text-muted-foreground hover:text-primary hover:bg-accent"
                 }`}>
                   <Icon size={20} />
                   <span>{label}</span>

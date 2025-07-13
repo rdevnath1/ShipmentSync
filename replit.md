@@ -53,6 +53,15 @@ Preferred communication style: Simple, everyday language.
 3. **Status Updates**: Tracking events are logged and displayed in real-time
 4. **Dashboard Analytics**: Aggregated data is displayed on the dashboard
 
+## Recent Changes
+
+### Color Scheme Update (July 13, 2025)
+- Updated the entire application's color palette to match the provided logo
+- Primary color changed to dark teal/slate: `hsl(210, 24%, 16%)`
+- Integrated the company logo into the sidebar navigation
+- Updated both light and dark theme variants to maintain consistency
+- Modified scrollbar colors and background tones to complement the new brand identity
+
 ## External Dependencies
 
 ### Third-Party APIs
