@@ -55,6 +55,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### ChatGPT O3 Fixes Implementation (July 13, 2025)
+- **Hub Injection**: Added fromAddressId "JFK" for US001 channel hub injection
+- **US Shipper Address**: Updated to JFK Airport fulfillment center with NY postal code 11430
+- **Weight Conversion**: Implemented proper ounces to kg conversion with 3 decimal precision
+- **Address Verification**: Added pre-shipment address verification API call
+- **Unique Reference Numbers**: Generated unique references with timestamp and random strings
+- **SUCCESSFUL RESULT**: System now creates shipments successfully with tracking numbers
+
 ### API Integration Fixes (July 13, 2025)
 - Fixed critical payload formatting for Jiayou API compliance
 - Corrected shipper address from US to China (CN) as required by documentation

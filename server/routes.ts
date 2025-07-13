@@ -135,13 +135,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const shippingAddress = order.shippingAddress as any;
       const items = order.items as any[];
 
+      // Convert weight from ounces to kg with 3 decimal precision
+      const convertOzToKg = (oz: number) => Math.round(Math.max(0.001, oz * 0.0283495) * 1000) / 1000;
+      
       // Prepare item list - use default item if no items in order
       const apiOrderItemList = items.length > 0 ? items.map(item => ({
         ename: item.name,
         sku: item.sku,
         price: item.unitPrice,
         quantity: item.quantity,
-        weight: Math.round(Math.max(0.001, (item.weight?.value || 0.1) * 0.0283495) * 1000) / 1000, // Convert ounces to kg, round to 3 decimals
+        weight: convertOzToKg(item.weight?.value || 0.1),
         unitCode: "PCE",
       })) : [
         {
@@ -149,7 +152,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sku: "DEFAULT-001",
           price: 10.00,
           quantity: 1,
-          weight: Math.round(Math.max(0.001, (weight || 1) * 0.0283495) * 1000) / 1000, // Convert ounces to kg, round to 3 decimals
+          weight: convertOzToKg(weight || 1),
           unitCode: "PCE",
         }
       ];
@@ -157,14 +160,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Only use US001 for US domestic shipping
       const defaultChannelCode = "US001";
 
-      // Prepare Jiayou order data
+      // Verify address first
+      console.log("Verifying address...");
+      const addressVerification = await jiayouService.verifyAddress(
+        shippingAddress.postalCode || "",
+        shippingAddress.country || "US",
+        shippingAddress.state || "",
+        shippingAddress.city || ""
+      );
+      console.log("Address verification result:", addressVerification);
+
+      if (addressVerification.code === 0) {
+        return res.status(400).json({ error: `Address verification failed: ${addressVerification.message}` });
+      }
+
+      // Generate unique reference number
+      const uniqueReferenceNo = `${order.orderNumber}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+      // Prepare Jiayou order data with fromAddressId for hub injection
       const jiayouOrderData = {
         channelCode: channelCode || defaultChannelCode,
-        referenceNo: `${order.orderNumber}-${Date.now()}`,
+        referenceNo: uniqueReferenceNo,
         productType: 1,
-        pweight: Math.round(Math.max(0.001, (weight || 1) * 0.0283495) * 1000) / 1000, // Convert ounces to kg, round to 3 decimals
+        pweight: convertOzToKg(weight || 1),
         pieces: 1,
         insured: 0,
+        fromAddressId: "JFK", // Hub injection for US001
 
         consigneeName: shippingAddress.name,
         consigneeCompany: shippingAddress.company || "",
@@ -177,11 +198,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         consigneeEmail: order.customerEmail || "",
         shipperName: "US Fulfillment Center",
         shipperCountryCode: "US",
-        shipperProvince: "CA",
-        shipperCity: "Los Angeles",
-        shipperAddress: "1234 Fulfillment Center Blvd",
-        shipperPostcode: "90001",
-        shipperPhone: "+1-555-123-4567",
+        shipperProvince: "NY",
+        shipperCity: "New York",
+        shipperAddress: "JFK Airport Fulfillment Center",
+        shipperPostcode: "11430",
+        shipperPhone: "+1-718-244-4444",
         currencyCode: "USD",
         apiOrderItemList,
       };
@@ -205,7 +226,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Make unique reference number for each attempt
         const currentOrderData = {
           ...jiayouOrderData,
-          referenceNo: `${order.orderNumber}-${Date.now()}-${attempts}`
+          referenceNo: `${order.orderNumber}-${Date.now()}-${attempts}-${Math.random().toString(36).substr(2, 9)}`
         };
         
         console.log(`Attempt ${attempts}: Sending to Jiayou API:`, JSON.stringify(currentOrderData, null, 2));

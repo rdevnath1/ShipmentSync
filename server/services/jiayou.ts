@@ -243,4 +243,24 @@ export class JiayouService {
       throw new Error('Failed to check postal code coverage');
     }
   }
+
+  async verifyAddress(postCode: string, countryCode: string, provinceCode: string, city: string): Promise<any> {
+    try {
+      const response = await axios.post(
+        `${this.baseUrl}/api/orderNew/verify`,
+        {
+          postCode: postCode,
+          countryCode: countryCode,
+          provinceCode: provinceCode,
+          city: city
+        },
+        { headers: this.getAuthHeaders() }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error('Error verifying address:', error);
+      throw new Error('Failed to verify address');
+    }
+  }
 }
