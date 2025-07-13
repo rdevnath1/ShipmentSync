@@ -55,6 +55,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### API Integration Fixes (July 13, 2025)
+- Fixed critical payload formatting for Jiayou API compliance
+- Corrected shipper address from US to China (CN) as required by documentation
+- Removed optional fields (shipMode, returnLabel) that were causing issues
+- Updated phone number formats and address structure
+- System now sends properly formatted requests that match API documentation exactly
+
 ### Color Scheme Update (July 13, 2025)
 - Updated the entire application's color palette to match the provided logo
 - Primary color changed to dark teal/slate: `hsl(210, 24%, 16%)`
