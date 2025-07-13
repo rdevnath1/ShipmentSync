@@ -20,6 +20,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update order address (for testing)
+  app.put("/api/orders/:id/address", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { shippingAddress } = req.body;
+      
+      const order = await storage.getOrder(parseInt(id));
+      if (!order) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+      
+      const updatedOrder = await storage.updateOrder(parseInt(id), { 
+        shippingAddress: shippingAddress 
+      });
+      
+      res.json(updatedOrder);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update order address" });
+    }
+  });
+
   // Pull orders from ShipStation
   app.post("/api/orders/pull-shipstation", async (req, res) => {
     try {
