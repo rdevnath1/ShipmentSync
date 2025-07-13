@@ -141,7 +141,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sku: item.sku,
         price: item.unitPrice,
         quantity: item.quantity,
-        weight: item.weight?.value || 0.1,
+        weight: Math.round(Math.max(0.001, (item.weight?.value || 0.1) * 0.0283495) * 1000) / 1000, // Convert ounces to kg, round to 3 decimals
         unitCode: "PCE",
       })) : [
         {
@@ -149,22 +149,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sku: "DEFAULT-001",
           price: 10.00,
           quantity: 1,
-          weight: weight || 1,
+          weight: Math.round(Math.max(0.001, (weight || 1) * 0.0283495) * 1000) / 1000, // Convert ounces to kg, round to 3 decimals
           unitCode: "PCE",
         }
       ];
 
-      // Determine channel code based on country
-      const defaultChannelCode = shippingAddress.country === "CA" ? "CA002" : 
-                                 shippingAddress.country === "US" ? "US001" : 
-                                 "CA002";
+      // Only use US001 for US domestic shipping
+      const defaultChannelCode = "US001";
 
       // Prepare Jiayou order data
       const jiayouOrderData = {
         channelCode: channelCode || defaultChannelCode,
-        referenceNo: order.orderNumber,
+        referenceNo: `${order.orderNumber}-${Date.now()}`,
         productType: 1,
-        pweight: weight || 1,
+        pweight: Math.round(Math.max(0.001, (weight || 1) * 0.0283495) * 1000) / 1000, // Convert ounces to kg, round to 3 decimals
         pieces: 1,
         insured: 0,
 
@@ -177,21 +175,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
         consigneePostcode: shippingAddress.postalCode || "",
         consigneePhone: shippingAddress.phone || "+1-555-000-0000",
         consigneeEmail: order.customerEmail || "",
-        shipperName: "Quikpik",
-        shipperCountryCode: "CN",
-        shipperProvince: "Guangdong",
-        shipperCity: "Shenzhen",
-        shipperAddress: "Longhua District",
-        shipperPostcode: "518000",
-        shipperPhone: "+86-13800138000",
+        shipperName: "US Fulfillment Center",
+        shipperCountryCode: "US",
+        shipperProvince: "CA",
+        shipperCity: "Los Angeles",
+        shipperAddress: "1234 Fulfillment Center Blvd",
+        shipperPostcode: "90001",
+        shipperPhone: "+1-555-123-4567",
         currencyCode: "USD",
         apiOrderItemList,
       };
 
-      // Create order with Jiayou
-      console.log("Sending to Jiayou API:", JSON.stringify(jiayouOrderData, null, 2));
-      const jiayouResponse = await jiayouService.createOrder(jiayouOrderData);
-      console.log("Jiayou API response:", jiayouResponse);
+      // Add field validation
+      const requiredFields = ['consigneeName', 'consigneeCountryCode', 'consigneeProvince', 'consigneeCity', 'consigneeAddress', 'consigneePostcode', 'consigneePhone'];
+      for (const field of requiredFields) {
+        if (!jiayouOrderData[field] || jiayouOrderData[field].trim() === '') {
+          return res.status(400).json({ error: `Required field ${field} is missing or empty` });
+        }
+      }
+
+      // Implement retry logic for error 100001
+      let jiayouResponse;
+      let attempts = 0;
+      const maxAttempts = 5;
+      
+      while (attempts < maxAttempts) {
+        attempts++;
+        
+        // Make unique reference number for each attempt
+        const currentOrderData = {
+          ...jiayouOrderData,
+          referenceNo: `${order.orderNumber}-${Date.now()}-${attempts}`
+        };
+        
+        console.log(`Attempt ${attempts}: Sending to Jiayou API:`, JSON.stringify(currentOrderData, null, 2));
+        jiayouResponse = await jiayouService.createOrder(currentOrderData);
+        console.log(`Attempt ${attempts}: Jiayou API response:`, jiayouResponse);
+        
+        if (jiayouResponse.code === 1) {
+          console.log(`Success on attempt ${attempts}`);
+          break;
+        }
+        
+        // Check if it's the "getting tracking number" error (100001)
+        if (jiayouResponse.message.includes('获取单号中，请稍后重试') || jiayouResponse.message.includes('100001')) {
+          console.log(`Attempt ${attempts}: Getting tracking number error, retrying...`);
+          await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds before retry
+          continue;
+        }
+        
+        // If it's a different error, don't retry
+        console.log(`Attempt ${attempts}: Different error, not retrying:`, jiayouResponse.message);
+        break;
+      }
 
       if (jiayouResponse.code !== 1) {
         return res.status(400).json({ error: jiayouResponse.message });
