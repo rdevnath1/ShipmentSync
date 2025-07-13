@@ -6,6 +6,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Dashboard from "@/pages/dashboard";
 import Orders from "@/pages/orders";
 import Shipments from "@/pages/shipments";
+import Labels from "@/pages/labels";
+import Tracking from "@/pages/tracking";
+import Settings from "@/pages/settings";
 import NotFound from "@/pages/not-found";
 import Sidebar from "@/components/sidebar";
 
@@ -18,6 +21,9 @@ function Router() {
           <Route path="/" component={Dashboard} />
           <Route path="/orders" component={Orders} />
           <Route path="/shipments" component={Shipments} />
+          <Route path="/labels" component={Labels} />
+          <Route path="/tracking" component={Tracking} />
+          <Route path="/settings" component={Settings} />
           <Route component={NotFound} />
         </Switch>
       </main>

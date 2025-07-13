@@ -40,15 +40,13 @@ export default function Sidebar() {
             const isActive = location === path;
             return (
               <li key={path}>
-                <Link href={path}>
-                  <a className={`flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors ${
-                    isActive 
-                      ? "text-blue-600 bg-blue-50" 
-                      : "text-slate-600 hover:text-blue-600 hover:bg-blue-50"
-                  }`}>
-                    <Icon size={20} />
-                    <span>{label}</span>
-                  </a>
+                <Link href={path} className={`flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors ${
+                  isActive 
+                    ? "text-blue-600 bg-blue-50" 
+                    : "text-slate-600 hover:text-blue-600 hover:bg-blue-50"
+                }`}>
+                  <Icon size={20} />
+                  <span>{label}</span>
                 </Link>
               </li>
             );
