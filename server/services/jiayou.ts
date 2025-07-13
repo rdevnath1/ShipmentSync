@@ -204,4 +204,19 @@ export class JiayouService {
       throw new Error('Failed to get channel codes from Jiayou');
     }
   }
+
+  async getChannelInfo(channelCode: string): Promise<any> {
+    try {
+      const response = await axios.post(
+        `${this.baseUrl}/api/orderNew/getChannelInfo`,
+        { channelCode },
+        { headers: this.getAuthHeaders() }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error('Error getting channel info from Jiayou:', error);
+      throw new Error('Failed to get channel info from Jiayou');
+    }
+  }
 }

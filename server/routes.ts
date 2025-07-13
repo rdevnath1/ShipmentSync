@@ -103,6 +103,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get channel delivery range/coverage info
+  app.get("/api/jiayou/channel-info", async (req, res) => {
+    try {
+      const { channelCode } = req.query;
+      if (!channelCode) {
+        return res.status(400).json({ error: "Channel code is required" });
+      }
+      
+      const channelInfo = await jiayouService.getChannelInfo(channelCode as string);
+      res.json(channelInfo);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch channel info" });
+    }
+  });
+
   // Create shipment with Jiayou
   app.post("/api/shipments/create", async (req, res) => {
     try {
