@@ -14,7 +14,6 @@ import { apiRequest } from "@/lib/queryClient";
 
 const createShipmentSchema = z.object({
   orderId: z.number(),
-  serviceType: z.string().min(1, "Service type is required"),
   weight: z.number().min(0.1, "Weight must be greater than 0"),
   dimensions: z.object({
     length: z.number().min(1, "Length is required"),
@@ -41,7 +40,6 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
     resolver: zodResolver(createShipmentSchema),
     defaultValues: {
       orderId: 0,
-      serviceType: "standard",
       weight: 5, // Default to 5 oz to meet Jiayou minimum requirements
       dimensions: {
         length: 10,
@@ -107,7 +105,8 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
     mutationFn: async (data: CreateShipmentForm) => {
       const shipmentData = {
         ...data,
-        channelCode: "US001" // Always use US001
+        channelCode: "US001", // Always use US001
+        serviceType: "standard" // Always use standard service
       };
       console.log("Sending shipment data:", shipmentData);
       const response = await apiRequest("POST", "/api/shipments/create", shipmentData);
@@ -170,19 +169,11 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
             </div>
             <div>
               <Label htmlFor="serviceType">Service Type</Label>
-              <Select
-                value={form.watch("serviceType")}
-                onValueChange={(value) => form.setValue("serviceType", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select service" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="express">Express</SelectItem>
-                  <SelectItem value="standard">Standard</SelectItem>
-                  <SelectItem value="economy">Economy</SelectItem>
-                </SelectContent>
-              </Select>
+              <Input
+                id="serviceType"
+                value="Standard"
+                disabled
+              />
             </div>
           </div>
 

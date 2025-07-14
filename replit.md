@@ -55,13 +55,20 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Simplified Interface Update (July 14, 2025)
+- **Removed Channel Selection**: Hardcoded US001 as the only shipping channel throughout the system
+- **Removed Service Type Selection**: Hardcoded "Standard" as the only service type
+- **Simplified UI**: Create shipment modal now shows disabled fields for channel (US001) and service type (Standard)
+- **Backend Optimization**: All API endpoints now automatically use US001 without user selection
+- **Improved User Experience**: Eliminated unnecessary choices to streamline the shipment creation process
+- **SUCCESSFUL RESULT**: Clean, simple interface with US001 channel and Standard service hardcoded
+
 ### Postal Code Coverage Fix (July 14, 2025)
 - **Fixed 500 Error**: Resolved ReferenceError where weight dimensions weren't properly destructured
 - **Improved Weight Handling**: Changed default weight from 1 oz (0.028 kg) to 5 oz (0.142 kg) to meet Jiayou's minimum requirements
 - **Better Error Messages**: System now shows actual Jiayou error messages instead of generic postal code errors
 - **Enhanced Coverage Check**: Added proper postal code validation with real-time feedback
-- **Channel Selection**: Added UI support for US001, US002, US003, and US004 channels with coverage checking
-- **SUCCESSFUL RESULT**: Users now see exact error reasons and can make informed decisions about shipping channels
+- **SUCCESSFUL RESULT**: Users now see exact error reasons and can make informed decisions about shipping compatibility
 
 ### ShipStation Integration Fix (July 14, 2025)
 - **Mark as Shipped Implementation**: Replaced updateOrderWithTracking with ShipStation's mark as shipped API
