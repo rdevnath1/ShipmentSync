@@ -3,11 +3,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Truck } from "lucide-react";
+import { useLocation } from "wouter";
 
 export default function TrackingSection() {
+  const [, navigate] = useLocation();
+  
   const { data: shipments } = useQuery({
     queryKey: ["/api/shipments"],
   });
+
+  const handleViewTracking = (trackingNumber: string) => {
+    navigate(`/tracking?number=${trackingNumber}`);
+  };
 
   const activeShipments = shipments?.filter((s: any) => 
     s.status === "created" || s.status === "in_transit"
@@ -86,6 +93,7 @@ export default function TrackingSection() {
                   className="w-full mt-4" 
                   variant="outline"
                   size="sm"
+                  onClick={() => handleViewTracking(shipment.trackingNumber)}
                 >
                   View Full Tracking
                 </Button>

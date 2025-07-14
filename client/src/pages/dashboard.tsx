@@ -123,6 +123,7 @@ export default function Dashboard() {
 
               <Button 
                 className="w-full bg-emerald-600 hover:bg-emerald-700"
+                onClick={() => window.location.href = '/orders'}
               >
                 <Plus className="mr-2" size={16} />
                 Create Shipments

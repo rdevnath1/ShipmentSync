@@ -20,6 +20,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete order
+  app.delete("/api/orders/:id", async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      
+      // Check if order exists
+      const order = await storage.getOrder(orderId);
+      if (!order) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+
+      // Check if order has associated shipments
+      const shipment = await storage.getShipmentByOrderId(orderId);
+      if (shipment) {
+        return res.status(400).json({ error: "Cannot delete order with associated shipments" });
+      }
+
+      // Delete the order (implement this in storage)
+      await storage.deleteOrder(orderId);
+      res.json({ message: "Order deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting order:", error);
+      res.status(500).json({ error: "Failed to delete order" });
+    }
+  });
+
   // Update order address (for testing)
   app.put("/api/orders/:id/address", async (req, res) => {
     try {

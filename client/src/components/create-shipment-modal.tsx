@@ -40,7 +40,7 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
     resolver: zodResolver(createShipmentSchema),
     defaultValues: {
       orderId: 0,
-      channelCode: "CA002",
+      channelCode: "US001",
       serviceType: "standard",
       weight: 1,
       dimensions: {

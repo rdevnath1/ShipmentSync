@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, Plus, Eye, Trash2, Package } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import CreateShipmentModal from "./create-shipment-modal";
 
 interface OrderTableProps {
@@ -13,6 +16,30 @@ interface OrderTableProps {
 export default function OrderTable({ orders }: OrderTableProps) {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const deleteOrderMutation = useMutation({
+    mutationFn: async (orderId: number) => {
+      const response = await apiRequest("DELETE", `/api/orders/${orderId}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Order deleted successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete order",
+        variant: "destructive",
+      });
+    },
+  });
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -32,6 +59,25 @@ export default function OrderTable({ orders }: OrderTableProps) {
     setShowCreateModal(true);
   };
 
+  const handleViewOrder = (order: any) => {
+    toast({
+      title: "Order Details",
+      description: `Order #${order.orderNumber} - ${order.customerName}`,
+    });
+  };
+
+  const handleDeleteOrder = (order: any) => {
+    if (window.confirm(`Are you sure you want to delete order #${order.orderNumber}?`)) {
+      deleteOrderMutation.mutate(order.id);
+    }
+  };
+
+  const filteredOrders = orders.filter(order => 
+    order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    order.customerEmail.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <>
       <Card>
@@ -47,9 +93,11 @@ export default function OrderTable({ orders }: OrderTableProps) {
                 <Input 
                   placeholder="Search orders..." 
                   className="pl-10 pr-4 py-2"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <Button>
+              <Button disabled>
                 <Plus className="mr-2" size={16} />
                 Manual Order
               </Button>
@@ -90,7 +138,7 @@ export default function OrderTable({ orders }: OrderTableProps) {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-slate-200">
-                  {orders.map((order: any) => {
+                  {filteredOrders.map((order: any) => {
                     const shippingAddress = order.shippingAddress as any;
                     return (
                       <tr key={order.id} className="hover:bg-slate-50 transition-colors">
@@ -136,11 +184,20 @@ export default function OrderTable({ orders }: OrderTableProps) {
                               <Package className="mr-1" size={12} />
                               Ship
                             </Button>
-                            <Button size="sm" variant="outline">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleViewOrder(order)}
+                            >
                               <Eye className="mr-1" size={12} />
                               View
                             </Button>
-                            <Button size="sm" variant="outline">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleDeleteOrder(order)}
+                              disabled={deleteOrderMutation.isPending}
+                            >
                               <Trash2 className="mr-1" size={12} />
                               Delete
                             </Button>

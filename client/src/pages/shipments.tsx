@@ -1,15 +1,62 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import Header from "@/components/header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Eye, Printer, Package } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function Shipments() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const { toast } = useToast();
+  
   const { data: shipments } = useQuery({
     queryKey: ["/api/shipments"],
   });
+
+  const trackingMutation = useMutation({
+    mutationFn: async (trackingNumber: string) => {
+      const response = await apiRequest("GET", `/api/tracking/${trackingNumber}`);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Tracking Information",
+        description: `Status: ${data.status || 'Unknown'}`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to fetch tracking information",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleTrackShipment = (trackingNumber: string) => {
+    trackingMutation.mutate(trackingNumber);
+  };
+
+  const handlePrintLabel = (shipment: any) => {
+    if (shipment.labelPath) {
+      window.open(shipment.labelPath, '_blank');
+    } else {
+      toast({
+        title: "Label Not Available",
+        description: "No label found for this shipment",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const filteredShipments = shipments?.filter(shipment => 
+    shipment.trackingNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    shipment.orderId.toString().includes(searchTerm.toLowerCase())
+  ) || [];
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -45,6 +92,8 @@ export default function Shipments() {
                   <Input 
                     placeholder="Search shipments..." 
                     className="pl-10 pr-4 py-2"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
               </div>
@@ -87,7 +136,7 @@ export default function Shipments() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-slate-200">
-                    {shipments.map((shipment: any) => (
+                    {filteredShipments.map((shipment: any) => (
                       <tr key={shipment.id} className="hover:bg-slate-50 transition-colors">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-slate-900">
@@ -118,16 +167,23 @@ export default function Shipments() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="flex items-center space-x-2">
-                            <Button size="sm" variant="outline">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleTrackShipment(shipment.trackingNumber)}
+                              disabled={trackingMutation.isPending}
+                            >
                               <Eye className="mr-1" size={12} />
                               Track
                             </Button>
-                            {shipment.labelPath && (
-                              <Button size="sm" variant="outline">
-                                <Printer className="mr-1" size={12} />
-                                Print
-                              </Button>
-                            )}
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handlePrintLabel(shipment)}
+                            >
+                              <Printer className="mr-1" size={12} />
+                              Print
+                            </Button>
                           </div>
                         </td>
                       </tr>
