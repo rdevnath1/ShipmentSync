@@ -48,7 +48,6 @@ export default function Dashboard() {
         title="Dashboard" 
         description="Manage your shipments and orders"
       />
-      
       <div className="p-6">
         <StatsCards stats={stats} />
         
@@ -96,7 +95,7 @@ export default function Dashboard() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-lg">Jiayou Carrier</CardTitle>
+                  <CardTitle className="text-lg">Carrier</CardTitle>
                   <p className="text-slate-600">Create shipments & generate labels</p>
                 </div>
                 <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
