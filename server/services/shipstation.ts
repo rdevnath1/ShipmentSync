@@ -105,22 +105,37 @@ export class ShipStationService {
 
   async updateOrderWithTracking(orderId: number, trackingNumber: string, carrierCode: string = 'other'): Promise<boolean> {
     try {
+      console.log(`Updating ShipStation order ${orderId} with tracking ${trackingNumber}`);
+      
+      // First, get the current order to preserve all fields
+      const existingOrder = await this.getOrder(orderId);
+      if (!existingOrder) {
+        console.error(`Order ${orderId} not found in ShipStation`);
+        return false;
+      }
+
+      // Update the order with tracking information
       const orderData = {
-        orderId,
+        ...existingOrder,
         trackingNumber,
         carrierCode,
         orderStatus: 'shipped',
       };
 
-      await axios.post(
+      const response = await axios.post(
         `${this.baseUrl}/orders/createorder`,
         orderData,
         { headers: this.getAuthHeaders() }
       );
 
+      console.log('ShipStation update response:', response.data);
       return true;
     } catch (error) {
       console.error('Error updating order in ShipStation:', error);
+      if (error.response) {
+        console.error('Response data:', error.response.data);
+        console.error('Response status:', error.response.status);
+      }
       return false;
     }
   }
