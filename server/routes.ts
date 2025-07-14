@@ -255,6 +255,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Convert weight from ounces to kg with 3 decimal precision
       const convertOzToKg = (oz: number) => Math.round(Math.max(0.001, oz * 0.0283495) * 1000) / 1000;
       
+      // Only use US001 for US domestic shipping
+      const defaultChannelCode = "US001";
+
+      // Check postal code coverage for the channel
+      console.log("Checking postal code coverage...");
+      const kgWeight = convertOzToKg(weight || 5); // 5 oz = 0.142 kg safe default
+
       // Prepare item list - use default item if no items in order
       const apiOrderItemList = items.length > 0 ? items.map(item => ({
         ename: item.name,
@@ -269,28 +276,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sku: "DEFAULT-001",
           price: 10.00,
           quantity: 1,
-          weight: convertOzToKg(weight || 1),
+          weight: kgWeight,
           unitCode: "PCE",
         }
       ];
-
-      // Only use US001 for US domestic shipping
-      const defaultChannelCode = "US001";
-
-      // Check postal code coverage for the channel
-      console.log("Checking postal code coverage...");
       const coverageCheck = await jiayouService.checkPostalCodeCoverage(
         channelCode || defaultChannelCode,
         shippingAddress.postalCode || "",
         { length, width, height },
-        convertOzToKg(weight || 1)
+        kgWeight
       );
       console.log("Coverage check result:", coverageCheck);
+      console.dir(coverageCheck, { depth: null });
+
+      if (coverageCheck.code === 0) {
+        return res.status(400).json({ 
+          error: `Postal code ${shippingAddress.postalCode} is not supported by channel ${channelCode || defaultChannelCode}.`
+        });
+      }
 
       if (coverageCheck.code === 1 && coverageCheck.data[0].errMsg) {
-        return res.status(400).json({ 
-          error: `Postal code ${shippingAddress.postalCode} is not supported by channel ${channelCode || defaultChannelCode}. Please use a different postal code or try channels US002, US003, or US004.`
-        });
+        // Bubble the real Jiayou error back to the caller
+        return res.status(400).json({ error: coverageCheck.data[0].errMsg });
       }
 
       // Verify address first
@@ -315,7 +322,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         channelCode: channelCode || defaultChannelCode,
         referenceNo: uniqueReferenceNo,
         productType: 1,
-        pweight: convertOzToKg(weight || 1),
+        pweight: kgWeight,
         pieces: 1,
         insured: 0,
         fromAddressId: "JFK", // Hub injection for US001

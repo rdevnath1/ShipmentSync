@@ -1,0 +1,97 @@
+What’s really triggering that “Postal code … not supported” 400
+
+The message is coming from your own express route, not from Jiayou.
+Your handler returns the 400 if the pricing call (/outerApi/costCal) comes back with
+
+{ "code": 1, "data": [ { "errMsg": "…" } ] }
+
+and you then assume any non-empty errMsg means “ZIP not supported.”
+But Jiayou also puts dimension / weight errors into that same errMsg field, so a bad weight or missing dimensions will masquerade as a ZIP-coverage failure.
+
+⸻
+
+1 Prove it with one log line
+
+Add this right after the cost-calc call:
+
+console.dir(coverageCheck, { depth: null });
+
+Run the request again.  You’ll see something like:
+
+{
+  "code": 1,
+  "data": [
+    {
+      "channelCode": "US001",
+      "errMsg": "Weight must be >= 0.05 kg"
+    }
+  ]
+}
+
+or
+
+{
+  "code": 1,
+  "data": [
+    {
+      "channelCode": "US001",
+      "errMsg": "Length+Girth exceeds limit"
+    }
+  ]
+}
+
+That confirms the ZIP (10008) is inside the grid; it’s the parcel specs that fail.
+
+⸻
+
+2 Why the weight is almost certainly the culprit
+	•	Your default fallback is weight || 1 (oz) → convertOzToKg(1) → 0.028 kg.
+	•	Jiayou’s US001 lane requires ≥ 0.05 kg (they round up to 50 g).
+	•	costCal flags the order, drops the message into errMsg, and your route throws the generic ZIP error.
+
+⸻
+
+3 Quick fixes in server/routes.ts
+
+// -------  BEFORE ------------
+const coverageCheck = await jiayouService.checkPostalCodeCoverage(
+  channelCode || defaultChannelCode,
+  shippingAddress.postalCode || "",
+  { length, width, height },
+  convertOzToKg(weight || 1)            // ≤ 1 oz default breaks costCal
+);
+
+// -------  AFTER -------------
+const kgWeight = convertOzToKg(weight || 5);  // 5 oz = 0.142 kg safe default
+const coverageCheck = await jiayouService.checkPostalCodeCoverage(
+  channelCode || defaultChannelCode,
+  shippingAddress.postalCode || "",
+  { length, width, height },
+  kgWeight
+);
+
+if (coverageCheck.code === 0) {
+  return res.status(400).json({ 
+    error: `Postal code ${shippingAddress.postalCode} is not supported by channel ${channelCode}.`
+  });
+}
+
+if (coverageCheck.code === 1 && coverageCheck.data[0].errMsg) {
+  // Bubble the real Jiayou error back to the caller
+  return res.status(400).json({ error: coverageCheck.data[0].errMsg });
+}
+
+What changed
+	1.	Safer default weight (≥ 0.05 kg).
+	2.	Treat code === 0 as the genuine “ZIP not supported.”
+	3.	Surface the exact errMsg so you know whether it’s weight, size, or something else.
+
+⸻
+
+4 Verify and move on
+	1.	Restart the server with the patch.
+	2.	Re-submit the test order.
+	•	If the weight really was the issue, the order will now pass costCal, go through the poll loop, and create the shipment.
+	•	If a new error shows up, the response will contain Jiayou’s true message (e.g., “Invalid fromAddressId”) instead of the misleading ZIP text.
+
+Once you see Coverage check result: { code: 1, data: [ { errMsg: "" } ] } in the log, the create-order call will proceed and your 400 will disappear.  Let me know the next payload if anything else stalls—now the route will tell us exactly why.
