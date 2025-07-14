@@ -281,7 +281,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       ];
       const coverageCheck = await jiayouService.checkPostalCodeCoverage(
-        channelCode || defaultChannelCode,
+        defaultChannelCode, // Always use US001
         shippingAddress.postalCode || "",
         { length, width, height },
         kgWeight
@@ -291,7 +291,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (coverageCheck.code === 0) {
         return res.status(400).json({ 
-          error: `Postal code ${shippingAddress.postalCode} is not supported by channel ${channelCode || defaultChannelCode}.`
+          error: `Postal code ${shippingAddress.postalCode} is not supported by channel ${defaultChannelCode}.`
         });
       }
 
@@ -319,7 +319,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Prepare Jiayou order data with fromAddressId for hub injection
       const jiayouOrderData = {
-        channelCode: channelCode || defaultChannelCode,
+        channelCode: defaultChannelCode, // Always use US001
         referenceNo: uniqueReferenceNo,
         productType: 1,
         pweight: kgWeight,
@@ -468,10 +468,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Check postal code coverage
   app.post("/api/jiayou/check-coverage", async (req, res) => {
     try {
-      const { channelCode, postCode, dimensions, weight } = req.body;
+      const { postCode, dimensions, weight } = req.body;
       
       const coverage = await jiayouService.checkPostalCodeCoverage(
-        channelCode || "US001",
+        "US001", // Always use US001
         postCode,
         dimensions || { length: 10, width: 10, height: 2 },
         weight || 0.2

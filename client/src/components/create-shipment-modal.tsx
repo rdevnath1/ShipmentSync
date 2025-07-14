@@ -14,7 +14,6 @@ import { apiRequest } from "@/lib/queryClient";
 
 const createShipmentSchema = z.object({
   orderId: z.number(),
-  channelCode: z.string().min(1, "Channel code is required"),
   serviceType: z.string().min(1, "Service type is required"),
   weight: z.number().min(0.1, "Weight must be greater than 0"),
   dimensions: z.object({
@@ -23,13 +22,6 @@ const createShipmentSchema = z.object({
     height: z.number().min(1, "Height is required"),
   }),
 });
-
-const availableChannels = [
-  { code: "US001", name: "US Standard (Limited Coverage)" },
-  { code: "US002", name: "US All Range Standard" },
-  { code: "US003", name: "US Economy" },
-  { code: "US004", name: "US Special Goods" },
-];
 
 type CreateShipmentForm = z.infer<typeof createShipmentSchema>;
 
@@ -49,9 +41,8 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
     resolver: zodResolver(createShipmentSchema),
     defaultValues: {
       orderId: 0,
-      channelCode: "US002", // Default to US002 for better coverage
       serviceType: "standard",
-      weight: 1,
+      weight: 5, // Default to 5 oz to meet Jiayou minimum requirements
       dimensions: {
         length: 10,
         width: 10,
@@ -73,7 +64,7 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
     setIsCheckingCoverage(true);
     try {
       const response = await apiRequest("POST", "/api/jiayou/check-coverage", {
-        channelCode: form.getValues("channelCode"),
+        channelCode: "US001", // Always use US001
         postCode: order.shippingAddress.postalCode,
         dimensions: form.getValues("dimensions"),
         weight: form.getValues("weight"),
@@ -84,13 +75,13 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
       if (result.code === 1 && result.data[0].errMsg) {
         toast({
           title: "Coverage Check",
-          description: `Postal code ${order.shippingAddress.postalCode} is not supported by this channel. Try US002, US003, or US004.`,
+          description: `Postal code ${order.shippingAddress.postalCode} is not supported by US001 channel.`,
           variant: "destructive",
         });
       } else {
         toast({
           title: "Coverage Check",
-          description: `Postal code ${order.shippingAddress.postalCode} is supported! Estimated cost: $${result.data[0].totalFee}`,
+          description: `Postal code ${order.shippingAddress.postalCode} is supported by US001! Estimated cost: $${result.data[0].totalFee}`,
         });
       }
     } catch (error) {
@@ -114,8 +105,12 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
 
   const createShipmentMutation = useMutation({
     mutationFn: async (data: CreateShipmentForm) => {
-      console.log("Sending shipment data:", data);
-      const response = await apiRequest("POST", "/api/shipments/create", data);
+      const shipmentData = {
+        ...data,
+        channelCode: "US001" // Always use US001
+      };
+      console.log("Sending shipment data:", shipmentData);
+      const response = await apiRequest("POST", "/api/shipments/create", shipmentData);
       return response.json();
     },
     onSuccess: (data) => {
@@ -167,21 +162,11 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
             </div>
             <div>
               <Label htmlFor="channelCode">Shipping Channel</Label>
-              <Select
-                value={form.watch("channelCode")}
-                onValueChange={(value) => form.setValue("channelCode", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select channel" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableChannels.map((channel) => (
-                    <SelectItem key={channel.code} value={channel.code}>
-                      {channel.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Input
+                id="channelCode"
+                value="US001 - US Standard"
+                disabled
+              />
             </div>
             <div>
               <Label htmlFor="serviceType">Service Type</Label>
