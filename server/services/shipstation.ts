@@ -103,41 +103,41 @@ export class ShipStationService {
     }
   }
 
-  async updateOrderWithTracking(orderId: number, trackingNumber: string, carrierCode: string = 'other'): Promise<boolean> {
+  async markAsShipped(orderId: number, trackingNumber: string, labelUrl?: string): Promise<boolean> {
     try {
-      console.log(`Updating ShipStation order ${orderId} with tracking ${trackingNumber}`);
+      console.log(`Marking ShipStation order ${orderId} as shipped with tracking ${trackingNumber}`);
       
-      // First, get the current order to preserve all fields
-      const existingOrder = await this.getOrder(orderId);
-      if (!existingOrder) {
-        console.error(`Order ${orderId} not found in ShipStation`);
-        return false;
-      }
-
-      // Update the order with tracking information
-      const orderData = {
-        ...existingOrder,
+      const shipmentData = {
+        orderId,
+        carrierCode: 'jiayou',
         trackingNumber,
-        carrierCode,
-        orderStatus: 'shipped',
+        shipDate: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
+        notifyCustomer: true,
+        notifySalesChannel: true,
+        ...(labelUrl && { labelUrl }) // Only include labelUrl if provided
       };
 
       const response = await axios.post(
-        `${this.baseUrl}/orders/createorder`,
-        orderData,
+        `${this.baseUrl}/orders/markasshipped`,
+        shipmentData,
         { headers: this.getAuthHeaders() }
       );
 
-      console.log('ShipStation update response:', response.data);
+      console.log('ShipStation mark as shipped response:', response.data);
       return true;
     } catch (error) {
-      console.error('Error updating order in ShipStation:', error);
+      console.error('Error marking order as shipped in ShipStation:', error);
       if (error.response) {
         console.error('Response data:', error.response.data);
         console.error('Response status:', error.response.status);
       }
       return false;
     }
+  }
+
+  // Keep the old method for backward compatibility but use the new one
+  async updateOrderWithTracking(orderId: number, trackingNumber: string, labelUrl?: string): Promise<boolean> {
+    return this.markAsShipped(orderId, trackingNumber, labelUrl);
   }
 
   async createShipment(orderId: number, trackingNumber: string): Promise<boolean> {

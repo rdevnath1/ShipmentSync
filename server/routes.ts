@@ -171,6 +171,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test ShipStation mark as shipped for existing shipment
+  app.post("/api/shipments/:id/mark-shipped", async (req, res) => {
+    try {
+      const shipmentId = parseInt(req.params.id);
+      const shipment = await storage.getShipment(shipmentId);
+      
+      if (!shipment) {
+        return res.status(404).json({ error: "Shipment not found" });
+      }
+
+      // Get the associated order
+      const order = await storage.getOrder(shipment.orderId);
+      if (!order || !order.shipstationOrderId) {
+        return res.status(400).json({ error: "Order not found or no ShipStation order ID" });
+      }
+
+      // Mark as shipped in ShipStation
+      const updateResult = await shipStationService.markAsShipped(
+        parseInt(order.shipstationOrderId),
+        shipment.trackingNumber,
+        shipment.labelPath
+      );
+
+      if (updateResult) {
+        res.json({ 
+          message: "Successfully marked as shipped in ShipStation",
+          trackingNumber: shipment.trackingNumber,
+          shipstationOrderId: order.shipstationOrderId
+        });
+      } else {
+        res.status(500).json({ error: "Failed to mark as shipped in ShipStation" });
+      }
+    } catch (error) {
+      console.error("Error marking as shipped:", error);
+      res.status(500).json({ error: "Failed to mark as shipped" });
+    }
+  });
+
   // Get available Jiayou channel codes
   app.get("/api/jiayou/channels", async (req, res) => {
     try {
@@ -352,12 +390,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update order status
       await storage.updateOrder(order.id, { status: "shipped" });
 
-      // Update ShipStation with tracking info
+      // Update ShipStation with tracking info using mark as shipped
       if (order.shipstationOrderId) {
-        await shipStationService.updateOrderWithTracking(
+        const updateResult = await shipStationService.markAsShipped(
           parseInt(order.shipstationOrderId),
-          jiayouResponse.data.trackingNo
+          jiayouResponse.data.trackingNo,
+          jiayouResponse.data.labelPath // Pass the Jiayou label URL
         );
+        
+        if (updateResult) {
+          console.log(`Successfully marked ShipStation order ${order.shipstationOrderId} as shipped`);
+        } else {
+          console.error(`Failed to mark ShipStation order ${order.shipstationOrderId} as shipped`);
+        }
       }
 
       res.json({

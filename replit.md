@@ -55,6 +55,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### ShipStation Integration Fix (July 14, 2025)
+- **Mark as Shipped Implementation**: Replaced updateOrderWithTracking with ShipStation's mark as shipped API
+- **Custom Carrier Support**: Using "jiayou" as carrier code for proper tracking integration
+- **Label URL Integration**: Passing Jiayou label URLs to ShipStation for direct printing
+- **Automatic Tracking Push**: System now automatically pushes tracking numbers to ShipStation on shipment creation
+- **Manual Sync Endpoint**: Added `/api/shipments/:id/mark-shipped` for manual ShipStation updates
+- **SUCCESSFUL RESULT**: ShipStation now receives tracking numbers and can print Jiayou labels directly
+
 ### ChatGPT O3 Fixes Implementation (July 13, 2025)
 - **Hub Injection**: Added fromAddressId "JFK" for US001 channel hub injection
 - **US Shipper Address**: Updated to JFK Airport fulfillment center with NY postal code 11430
