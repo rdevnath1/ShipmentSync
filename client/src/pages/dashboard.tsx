@@ -7,10 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { useLocation } from "wouter";
 import { Download, Truck, Plus, FolderSync } from "lucide-react";
 
 export default function Dashboard() {
   const { toast } = useToast();
+  const [location, setLocation] = useLocation();
 
   const { data: orders, refetch: refetchOrders } = useQuery({
     queryKey: ["/api/orders"],
@@ -123,7 +125,7 @@ export default function Dashboard() {
 
               <Button 
                 className="w-full bg-emerald-600 hover:bg-emerald-700"
-                onClick={() => window.location.href = '/orders'}
+                onClick={() => setLocation('/orders')}
               >
                 <Plus className="mr-2" size={16} />
                 Create Shipments

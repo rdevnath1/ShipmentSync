@@ -6,14 +6,14 @@ import { Truck } from "lucide-react";
 import { useLocation } from "wouter";
 
 export default function TrackingSection() {
-  const [, navigate] = useLocation();
+  const [location, setLocation] = useLocation();
   
   const { data: shipments } = useQuery({
     queryKey: ["/api/shipments"],
   });
 
   const handleViewTracking = (trackingNumber: string) => {
-    navigate(`/tracking?number=${trackingNumber}`);
+    setLocation('/tracking');
   };
 
   const activeShipments = shipments?.filter((s: any) => 

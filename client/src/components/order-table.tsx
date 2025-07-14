@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import CreateShipmentModal from "./create-shipment-modal";
+import CreateOrderModal from "./create-order-modal";
 
 interface OrderTableProps {
   orders: any[];
@@ -15,6 +16,7 @@ interface OrderTableProps {
 
 export default function OrderTable({ orders }: OrderTableProps) {
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showCreateOrderModal, setShowCreateOrderModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
@@ -97,7 +99,7 @@ export default function OrderTable({ orders }: OrderTableProps) {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <Button disabled>
+              <Button onClick={() => setShowCreateOrderModal(true)}>
                 <Plus className="mr-2" size={16} />
                 Manual Order
               </Button>
@@ -217,6 +219,11 @@ export default function OrderTable({ orders }: OrderTableProps) {
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         order={selectedOrder}
+      />
+      
+      <CreateOrderModal
+        isOpen={showCreateOrderModal}
+        onClose={() => setShowCreateOrderModal(false)}
       />
     </>
   );

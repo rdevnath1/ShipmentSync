@@ -41,16 +41,31 @@ export default function Shipments() {
     trackingMutation.mutate(trackingNumber);
   };
 
-  const handlePrintLabel = (shipment: any) => {
-    if (shipment.labelPath) {
-      window.open(shipment.labelPath, '_blank');
-    } else {
+  const printMutation = useMutation({
+    mutationFn: async (shipmentId: number) => {
+      const response = await apiRequest("POST", `/api/shipments/${shipmentId}/print`);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      if (data.labelPath) {
+        window.open(data.labelPath, '_blank');
+        toast({
+          title: "Label Opened",
+          description: `Label for tracking #${data.trackingNumber} opened in new tab`,
+        });
+      }
+    },
+    onError: (error: any) => {
       toast({
-        title: "Label Not Available",
-        description: "No label found for this shipment",
+        title: "Print Error",
+        description: error.message || "Failed to print label",
         variant: "destructive",
       });
-    }
+    },
+  });
+
+  const handlePrintLabel = (shipment: any) => {
+    printMutation.mutate(shipment.id);
   };
 
   const filteredShipments = shipments?.filter(shipment => 
@@ -180,9 +195,10 @@ export default function Shipments() {
                               size="sm" 
                               variant="outline"
                               onClick={() => handlePrintLabel(shipment)}
+                              disabled={printMutation.isPending}
                             >
                               <Printer className="mr-1" size={12} />
-                              Print
+                              {printMutation.isPending ? "Printing..." : "Print"}
                             </Button>
                           </div>
                         </td>

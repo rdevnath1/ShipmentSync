@@ -67,6 +67,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create manual order
+  app.post("/api/orders/manual", async (req, res) => {
+    try {
+      const orderData = {
+        orderNumber: req.body.orderNumber,
+        referenceNumber: `MANUAL-${Date.now()}`,
+        customerName: req.body.customerName,
+        customerEmail: req.body.customerEmail,
+        customerPhone: req.body.customerPhone,
+        shippingAddress: req.body.shippingAddress,
+        billingAddress: req.body.shippingAddress, // Use shipping as billing for manual orders
+        items: req.body.items,
+        totalAmount: req.body.totalAmount,
+        currency: "USD",
+        status: "pending",
+      };
+
+      const validatedOrder = insertOrderSchema.parse(orderData);
+      const createdOrder = await storage.createOrder(validatedOrder);
+      
+      res.json(createdOrder);
+    } catch (error) {
+      console.error("Error creating manual order:", error);
+      res.status(500).json({ error: "Failed to create manual order" });
+    }
+  });
+
   // Pull orders from ShipStation
   app.post("/api/orders/pull-shipstation", async (req, res) => {
     try {
@@ -116,6 +143,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(shipments);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch shipments" });
+    }
+  });
+
+  // Print label for shipment
+  app.post("/api/shipments/:id/print", async (req, res) => {
+    try {
+      const shipmentId = parseInt(req.params.id);
+      const shipment = await storage.getShipment(shipmentId);
+      
+      if (!shipment) {
+        return res.status(404).json({ error: "Shipment not found" });
+      }
+
+      if (!shipment.labelPath) {
+        return res.status(400).json({ error: "No label available for this shipment" });
+      }
+
+      // Return the label path for frontend to open
+      res.json({ 
+        labelPath: shipment.labelPath,
+        trackingNumber: shipment.trackingNumber 
+      });
+    } catch (error) {
+      console.error("Error printing label:", error);
+      res.status(500).json({ error: "Failed to print label" });
     }
   });
 
