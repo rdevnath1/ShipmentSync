@@ -150,13 +150,20 @@ export class JiayouService {
       const response = await axios.post(
         `${this.baseUrl}/api/orderNew/createOrder`,
         orderData,
-        { headers: this.getAuthHeaders() }
+        { 
+          headers: this.getAuthHeaders(),
+          timeout: 60000 // 60 second timeout
+        }
       );
 
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
+      // NEW: dump Jiayou's real message
+      if (error.response?.data) {
+        console.error("Jiayou raw error →", error.response.data);
+      }
       console.error('Error creating order with Jiayou:', error);
-      throw new Error('Failed to create order with Jiayou');
+      throw error;
     }
   }
 

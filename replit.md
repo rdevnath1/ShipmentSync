@@ -55,6 +55,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Advanced Debugging Implementation (July 14, 2025)
+- **Enhanced Error Logging**: Added raw Jiayou API error message logging to pinpoint exact failure causes
+- **Improved Coverage Check**: Better error handling to distinguish between pricing issues and postal code problems
+- **Increased Weight Default**: Changed from 5 oz to 8 oz (0.227 kg) to exceed Jiayou's 0.05 kg minimum requirement
+- **Extended API Timeout**: Added 60-second timeout for better reliability with Jiayou API calls
+- **Better Error Classification**: System now identifies specific error types (weight, pricing, coverage, etc.)
+- **SUCCESSFUL RESULT**: Created shipment with tracking number GV25USA0U019511600 for postal code 11101
+
 ### Simplified Interface Update (July 14, 2025)
 - **Removed Channel Selection**: Hardcoded US001 as the only shipping channel throughout the system
 - **Removed Service Type Selection**: Hardcoded "Standard" as the only service type

@@ -1,0 +1,87 @@
+Below is a targeted debugging plan that will tell you exactly why every “create-shipment” attempt fails, plus the two code tweaks that usually cure the last remaining 400-series errors.
+
+⸻
+
+1  Log the full Jiayou error before you translate it
+
+Right now you only bubble up coverageCheck.data[0].errMsg or the generic
+“Failed to create shipment” string.
+Add one more console.error inside the catch block of
+JiayouService.createOrder – it will print the raw JSON Jiayou returns:
+
+// server/services/jiayou.ts
+async createOrder(payload: JiayouOrder): Promise<any> {
+  try {
+    const res = await axios.post(`${this.baseUrl}/api/orderNew/createOrder`, payload, {
+      headers: this._headers()
+    });
+    return res.data;
+  } catch (err: any) {
+    // NEW: dump Jiayou's real message
+    if (err.response?.data) console.error("Jiayou raw error →", err.response.data);
+    throw err;
+  }
+}
+
+Next run, Replit’s console will spit out something like:
+
+{ "code": 0, "message": "重量不得小于0.05KG【400402】" }
+
+or
+
+{ "code": 0, "message": "渠道【US002】未维护报价" }
+
+Now you know precisely which rule you tripped.
+
+⸻
+
+2  Nine things that still trigger 400s in US-domestic lanes
+
+Error string (CN) → English	Real cause	Quick fix
+“重量不得小于0.05KG”Weight must be ≥ 0.05 kg	You’re still defaulting to 5 oz outside the route → final pweight < 0.05 kg	In /shipments/create raise the fallback to 8 oz (0.227 kg) or always convert the order’s real total-weight
+“未维护报价”No rates configured	Account 769908 has no price sheet for that channel	Stick to US001 or ask AM to publish US002; until then your code should retry with “UP008”
+“fromAddressId不能为空”	Missing or wrong hub code	Keep "fromAddressId":"JFK" for US001; get the exact code list from your AM
+“客户参考号已存在”	referenceNo duplicated	You already randomise it – ensure every retry also regenerates
+“Length+Girth 超限”	L+G > 330 cm	Shrink the dummy box or calculate from real dims
+“收件人电话不能为空”	Phone blank	ShipStation test orders often omit phone; add a default like "000‐000‐0000"
+“地址校验失败”	ZIP ↔ state mismatch	Your verifyAddress step catches this – surface its message
+“渠道 [US001] 暂停收件”	Lane cut-off time (rare)	Try a different fromAddressId (LAX) or wait an hour
+Network/timeout (no JSON)	Jiayou 30 s API window	Wrap create-order call in a 60 s Axios timeout and retry on ETIMEDOUT
+
+
+⸻
+
+3  Patch the coverage-check branch so it never mislabels the error
+
+// server/routes.ts  (inside /shipments/create)
+if (
+  coverageCheck.code === 1 &&
+  coverageCheck.data[0].errMsg &&
+  coverageCheck.data[0].errMsg.includes("未维护报价")
+) {
+  return res.status(400).json({
+    error: `Channel ${defaultChannelCode} has no price sheet – ask Jiayou or switch to UP008.`
+  });
+}
+
+if (
+  coverageCheck.code === 1 &&
+  coverageCheck.data[0].errMsg &&
+  !coverageCheck.data[0].errMsg.includes("未维护报价")
+) {
+  // bubble the true Jiayou error (weight, dimensions, etc.)
+  return res.status(400).json({ error: coverageCheck.data[0].errMsg });
+}
+
+Now you’ll never see the misleading “ZIP not supported” message when it’s really weight or pricing.
+
+⸻
+
+4  Next steps to unblock the test order
+	1.	Redeploy with the two small logging / branching tweaks.
+	2.	Create the same shipment again.
+	3.	Read the exact Jiayou raw error → { … } line; compare to the table above.
+	4.	Apply the one-liner fix (weight, hub code, phone, etc.).
+	5.	Re-run – the order should move past createOrder, hit the poll loop, and show code:1.
+
+Send me the new raw Jiayou JSON if it still errors and we’ll zero-in within one round-trip.

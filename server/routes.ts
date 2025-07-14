@@ -260,7 +260,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check postal code coverage for the channel
       console.log("Checking postal code coverage...");
-      const kgWeight = convertOzToKg(weight || 5); // 5 oz = 0.142 kg safe default
+      const kgWeight = convertOzToKg(weight || 8); // 8 oz = 0.227 kg safe default (above 0.05kg minimum)
 
       // Prepare item list - use default item if no items in order
       const apiOrderItemList = items.length > 0 ? items.map(item => ({
@@ -295,8 +295,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      if (coverageCheck.code === 1 && coverageCheck.data[0].errMsg) {
-        // Bubble the real Jiayou error back to the caller
+      if (
+        coverageCheck.code === 1 &&
+        coverageCheck.data[0].errMsg &&
+        coverageCheck.data[0].errMsg.includes("未维护报价")
+      ) {
+        return res.status(400).json({
+          error: `Channel ${defaultChannelCode} has no price sheet – ask Jiayou or switch to UP008.`
+        });
+      }
+
+      if (
+        coverageCheck.code === 1 &&
+        coverageCheck.data[0].errMsg &&
+        !coverageCheck.data[0].errMsg.includes("未维护报价")
+      ) {
+        // bubble the true Jiayou error (weight, dimensions, etc.)
         return res.status(400).json({ error: coverageCheck.data[0].errMsg });
       }
 

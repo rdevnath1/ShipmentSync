@@ -40,7 +40,7 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
     resolver: zodResolver(createShipmentSchema),
     defaultValues: {
       orderId: 0,
-      weight: 5, // Default to 5 oz to meet Jiayou minimum requirements
+      weight: 8, // Default to 8 oz to exceed Jiayou minimum requirements (0.227 kg > 0.05 kg)
       dimensions: {
         length: 10,
         width: 10,
