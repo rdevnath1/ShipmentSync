@@ -24,13 +24,6 @@ const createShipmentSchema = z.object({
   }),
 });
 
-const availableChannels = [
-  { code: "US001", name: "US Standard (Limited Coverage)" },
-  { code: "US002", name: "US All Range Standard" },
-  { code: "US003", name: "US Economy" },
-  { code: "US004", name: "US Special Goods" },
-];
-
 type CreateShipmentForm = z.infer<typeof createShipmentSchema>;
 
 interface CreateShipmentModalProps {
@@ -42,14 +35,12 @@ interface CreateShipmentModalProps {
 export default function CreateShipmentModal({ isOpen, onClose, order }: CreateShipmentModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [isCheckingCoverage, setIsCheckingCoverage] = useState(false);
-  const [coverageResult, setCoverageResult] = useState<any>(null);
 
   const form = useForm<CreateShipmentForm>({
     resolver: zodResolver(createShipmentSchema),
     defaultValues: {
       orderId: 0,
-      channelCode: "US002", // Default to US002 for better coverage
+      channelCode: "US001",
       serviceType: "standard",
       weight: 1,
       dimensions: {
@@ -59,50 +50,6 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
       },
     },
   });
-
-  const checkCoverage = async () => {
-    if (!order?.shippingAddress?.postalCode) {
-      toast({
-        title: "Error",
-        description: "No postal code found for this order",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsCheckingCoverage(true);
-    try {
-      const response = await apiRequest("POST", "/api/jiayou/check-coverage", {
-        channelCode: form.getValues("channelCode"),
-        postCode: order.shippingAddress.postalCode,
-        dimensions: form.getValues("dimensions"),
-        weight: form.getValues("weight"),
-      });
-      const result = await response.json();
-      setCoverageResult(result);
-      
-      if (result.code === 1 && result.data[0].errMsg) {
-        toast({
-          title: "Coverage Check",
-          description: `Postal code ${order.shippingAddress.postalCode} is not supported by this channel. Try US002, US003, or US004.`,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Coverage Check",
-          description: `Postal code ${order.shippingAddress.postalCode} is supported! Estimated cost: $${result.data[0].totalFee}`,
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to check coverage",
-        variant: "destructive",
-      });
-    } finally {
-      setIsCheckingCoverage(false);
-    }
-  };
 
   // Update form when order changes
   useEffect(() => {
@@ -156,7 +103,7 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
         </DialogHeader>
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <Label htmlFor="orderId">Order ID</Label>
               <Input
@@ -166,25 +113,7 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
               />
             </div>
             <div>
-              <Label htmlFor="channelCode">Shipping Channel</Label>
-              <Select
-                value={form.watch("channelCode")}
-                onValueChange={(value) => form.setValue("channelCode", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select channel" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableChannels.map((channel) => (
-                    <SelectItem key={channel.code} value={channel.code}>
-                      {channel.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="serviceType">Service Type</Label>
+              <Label htmlFor="serviceType">Shipping Service</Label>
               <Select
                 value={form.watch("serviceType")}
                 onValueChange={(value) => form.setValue("serviceType", value)}
@@ -193,9 +122,9 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
                   <SelectValue placeholder="Select service" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="express">Express</SelectItem>
-                  <SelectItem value="standard">Standard</SelectItem>
-                  <SelectItem value="economy">Economy</SelectItem>
+                  <SelectItem value="express">Jiayou Express</SelectItem>
+                  <SelectItem value="standard">Jiayou Standard</SelectItem>
+                  <SelectItem value="economy">Jiayou Economy</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -226,17 +155,7 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
               </div>
               <div>
                 <Label>Postal Code</Label>
-                <div className="flex gap-2">
-                  <Input value={shippingAddress?.postalCode || ""} disabled />
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={checkCoverage}
-                    disabled={isCheckingCoverage}
-                  >
-                    {isCheckingCoverage ? "Checking..." : "Check Coverage"}
-                  </Button>
-                </div>
+                <Input value={shippingAddress?.postalCode || ""} disabled />
               </div>
             </div>
           </div>
