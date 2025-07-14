@@ -276,6 +276,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Only use US001 for US domestic shipping
       const defaultChannelCode = "US001";
 
+      // Check postal code coverage for the channel
+      console.log("Checking postal code coverage...");
+      const coverageCheck = await jiayouService.checkPostalCodeCoverage(
+        channelCode || defaultChannelCode,
+        shippingAddress.postalCode || "",
+        { length: length || 10, width: width || 10, height: height || 2 },
+        convertOzToKg(weight || 1)
+      );
+      console.log("Coverage check result:", coverageCheck);
+
+      if (coverageCheck.code === 1 && coverageCheck.data[0].errMsg) {
+        return res.status(400).json({ 
+          error: `Postal code ${shippingAddress.postalCode} is not supported by channel ${channelCode || defaultChannelCode}. Please use a different postal code or try channels US002, US003, or US004.`
+        });
+      }
+
       // Verify address first
       console.log("Verifying address...");
       const addressVerification = await jiayouService.verifyAddress(
