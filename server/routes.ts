@@ -238,6 +238,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/shipments/create", async (req, res) => {
     try {
       const { orderId, channelCode, serviceType, weight, dimensions } = req.body;
+      const { length = 10, width = 10, height = 2 } = dimensions ?? {};
       console.log("Create shipment request:", { orderId, channelCode, serviceType, weight, dimensions });
 
       // Get order details
@@ -281,7 +282,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const coverageCheck = await jiayouService.checkPostalCodeCoverage(
         channelCode || defaultChannelCode,
         shippingAddress.postalCode || "",
-        { length: length || 10, width: width || 10, height: height || 2 },
+        { length, width, height },
         convertOzToKg(weight || 1)
       );
       console.log("Coverage check result:", coverageCheck);
