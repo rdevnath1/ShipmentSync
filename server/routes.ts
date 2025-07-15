@@ -258,6 +258,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Only use US001 for US domestic shipping
       const defaultChannelCode = "US001";
 
+      // Check for PO Box addresses before hitting Jiayou API
+      const addressLine = `${shippingAddress.street1} ${shippingAddress.street2 || ""}`.trim();
+      if (/^\s*P\.?\s*O\.?\s*BOX/i.test(addressLine)) {
+        return res.status(400).json({ 
+          error: `Address "${addressLine}" is a PO Box. US001 can only deliver to street addresses. Please provide a physical delivery address.` 
+        });
+      }
+
       // Check postal code coverage for the channel
       console.log("Checking postal code coverage...");
       const kgWeight = convertOzToKg(weight || 8); // 8 oz = 0.227 kg safe default (above 0.05kg minimum)
@@ -310,6 +318,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         coverageCheck.data[0].errMsg &&
         !coverageCheck.data[0].errMsg.includes("未维护报价")
       ) {
+        // Check if this is a PO Box ZIP code issue
+        const isPOBoxError = /PO\s*BOX/i.test(coverageCheck.data[0].errMsg) || 
+                            coverageCheck.data[0].errMsg.includes("不支持PO BOX") ||
+                            coverageCheck.data[0].errMsg.includes("不在渠道分区范围内");
+        
+        if (isPOBoxError) {
+          return res.status(400).json({ 
+            error: `ZIP ${shippingAddress.postalCode} is a PO Box ZIP code. US001 can only deliver to street addresses. Please provide a physical delivery address.` 
+          });
+        }
         // bubble the true Jiayou error (weight, dimensions, etc.)
         return res.status(400).json({ error: coverageCheck.data[0].errMsg });
       }

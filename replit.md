@@ -55,6 +55,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### PO Box Detection Implementation (July 15, 2025)
+- **Smart PO Box Detection**: Added dual-layer PO Box detection for addresses and ZIP codes
+- **User-Friendly Error Messages**: Converts Chinese Jiayou errors to clear English explanations
+- **ZIP Code Intelligence**: Detects PO Box-only ZIP codes like 10008 and provides actionable guidance
+- **Address Pattern Matching**: Identifies "P.O. Box" patterns in street addresses before API calls
+- **Error Classification**: Distinguishes between PO Box issues, pricing problems, and genuine coverage gaps
+- **SUCCESSFUL RESULT**: System now clearly identifies ZIP 10008 as PO Box and provides helpful guidance
+
 ### Advanced Debugging Implementation (July 14, 2025)
 - **Enhanced Error Logging**: Added raw Jiayou API error message logging to pinpoint exact failure causes
 - **Improved Coverage Check**: Better error handling to distinguish between pricing issues and postal code problems

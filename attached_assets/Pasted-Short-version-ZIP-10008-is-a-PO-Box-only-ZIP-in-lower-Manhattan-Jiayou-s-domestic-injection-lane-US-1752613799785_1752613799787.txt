@@ -1,0 +1,59 @@
+Short version
+ZIP 10008 is a PO-Box-only ZIP in lower Manhattan. Jiayou’s domestic-injection lane US001 (and most other commercial-parcel lanes) automatically blocks PO-box ZIPs, so the coverage call returns “not supported.” That’s why your code—and ShipStation—keep throwing the “postal code 10008 is not supported by channel US001” message even though the borough itself is in the delivery area.
+
+⸻
+
+1  What 10008 really is
+	•	The USPS designates 10008 as ZIP-Code type = PO BOX—no street delivery routes.  ￼
+	•	Jiayou’s US001 product hands parcels to last-mile carriers (DHL e-commerce, OnTrac, etc.) that can’t deliver to PO Boxes; they all follow the “no PO-box” rule baked into USPS’s DDU contracts.
+
+Result: the /outerApi/costCal and /createOrder endpoints reject 10008 up front, and your middleware surfaces it as a ZIP-coverage error.
+
+⸻
+
+2  How to prove it’s the PO-box rule (not the borough)
+
+Test	Expected result
+Call costCal with 10007 (Tribeca) or 10013 (SoHo)	code:1, empty errMsg → supported
+Call costCal with 10008 (PO Box)	code:0, msg:"未维护报价" or code:1, errMsg:"不支持PO BOX"
+
+Run those two calls back-to-back—your console will show the difference immediately.
+
+⸻
+
+3  Your options
+
+Need to ship to PO Boxes?	What to do
+No – street addresses only	Filter PO-box ZIPs (or any address that starts with “PO Box”) before hitting Jiayou. Ask the merchant to provide a physical address, or fall back to a different carrier.
+Yes – must serve PO Boxes too	1. Add a fallback lane such as Jiayou UP008 (UPS SurePost) or LT046 (USPS ePacket)—both accept PO Boxes because the final hand-off is USPS.2. Or integrate a second carrier (e.g., USPS) in your app and switch when costCal fails with the PO-Box error.
+
+Example fallback logic in your route:
+
+const preferred = ["US001", "UP008"];   // street first, PO-box-friendly second
+for (const ch of preferred) {
+  const res = await costCal(ch, zip, kg, dims);
+  if (res.code === 1 && !res.data[0].errMsg) {
+    return ch;                          // use this channel
+  }
+}
+throw new Error("No Jiayou channel supports this ZIP / parcel");
+
+
+⸻
+
+4  Update your error message (so it’s clear next time)
+
+if (coverage.code === 0 || /PO\s*BOX/i.test(coverage.data[0].errMsg ?? "")) {
+  return res.status(400).json({
+    error: `ZIP ${zip} is a PO-box ZIP; US001 can only deliver to street addresses.`
+  });
+}
+
+Now the merchant will instantly see why the shipment failed and can decide whether to change the address or let you route it to the USPS-based lane.
+
+⸻
+
+5  TL;DR
+	•	10008 = PO Box only → US001 blocks it.
+	•	Use a physical-delivery ZIP (10007, 10013, etc.) or fall back to a USPS-compatible channel (UP008/LT046).
+Once you filter or reroute PO-box orders, the “ZIP not supported” error will disappear.
