@@ -318,12 +318,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         coverageCheck.data[0].errMsg &&
         !coverageCheck.data[0].errMsg.includes("未维护报价")
       ) {
-        // Check if this is a PO Box ZIP code issue
+        // Check if this is specifically a PO Box ZIP code issue (be more specific)
         const isPOBoxError = /PO\s*BOX/i.test(coverageCheck.data[0].errMsg) || 
-                            coverageCheck.data[0].errMsg.includes("不支持PO BOX") ||
-                            coverageCheck.data[0].errMsg.includes("不在渠道分区范围内");
+                            coverageCheck.data[0].errMsg.includes("不支持PO BOX");
         
-        if (isPOBoxError) {
+        // Only classify as PO Box if it's specifically mentioned in the error message or if it's the known PO Box ZIP 10008
+        if (isPOBoxError || (shippingAddress.postalCode === '10008' && coverageCheck.data[0].errMsg.includes("不在渠道分区范围内"))) {
           return res.status(400).json({ 
             error: `ZIP ${shippingAddress.postalCode} is a PO Box ZIP code. US001 can only deliver to street addresses. Please provide a physical delivery address.` 
           });
