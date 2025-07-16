@@ -62,7 +62,9 @@ Preferred communication style: Simple, everyday language.
 - **Relocated API Status**: Moved API Integration Status card to bottom of dashboard for better content flow
 - **Removed Quick Actions**: Eliminated redundant Quick Actions section to keep interface clean and focused
 - **Enhanced UX**: Shipped orders now show "Edit Shipment" and "Print" buttons only, removing redundant View option
-- **SUCCESSFUL RESULT**: Cleaner, more intuitive dashboard with consolidated integration status positioned at bottom
+- **Added Tracking Links**: Added clickable tracking column in orders table that navigates to tracking page with pre-filled tracking number
+- **URL Parameter Support**: Tracking page now supports ?track= parameter for direct tracking link navigation
+- **SUCCESSFUL RESULT**: Cleaner, more intuitive dashboard with consolidated integration status and seamless tracking navigation
 
 ### Unified Orders Interface (July 16, 2025)
 - **Single Orders Page**: Consolidated 3 separate tabs (Orders, Shipments, Labels) into one unified interface

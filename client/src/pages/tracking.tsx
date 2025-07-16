@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import Header from "@/components/header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,10 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, MapPin, Clock, Package, Truck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 
 export default function Tracking() {
   const { toast } = useToast();
+  const [location] = useLocation();
   const [trackingNumber, setTrackingNumber] = useState("");
   const [trackingData, setTrackingData] = useState<any>(null);
 
@@ -38,6 +40,16 @@ export default function Tracking() {
       });
     },
   });
+
+  // Check for tracking parameter in URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.split('?')[1]);
+    const trackParam = urlParams.get('track');
+    if (trackParam) {
+      setTrackingNumber(trackParam);
+      trackingMutation.mutate(trackParam);
+    }
+  }, [location, trackingMutation]);
 
   const handleTrackPackage = () => {
     if (!trackingNumber.trim()) {

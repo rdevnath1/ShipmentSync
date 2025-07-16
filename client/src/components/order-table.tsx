@@ -3,9 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Eye, Trash2, Package, Printer, Edit } from "lucide-react";
+import { Search, Plus, Eye, Trash2, Package, Printer, Edit, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import CreateShipmentModal from "./create-shipment-modal";
 import CreateOrderModal from "./create-order-modal";
@@ -26,6 +27,7 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
 
   const deleteOrderMutation = useMutation({
     mutationFn: async (orderId: number) => {
@@ -69,6 +71,18 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
   const handleViewEditOrder = (order: any) => {
     setSelectedOrder(order);
     setShowEditOrderModal(true);
+  };
+
+  const handleTrackingClick = (order: any) => {
+    if (order.trackingNumber) {
+      setLocation(`/tracking?track=${order.trackingNumber}`);
+    } else {
+      toast({
+        title: "No Tracking Available",
+        description: "This order hasn't been shipped yet",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDeleteOrder = (order: any) => {
@@ -171,6 +185,9 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
                         Status
                       </th>
                       <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        Tracking
+                      </th>
+                      <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Date
                       </th>
                       <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
@@ -211,6 +228,21 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
                             <Badge className={getStatusColor(order.status)}>
                               {order.status}
                             </Badge>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {order.trackingNumber ? (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleTrackingClick(order)}
+                                className="text-blue-600 hover:text-blue-800 p-0 h-auto font-normal"
+                              >
+                                <ExternalLink className="mr-1" size={12} />
+                                {order.trackingNumber}
+                              </Button>
+                            ) : (
+                              <span className="text-sm text-muted-foreground">No tracking</span>
+                            )}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                             {new Date(order.createdAt).toLocaleDateString()}
@@ -304,6 +336,19 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
                         <p className="text-xs text-muted-foreground">
                           {new Date(order.createdAt).toLocaleDateString()}
                         </p>
+                        {order.trackingNumber && (
+                          <div className="mt-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleTrackingClick(order)}
+                              className="text-blue-600 hover:text-blue-800 p-0 h-auto font-normal text-xs"
+                            >
+                              <ExternalLink className="mr-1" size={12} />
+                              Track: {order.trackingNumber}
+                            </Button>
+                          </div>
+                        )}
                       </div>
                       
                       <div className="flex flex-wrap gap-2">
