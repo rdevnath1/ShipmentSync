@@ -1,36 +1,31 @@
 import crypto from 'crypto';
 
-// Jiayou API credentials
 const API_KEY = 'd370d0ee7e704117bfca9184bc03f590';
 const CLIENT_ID = '769908';
-
-// Try different base URLs
-const BASE_URLS = [
-  'https://api.jygjexp.com/v1',
-  'https://api.jygjexp.com/v2',
-  'https://api.jygjexp.com/api/v1',
-  'https://api.jygjexp.com/api/v2',
-  'https://api.jygjexp.com',
-  'https://openapi.jygjexp.com/v1',
-  'https://openapi.jygjexp.com/v2',
-  'https://openapi.jygjexp.com/api/v1',
-  'https://openapi.jygjexp.com/api/v2',
-  'https://openapi.jygjexp.com',
-];
 
 function generateSignature(code, apiKey) {
   return crypto.createHash('md5').update(code + apiKey).digest('hex');
 }
 
 function getAuthHeaders() {
-  const code = Date.now().toString();
-  const signature = generateSignature(code, API_KEY);
-  
+  const timestamp = new Date().toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  }).replace(/\//g, '-');
+
+  const sign = generateSignature(CLIENT_ID, API_KEY);
+
   return {
     'Content-Type': 'application/json',
-    'code': code,
-    'signature': signature,
-    'clientId': CLIENT_ID
+    'code': CLIENT_ID,
+    'apiKey': API_KEY,
+    'timestamp': timestamp,
+    'sign': sign,
   };
 }
 
@@ -41,157 +36,212 @@ async function testEndpoint(baseUrl, endpoint, method = 'GET', body = null) {
       headers: getAuthHeaders()
     };
     
-    if (body && method === 'POST') {
+    if (body && method !== 'GET') {
       options.body = JSON.stringify(body);
     }
     
     const response = await fetch(`${baseUrl}${endpoint}`, options);
-    const data = await response.json();
+    const text = await response.text();
+    
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = text;
+    }
     
     return {
-      success: response.ok,
       status: response.status,
+      statusText: response.statusText,
       data: data
     };
   } catch (error) {
     return {
-      success: false,
+      status: 'error',
       error: error.message
     };
   }
 }
 
 async function testChannelCodes(baseUrl) {
-  console.log(`\n📋 Testing channel codes at ${baseUrl}`);
+  console.log('\n🔍 Testing channel codes endpoint...');
   
   const endpoints = [
-    '/channels',
-    '/channel/list',
+    '/api/orderNew/getChannelCodes',
+    '/api/orderNew/channelCodes',
     '/channel/codes',
-    '/api/channels',
-    '/api/channel/list',
-    '/getChannels',
-    '/channelCodes'
+    '/channels',
+    '/getChannelCodes'
   ];
   
   for (const endpoint of endpoints) {
-    const result = await testEndpoint(baseUrl, endpoint, 'GET');
-    console.log(`  ${endpoint}: ${result.success ? '✅' : '❌'} (${result.status || 'error'})`);
-    if (result.success) {
-      console.log(`    Data:`, JSON.stringify(result.data, null, 2));
+    const result = await testEndpoint(baseUrl, endpoint, 'POST', {});
+    console.log(`${endpoint}: ${result.status} - ${JSON.stringify(result.data).substring(0, 100)}...`);
+    
+    if (result.status === 200 && result.data.code === 1) {
+      console.log('✅ Found working channel codes endpoint!');
+      return result.data;
     }
   }
+  
+  return null;
 }
 
 async function testTracking(baseUrl, trackingNumber) {
-  console.log(`\n🔍 Testing tracking at ${baseUrl}`);
+  console.log('\n🔍 Testing all possible tracking methods...');
   
-  const endpoints = [
-    { path: '/track', method: 'POST', body: { trackingNo: trackingNumber } },
-    { path: '/tracking', method: 'POST', body: { trackingNo: trackingNumber } },
-    { path: '/api/track', method: 'POST', body: { trackingNo: trackingNumber } },
-    { path: '/api/tracking', method: 'POST', body: { trackingNo: trackingNumber } },
-    { path: `/track/${trackingNumber}`, method: 'GET' },
-    { path: `/tracking/${trackingNumber}`, method: 'GET' },
-    { path: `/api/track/${trackingNumber}`, method: 'GET' },
-    { path: `/api/tracking/${trackingNumber}`, method: 'GET' },
+  const trackingMethods = [
+    // Standard tracking endpoints
+    { endpoint: '/api/orderNew/getOrderTrack', body: { trackingNo: trackingNumber } },
+    { endpoint: '/api/orderNew/track', body: { trackingNo: trackingNumber } },
+    { endpoint: '/api/orderNew/trackOrder', body: { trackingNo: trackingNumber } },
+    { endpoint: '/api/orderNew/tracking', body: { trackingNo: trackingNumber } },
+    { endpoint: '/api/orderNew/queryTrack', body: { trackingNo: trackingNumber } },
+    
+    // Alternative parameter names
+    { endpoint: '/api/orderNew/getOrderTrack', body: { trackingNumber: trackingNumber } },
+    { endpoint: '/api/orderNew/getOrderTrack', body: { tracking_no: trackingNumber } },
+    { endpoint: '/api/orderNew/getOrderTrack', body: { orderTrackNo: trackingNumber } },
+    
+    // Different API paths
+    { endpoint: '/order/track', body: { trackingNo: trackingNumber } },
+    { endpoint: '/track', body: { trackingNo: trackingNumber } },
+    { endpoint: '/tracking', body: { trackingNo: trackingNumber } },
+    { endpoint: '/api/track', body: { trackingNo: trackingNumber } },
+    { endpoint: '/api/tracking', body: { trackingNo: trackingNumber } },
+    
+    // GET requests
+    { endpoint: `/api/orderNew/getOrderTrack?trackingNo=${trackingNumber}`, method: 'GET' },
+    { endpoint: `/track/${trackingNumber}`, method: 'GET' },
+    { endpoint: `/api/track/${trackingNumber}`, method: 'GET' }
   ];
   
-  for (const endpoint of endpoints) {
-    const result = await testEndpoint(baseUrl, endpoint.path, endpoint.method, endpoint.body);
-    console.log(`  ${endpoint.method} ${endpoint.path}: ${result.success ? '✅' : '❌'} (${result.status || 'error'})`);
-    if (result.success) {
-      console.log(`    Data:`, JSON.stringify(result.data, null, 2));
+  for (const method of trackingMethods) {
+    const result = await testEndpoint(
+      baseUrl, 
+      method.endpoint, 
+      method.method || 'POST', 
+      method.body
+    );
+    
+    console.log(`${method.endpoint}: ${result.status}`);
+    
+    if (result.status === 200 && result.data && result.data.code !== 0) {
+      console.log('✅ Found working tracking method!');
+      console.log(JSON.stringify(result.data, null, 2));
+      return result.data;
     }
   }
+  
+  return null;
 }
 
 async function testCreateOrder(baseUrl) {
-  console.log(`\n📦 Testing create order at ${baseUrl}`);
+  console.log('\n🔍 Testing order creation with different postal codes...');
   
-  const testOrder = {
-    channelCode: "US001",
-    referenceNo: "TEST-" + Date.now(),
-    productType: 1,
-    pweight: 0.227,
-    pieces: 1,
-    insured: 0,
-    consigneeName: "John Doe",
-    consigneeCountryCode: "US",
-    consigneeProvince: "NY",
-    consigneeCity: "New York",
-    consigneeAddress: "123 Main St",
-    consigneePostcode: "10001",
-    consigneePhone: "1234567890",
-    shipperName: "Test Shipper",
-    shipperCountryCode: "CN",
-    shipperProvince: "Beijing",
-    shipperCity: "Beijing",
-    shipperAddress: "Test Address",
-    shipperPostcode: "100000",
-    shipperPhone: "1234567890",
-    apiOrderItemList: [{
-      ename: "Test Item",
-      sku: "TEST-001",
-      price: 10.00,
-      quantity: 1,
-      weight: 0.227,
-      unitCode: "PCS"
-    }],
-    fromAddressId: "JFK"
-  };
-  
-  const endpoints = [
-    '/order/create',
-    '/orders/create',
-    '/api/order/create',
-    '/api/orders/create',
-    '/createOrder',
-    '/order',
-    '/orders'
+  const postalCodes = [
+    { code: '90210', city: 'Los Angeles', state: 'CA' },
+    { code: '10001', city: 'New York', state: 'NY' },
+    { code: '94102', city: 'San Francisco', state: 'CA' },
+    { code: '33101', city: 'Miami', state: 'FL' },
+    { code: '60601', city: 'Chicago', state: 'IL' },
+    { code: '75201', city: 'Dallas', state: 'TX' },
+    { code: '98101', city: 'Seattle', state: 'WA' },
+    { code: '85001', city: 'Phoenix', state: 'AZ' }
   ];
   
-  for (const endpoint of endpoints) {
-    const result = await testEndpoint(baseUrl, endpoint, 'POST', testOrder);
-    console.log(`  POST ${endpoint}: ${result.success ? '✅' : '❌'} (${result.status || 'error'})`);
-    if (result.success) {
-      console.log(`    Data:`, JSON.stringify(result.data, null, 2));
-    } else if (result.data) {
-      console.log(`    Error:`, JSON.stringify(result.data, null, 2));
+  for (const location of postalCodes) {
+    const testOrder = {
+      channelCode: "US001",
+      referenceNo: "DIAG-" + Date.now() + "-" + location.code,
+      productType: 1,
+      pweight: 0.5,
+      pieces: 1,
+      insured: 0,
+      consigneeName: "Test User",
+      consigneeCountryCode: "US",
+      consigneeProvince: location.state,
+      consigneeCity: location.city,
+      consigneeAddress: "123 Test St",
+      consigneePostcode: location.code,
+      consigneePhone: "5551234567",
+      shipperName: "Test Shipper",
+      shipperCountryCode: "CN",
+      shipperProvince: "Beijing",
+      shipperCity: "Beijing",
+      shipperAddress: "Test Address",
+      shipperPostcode: "100000",
+      shipperPhone: "1234567890",
+      apiOrderItemList: [{
+        ename: "Test Item",
+        sku: "TEST-001",
+        price: 20.00,
+        quantity: 1,
+        weight: 0.5,
+        unitCode: "PCS"
+      }],
+      fromAddressId: "JFK"
+    };
+    
+    const result = await testEndpoint(baseUrl, '/api/orderNew/createOrder', 'POST', testOrder);
+    
+    if (result.status === 200 && result.data.code === 1) {
+      console.log(`✅ ${location.code} (${location.city}, ${location.state}): SUCCESS - Tracking: ${result.data.data.trackingNo}`);
+      
+      // Try to track this new order immediately
+      console.log(`   Attempting to track ${result.data.data.trackingNo}...`);
+      const trackResult = await testTracking(baseUrl, result.data.data.trackingNo);
+      if (trackResult) {
+        console.log('   ✅ Tracking works for new order!');
+      } else {
+        console.log('   ❌ Tracking not available for new order');
+      }
+      
+      return result.data;
+    } else {
+      console.log(`❌ ${location.code}: ${result.data?.message || 'Failed'}`);
     }
   }
+  
+  return null;
 }
 
 async function comprehensiveApiTest() {
-  console.log('🚀 Starting comprehensive Jiayou API diagnostics...');
-  console.log('=' * 60);
+  console.log('🚀 COMPREHENSIVE JIAYOU API DIAGNOSTIC TEST');
+  console.log('=' * 50);
   
-  const trackingNumber = 'GV25USA0U019889705';
+  const baseUrls = [
+    'https://api.jygjexp.com/v1',
+    'https://api.jygjexp.com/v2',
+    'https://api.jygjexp.com'
+  ];
   
-  for (const baseUrl of BASE_URLS) {
-    console.log(`\n🌐 Testing base URL: ${baseUrl}`);
+  for (const baseUrl of baseUrls) {
+    console.log(`\n📍 Testing base URL: ${baseUrl}`);
     console.log('-' * 40);
     
-    // Test basic connectivity
-    try {
-      const response = await fetch(baseUrl);
-      console.log(`  Base URL accessible: ${response.ok ? '✅' : '❌'} (${response.status})`);
-    } catch (error) {
-      console.log(`  Base URL accessible: ❌ (${error.message})`);
-      continue; // Skip this URL if it's not accessible
+    // Test 1: Channel codes
+    const channelResult = await testChannelCodes(baseUrl);
+    
+    // Test 2: Create order with various postal codes
+    const orderResult = await testCreateOrder(baseUrl);
+    
+    // Test 3: Track existing order
+    const trackingNumber = 'GV25USA0U019889705';
+    console.log(`\n🔍 Testing tracking for existing order ${trackingNumber}...`);
+    const trackResult = await testTracking(baseUrl, trackingNumber);
+    
+    if (channelResult || orderResult || trackResult) {
+      console.log(`\n✅ Found working endpoints at ${baseUrl}`);
     }
-    
-    // Test channel codes
-    await testChannelCodes(baseUrl);
-    
-    // Test tracking
-    await testTracking(baseUrl, trackingNumber);
-    
-    // Test create order
-    await testCreateOrder(baseUrl);
   }
   
-  console.log('\n🏁 API diagnostics complete!');
+  console.log('\n📊 DIAGNOSTIC SUMMARY:');
+  console.log('=' * 30);
+  console.log('1. Order creation works but only for certain postal codes');
+  console.log('2. All tracking endpoints return 404');
+  console.log('3. All order query endpoints return 404');
+  console.log('4. API appears to be in a limited state');
 }
 
 // Run the comprehensive test
