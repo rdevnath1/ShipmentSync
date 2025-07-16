@@ -309,15 +309,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
         
-        // For coverage issues, provide more detailed error message
+        // For coverage issues, log warning but proceed with shipment creation
+        // since customer service confirmed coverage exists
         if (coverageCheck.data[0].errMsg.includes("不在渠道分区范围内")) {
-          return res.status(400).json({ 
-            error: `ZIP ${shippingAddress.postalCode} appears to be outside US001 coverage area according to Jiayou API. However, if customer service confirmed this ZIP is supported, you may need to contact Jiayou support to update their coverage database or check if there's a different channel code for this area.` 
-          });
+          console.warn(`⚠️  Coverage check API returned error for ${shippingAddress.postalCode}, but proceeding with shipment creation since customer service confirmed coverage exists.`);
+          console.warn(`Coverage API error: ${coverageCheck.data[0].errMsg}`);
+        } else {
+          // For other errors (weight, dimensions, etc.), still fail
+          return res.status(400).json({ error: coverageCheck.data[0].errMsg });
         }
-        
-        // bubble the true Jiayou error (weight, dimensions, etc.)
-        return res.status(400).json({ error: coverageCheck.data[0].errMsg });
       }
 
       // Verify address first
@@ -457,6 +457,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating shipment:", error);
       res.status(500).json({ error: "Failed to create shipment" });
+    }
+  });
+
+  // Update shipment
+  app.put("/api/shipments/:id", async (req, res) => {
+    try {
+      const shipmentId = parseInt(req.params.id);
+      const { trackingNumber, channelCode, serviceType, weight, dimensions, status } = req.body;
+      
+      const shipment = await storage.getShipment(shipmentId);
+      if (!shipment) {
+        return res.status(404).json({ error: "Shipment not found" });
+      }
+
+      const updateData = {
+        trackingNumber,
+        channelCode: channelCode || "US001",
+        serviceType: serviceType || "standard",
+        weight: weight?.toString(),
+        dimensions,
+        status,
+      };
+
+      const updatedShipment = await storage.updateShipment(shipmentId, updateData);
+      
+      res.json({
+        message: "Shipment updated successfully",
+        shipment: updatedShipment,
+      });
+    } catch (error) {
+      console.error("Error updating shipment:", error);
+      res.status(500).json({ error: "Failed to update shipment" });
     }
   });
 

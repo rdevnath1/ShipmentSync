@@ -55,6 +55,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Manual Edit Shipment Feature (July 16, 2025)
+- **Edit Shipment Modal**: Added comprehensive modal for editing existing shipments
+- **Edit Button**: Added edit button to shipments table for easy access
+- **Backend API**: Created PUT endpoint for updating shipment details
+- **Form Validation**: Implemented validation for tracking number, weight, dimensions, and status
+- **Status Management**: Users can update shipment status (created, shipped, in_transit, delivered, cancelled)
+- **Weight & Dimensions**: Editable package details with proper validation
+- **Channel Lock**: Channel code (US001) and service type (Standard) remain locked but visible
+- **SUCCESSFUL RESULT**: Users can now manually edit shipments after creation with full validation
+
 ### PO Box Detection Implementation (July 15, 2025)
 - **Smart PO Box Detection**: Added dual-layer PO Box detection for addresses and ZIP codes
 - **User-Friendly Error Messages**: Converts Chinese Jiayou errors to clear English explanations

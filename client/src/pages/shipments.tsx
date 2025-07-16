@@ -1,16 +1,19 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import Header from "@/components/header";
+import EditShipmentModal from "@/components/edit-shipment-modal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Eye, Printer, Package } from "lucide-react";
+import { Search, Eye, Printer, Package, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
 export default function Shipments() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedShipment, setSelectedShipment] = useState(null);
   const { toast } = useToast();
   
   const { data: shipments } = useQuery({
@@ -66,6 +69,16 @@ export default function Shipments() {
 
   const handlePrintLabel = (shipment: any) => {
     printMutation.mutate(shipment.id);
+  };
+
+  const handleEditShipment = (shipment: any) => {
+    setSelectedShipment(shipment);
+    setEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setEditModalOpen(false);
+    setSelectedShipment(null);
   };
 
   const filteredShipments = shipments?.filter(shipment => 
@@ -185,6 +198,14 @@ export default function Shipments() {
                             <Button 
                               size="sm" 
                               variant="outline"
+                              onClick={() => handleEditShipment(shipment)}
+                            >
+                              <Edit className="mr-1" size={12} />
+                              Edit
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
                               onClick={() => handleTrackShipment(shipment.trackingNumber)}
                               disabled={trackingMutation.isPending}
                             >
@@ -211,6 +232,12 @@ export default function Shipments() {
           </CardContent>
         </Card>
       </div>
+      
+      <EditShipmentModal 
+        isOpen={editModalOpen}
+        onClose={handleCloseEditModal}
+        shipment={selectedShipment}
+      />
     </>
   );
 }
