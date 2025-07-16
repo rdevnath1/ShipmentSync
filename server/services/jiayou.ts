@@ -124,22 +124,38 @@ export class JiayouService {
   }
 
   private getAuthHeaders(): Record<string, string> {
-    const code = Date.now().toString();
-    const signature = this.generateSignature(code, this.apiKey);
+    // Use the working authentication format from our successful tests
+    const timestamp = new Date().toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    }).replace(/\//g, '-');
+
+    const sign = this.generateSignature(this.clientId, this.apiKey);
+
+    // Log auth details for debugging (ChatGPT suggestion #4)
+    console.log(`→ Jiayou auth headers: code=${this.clientId}, timestamp=${timestamp}`);
 
     return {
       'Content-Type': 'application/json',
-      'code': code,
-      'signature': signature,
-      'clientId': this.clientId,
-      'accesskey': this.apiKey  // Add the required accesskey header
+      'code': this.clientId,
+      'apiKey': this.apiKey,
+      'timestamp': timestamp,
+      'sign': sign,
     };
   }
 
   async createOrder(orderData: JiayouCreateOrderRequest): Promise<JiayouCreateOrderResponse> {
     try {
+      // Log the order creation attempt (ChatGPT suggestion #1)
+      console.log("→ Jiayou createOrder", orderData.referenceNo, orderData.channelCode);
+      
       const response = await axios.post(
-        `${this.baseUrl}/order/create`,  // Use correct endpoint
+        `${this.baseUrl}/api/orderNew/createOrder`,  // Use the working endpoint from our tests
         orderData,
         { 
           headers: this.getAuthHeaders(),
@@ -147,9 +163,20 @@ export class JiayouService {
         }
       );
 
-      return response.data;
+      const data = response.data;
+      
+      // Log the response (ChatGPT suggestion #2)
+      console.log("→ Jiayou response:", data);
+      
+      // Check if the order was actually created successfully
+      if (!data || data.code !== 1) {
+        console.error(`Jiayou failed: ${data?.message || "unknown error"}`);
+        throw new Error(`Jiayou failed: ${data?.message || "unknown error"}`);
+      }
+
+      return data;
     } catch (error: any) {
-      // NEW: dump Jiayou's real message
+      // Enhanced error logging (ChatGPT suggestion)
       if (error.response?.data) {
         console.error("Jiayou raw error →", error.response.data);
       }

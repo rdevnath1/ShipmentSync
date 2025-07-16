@@ -454,9 +454,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         break;
       }
 
-      if (jiayouResponse.code !== 1) {
+      // ChatGPT's critical suggestion: Only proceed if Jiayou succeeded
+      if (!jiayouResponse || jiayouResponse.code !== 1) {
+        console.error("❌ Jiayou failed - NOT calling ShipStation");
+        
         // Translate common Chinese error messages to English
-        let errorMessage = jiayouResponse.message;
+        let errorMessage = jiayouResponse?.message || "Unknown error from Jiayou";
         
         // Common error message translations
         const errorTranslations = {
@@ -482,12 +485,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         // If no translation found, keep original message but add helpful note
-        if (errorMessage === jiayouResponse.message && /[\u4e00-\u9fff]/.test(errorMessage)) {
+        if (errorMessage === jiayouResponse?.message && /[\u4e00-\u9fff]/.test(errorMessage)) {
           errorMessage = `Shipping service error: ${jiayouResponse.message}. Please check your address format and try again.`;
         }
 
         return res.status(400).json({ error: errorMessage });
       }
+
+      // If we get here, Jiayou succeeded (code === 1)
+      console.log("✅ Jiayou succeeded - proceeding with ShipStation update");
 
       // Update order with shipment data and mark as shipped
       const shipmentUpdate = {
