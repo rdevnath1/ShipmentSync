@@ -496,9 +496,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         trackingNumber: jiayouResponse.data.trackingNo,
         markNo: jiayouResponse.data.markNo,
         labelPath: jiayouResponse.data.labelPath,
-        channelCode: channelCode || "US001",
-        serviceType: serviceType || "standard",
-        weight: weight?.toString() || "1",
+        channelCode: defaultChannelCode || "US001",
+        serviceType: "standard",
+        weight: weight?.toString() || "8",
         dimensions: dimensions || null,
         status: "shipped",
       };
