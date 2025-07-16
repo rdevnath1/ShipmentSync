@@ -613,6 +613,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // API Key Management Routes
+  app.get("/api/api-keys", async (req, res) => {
+    try {
+      const apiKeys = await storage.getApiKeys();
+      
+      // Don't expose the secret in the response
+      const sanitizedKeys = apiKeys.map(key => ({
+        ...key,
+        keySecret: `${key.keySecret.substring(0, 8)}...`
+      }));
+      
+      res.json(sanitizedKeys);
+    } catch (error) {
+      console.error("Error fetching API keys:", error);
+      res.status(500).json({ error: "Failed to fetch API keys" });
+    }
+  });
+
+  app.post("/api/api-keys", async (req, res) => {
+    try {
+      const { name, permissions } = req.body;
+      
+      // Generate secure API key components
+      const keyId = `sk_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+      const keySecret = `${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`;
+      
+      const apiKeyData = {
+        name,
+        keyId,
+        keySecret,
+        permissions,
+        isActive: true,
+      };
+      
+      const apiKey = await storage.createApiKey(apiKeyData);
+      
+      res.json(apiKey);
+    } catch (error) {
+      console.error("Error creating API key:", error);
+      res.status(500).json({ error: "Failed to create API key" });
+    }
+  });
+
+  app.put("/api/api-keys/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { name, permissions, isActive } = req.body;
+      
+      const apiKey = await storage.updateApiKey(id, {
+        name,
+        permissions,
+        isActive,
+      });
+      
+      res.json(apiKey);
+    } catch (error) {
+      console.error("Error updating API key:", error);
+      res.status(500).json({ error: "Failed to update API key" });
+    }
+  });
+
+  app.delete("/api/api-keys/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteApiKey(id);
+      res.json({ message: "API key deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting API key:", error);
+      res.status(500).json({ error: "Failed to delete API key" });
+    }
+  });
+
   // Get channel codes
   app.get("/api/jiayou/channels", async (req, res) => {
     try {

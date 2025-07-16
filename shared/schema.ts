@@ -48,6 +48,18 @@ export const trackingEvents = pgTable("tracking_events", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const apiKeys = pgTable("api_keys", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(), // Company/Client name
+  keyId: text("key_id").notNull().unique(), // Public identifier
+  keySecret: text("key_secret").notNull(), // Secret key for authentication
+  permissions: jsonb("permissions").notNull(), // Array of permissions like ["read:orders", "write:shipments"]
+  isActive: boolean("is_active").default(true),
+  lastUsed: timestamp("last_used"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const ordersRelations = relations(orders, ({ many }) => ({
   trackingEvents: many(trackingEvents),
 }));
@@ -57,6 +69,10 @@ export const trackingEventsRelations = relations(trackingEvents, ({ one }) => ({
     fields: [trackingEvents.orderId],
     references: [orders.id],
   }),
+}));
+
+export const apiKeysRelations = relations(apiKeys, ({ many }) => ({
+  // Future: add usage logs relation if needed
 }));
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -87,3 +103,13 @@ export type Order = typeof orders.$inferSelect;
 
 export type InsertTrackingEvent = z.infer<typeof insertTrackingEventSchema>;
 export type TrackingEvent = typeof trackingEvents.$inferSelect;
+
+export const insertApiKeySchema = createInsertSchema(apiKeys).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  lastUsed: true,
+});
+
+export type InsertApiKey = z.infer<typeof insertApiKeySchema>;
+export type ApiKey = typeof apiKeys.$inferSelect;
