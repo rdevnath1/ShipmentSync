@@ -5,8 +5,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Dashboard from "@/pages/dashboard";
 import Orders from "@/pages/orders";
-import Shipments from "@/pages/shipments";
-import Labels from "@/pages/labels";
 import Tracking from "@/pages/tracking";
 import Settings from "@/pages/settings";
 import NotFound from "@/pages/not-found";
@@ -20,8 +18,6 @@ function Router() {
         <Switch>
           <Route path="/" component={Dashboard} />
           <Route path="/orders" component={Orders} />
-          <Route path="/shipments" component={Shipments} />
-          <Route path="/labels" component={Labels} />
           <Route path="/tracking" component={Tracking} />
           <Route path="/settings" component={Settings} />
           <Route component={NotFound} />

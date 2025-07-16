@@ -55,6 +55,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Unified Orders Interface (July 16, 2025)
+- **Single Orders Page**: Consolidated 3 separate tabs (Orders, Shipments, Labels) into one unified interface
+- **Smart Filtering**: Added filter buttons for All, Pending, and Shipped orders with live counts
+- **Contextual Actions**: Pending orders show Ship/View/Delete actions; Shipped orders show Edit/Print/View actions
+- **Integrated Label Printing**: Print labels directly from shipped orders rather than separate page
+- **Streamlined Navigation**: Removed redundant Shipments and Labels pages from sidebar
+- **Database Unified**: All order data stored in single orders table; shipments are orders with tracking numbers
+- **API Consistency**: Updated all endpoints to work with unified orders structure
+- **SUCCESSFUL RESULT**: Clean, intuitive interface where orders naturally progress from pending to shipped
+
 ### Manual Edit Shipment Feature (July 16, 2025)
 - **Edit Shipment Modal**: Added comprehensive modal for editing existing shipments
 - **Edit Button**: Added edit button to shipments table for easy access

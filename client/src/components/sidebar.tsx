@@ -2,8 +2,6 @@ import { Link, useLocation } from "wouter";
 import { 
   LayoutDashboard, 
   Package, 
-  Truck, 
-  Tag, 
   Route, 
   Settings 
 } from "lucide-react";
@@ -12,8 +10,6 @@ import logoPath from "@assets/logo_1752442395960.png";
 const navItems = [
   { path: "/", icon: LayoutDashboard, label: "Dashboard" },
   { path: "/orders", icon: Package, label: "Orders" },
-  { path: "/shipments", icon: Truck, label: "Shipments" },
-  { path: "/labels", icon: Tag, label: "Labels" },
   { path: "/tracking", icon: Route, label: "Tracking" },
   { path: "/settings", icon: Settings, label: "Settings" },
 ];

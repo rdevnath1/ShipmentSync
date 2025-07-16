@@ -3,20 +3,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Eye, Trash2, Package } from "lucide-react";
+import { Search, Plus, Eye, Trash2, Package, Printer, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import CreateShipmentModal from "./create-shipment-modal";
 import CreateOrderModal from "./create-order-modal";
+import EditShipmentModal from "./edit-shipment-modal";
 
 interface OrderTableProps {
   orders: any[];
+  showShipmentActions?: boolean;
 }
 
-export default function OrderTable({ orders }: OrderTableProps) {
+export default function OrderTable({ orders, showShipmentActions = false }: OrderTableProps) {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showCreateOrderModal, setShowCreateOrderModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
@@ -32,7 +35,7 @@ export default function OrderTable({ orders }: OrderTableProps) {
         title: "Success",
         description: "Order deleted successfully",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/orders/pending"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
     },
     onError: (error: any) => {
       toast({
@@ -72,6 +75,38 @@ export default function OrderTable({ orders }: OrderTableProps) {
     if (window.confirm(`Are you sure you want to delete order #${order.orderNumber}?`)) {
       deleteOrderMutation.mutate(order.id);
     }
+  };
+
+  const handleEditShipment = (order: any) => {
+    setSelectedOrder(order);
+    setShowEditModal(true);
+  };
+
+  const printMutation = useMutation({
+    mutationFn: async (orderId: number) => {
+      const response = await apiRequest("POST", `/api/shipments/${orderId}/print`);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      if (data.labelPath) {
+        window.open(data.labelPath, '_blank');
+        toast({
+          title: "Label Opened",
+          description: `Label for tracking #${data.trackingNumber} opened in new tab`,
+        });
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Print Error",
+        description: error.message || "Failed to print label",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handlePrintLabel = (order: any) => {
+    printMutation.mutate(order.id);
   };
 
   const filteredOrders = orders.filter(order => 
@@ -178,31 +213,63 @@ export default function OrderTable({ orders }: OrderTableProps) {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="flex items-center space-x-2">
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleCreateShipment(order)}
-                            >
-                              <Package className="mr-1" size={12} />
-                              Ship
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleViewOrder(order)}
-                            >
-                              <Eye className="mr-1" size={12} />
-                              View
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleDeleteOrder(order)}
-                              disabled={deleteOrderMutation.isPending}
-                            >
-                              <Trash2 className="mr-1" size={12} />
-                              Delete
-                            </Button>
+                            {order.status === 'pending' ? (
+                              <>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => handleCreateShipment(order)}
+                                >
+                                  <Package className="mr-1" size={12} />
+                                  Ship
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => handleViewOrder(order)}
+                                >
+                                  <Eye className="mr-1" size={12} />
+                                  View
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => handleDeleteOrder(order)}
+                                  disabled={deleteOrderMutation.isPending}
+                                >
+                                  <Trash2 className="mr-1" size={12} />
+                                  Delete
+                                </Button>
+                              </>
+                            ) : (
+                              <>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => handleEditShipment(order)}
+                                >
+                                  <Edit className="mr-1" size={12} />
+                                  Edit
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => handlePrintLabel(order)}
+                                  disabled={printMutation.isPending}
+                                >
+                                  <Printer className="mr-1" size={12} />
+                                  {printMutation.isPending ? "Printing..." : "Print"}
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => handleViewOrder(order)}
+                                >
+                                  <Eye className="mr-1" size={12} />
+                                  View
+                                </Button>
+                              </>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -224,6 +291,12 @@ export default function OrderTable({ orders }: OrderTableProps) {
       <CreateOrderModal
         isOpen={showCreateOrderModal}
         onClose={() => setShowCreateOrderModal(false)}
+      />
+      
+      <EditShipmentModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        shipment={selectedOrder}
       />
     </>
   );
