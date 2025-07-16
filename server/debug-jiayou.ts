@@ -41,16 +41,18 @@ export async function verifyJiayouOrder(orderId: number) {
       } else {
         return {
           success: false,
-          error: `Jiayou tracking failed: ${trackingData.message}`,
+          error: `Jiayou tracking unavailable: ${trackingData.message}`,
           trackingData,
-          orderData: order
+          orderData: order,
+          note: 'This is a known issue with Jiayou tracking endpoints returning 404. The tracking number exists but cannot be queried.'
         };
       }
     } catch (error) {
       return {
         success: false,
         error: `Jiayou API error: ${error.message}`,
-        orderData: order
+        orderData: order,
+        note: 'Tracking endpoints appear to be deprecated or moved.'
       };
     }
   } catch (error) {
