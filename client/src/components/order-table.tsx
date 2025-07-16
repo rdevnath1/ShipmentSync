@@ -51,13 +51,13 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
   const getStatusColor = (status: string) => {
     switch (status) {
       case "shipped":
-        return "bg-emerald-100 text-emerald-800";
+        return "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400";
       case "pending":
-        return "bg-amber-100 text-amber-800";
+        return "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400";
       case "delivered":
-        return "bg-emerald-100 text-emerald-800";
+        return "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400";
       default:
-        return "bg-slate-100 text-slate-800";
+        return "bg-muted text-muted-foreground";
     }
   };
 
@@ -129,11 +129,11 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
           <div className="flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0">
             <div>
               <CardTitle className="text-lg">Recent Orders</CardTitle>
-              <p className="text-slate-600">Orders imported from ShipStation</p>
+              <p className="text-muted-foreground">Orders imported from ShipStation</p>
             </div>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
               <div className="relative flex-1 sm:flex-none">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={16} />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={16} />
                 <Input 
                   placeholder="Search orders..." 
                   className="pl-10 pr-4 py-2 w-full sm:w-64"
@@ -152,63 +152,63 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
         <CardContent>
           {!orders || orders.length === 0 ? (
             <div className="text-center py-12">
-              <Package className="mx-auto h-12 w-12 text-slate-400 mb-4" />
-              <h3 className="text-lg font-medium text-slate-900 mb-2">No orders yet</h3>
-              <p className="text-slate-500">Pull orders from ShipStation to get started</p>
+              <Package className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-medium text-foreground mb-2">No orders yet</h3>
+              <p className="text-muted-foreground">Pull orders from ShipStation to get started</p>
             </div>
           ) : (
             <>
               {/* Desktop Table View */}
               <div className="hidden lg:block overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-slate-50">
+                  <thead className="bg-muted">
                     <tr>
-                      <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Order ID
                       </th>
-                      <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Customer
                       </th>
-                      <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Destination
                       </th>
-                      <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Status
                       </th>
-                      <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Date
                       </th>
-                      <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-slate-200">
+                  <tbody className="bg-background divide-y divide-border">
                     {filteredOrders.map((order: any) => {
                       const shippingAddress = order.shippingAddress as any;
                       return (
-                        <tr key={order.id} className="hover:bg-slate-50 transition-colors">
+                        <tr key={order.id} className="hover:bg-muted transition-colors">
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-slate-900">
+                            <div className="text-sm font-medium text-foreground">
                               #{order.orderNumber}
                             </div>
-                            <div className="text-sm text-slate-500">
+                            <div className="text-sm text-muted-foreground">
                               {order.referenceNumber}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-slate-900">
+                            <div className="text-sm font-medium text-foreground">
                               {order.customerName}
                             </div>
-                            <div className="text-sm text-slate-500">
+                            <div className="text-sm text-muted-foreground">
                               {order.customerEmail}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-slate-900">
+                            <div className="text-sm text-foreground">
                               {shippingAddress?.city}
                             </div>
-                            <div className="text-sm text-slate-500">
+                            <div className="text-sm text-muted-foreground">
                               {shippingAddress?.country}
                             </div>
                           </td>
@@ -217,7 +217,7 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
                               {order.status}
                             </Badge>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                             {new Date(order.createdAt).toLocaleDateString()}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -305,7 +305,7 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
                       <div className="flex justify-between items-start mb-3">
                         <div>
                           <h3 className="font-semibold text-sm">#{order.orderNumber}</h3>
-                          <p className="text-xs text-slate-500">{order.referenceNumber}</p>
+                          <p className="text-xs text-muted-foreground">{order.referenceNumber}</p>
                         </div>
                         <Badge className={getStatusColor(order.status)}>
                           {order.status}
@@ -315,13 +315,13 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
                       <div className="space-y-2 mb-4">
                         <div>
                           <p className="text-sm font-medium">{order.customerName}</p>
-                          <p className="text-xs text-slate-500">{order.customerEmail}</p>
+                          <p className="text-xs text-muted-foreground">{order.customerEmail}</p>
                         </div>
                         <div>
                           <p className="text-sm">{shippingAddress?.city}</p>
-                          <p className="text-xs text-slate-500">{shippingAddress?.country}</p>
+                          <p className="text-xs text-muted-foreground">{shippingAddress?.country}</p>
                         </div>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-muted-foreground">
                           {new Date(order.createdAt).toLocaleDateString()}
                         </p>
                       </div>

@@ -8,15 +8,15 @@ interface HeaderProps {
 
 export default function Header({ title, description }: HeaderProps) {
   return (
-    <header className="bg-white border-b border-slate-200 px-4 lg:px-6 py-4 pt-16 lg:pt-4">
+    <header className="bg-background border-b border-border px-4 lg:px-6 py-4 pt-16 lg:pt-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
         <div>
-          <h2 className="text-xl lg:text-2xl font-semibold text-slate-800">{title}</h2>
-          <p className="text-sm lg:text-base text-slate-600">{description}</p>
+          <h2 className="text-xl lg:text-2xl font-semibold text-foreground">{title}</h2>
+          <p className="text-sm lg:text-base text-muted-foreground">{description}</p>
         </div>
         <div className="flex items-center space-x-2 lg:space-x-4">
           <Button variant="ghost" size="sm" className="relative">
-            <Bell className="text-slate-400" size={20} />
+            <Bell className="text-muted-foreground" size={20} />
             <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
           </Button>
           
@@ -25,8 +25,8 @@ export default function Header({ title, description }: HeaderProps) {
               <User className="text-white" size={16} />
             </div>
             <div className="text-sm hidden sm:block">
-              <p className="font-medium text-slate-800">Admin User</p>
-              <p className="text-slate-500">admin@company.com</p>
+              <p className="font-medium text-foreground">Admin User</p>
+              <p className="text-muted-foreground">admin@company.com</p>
             </div>
           </div>
         </div>

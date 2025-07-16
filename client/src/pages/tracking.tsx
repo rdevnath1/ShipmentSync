@@ -96,12 +96,12 @@ export default function Tracking() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-base lg:text-lg">Track Package</CardTitle>
-                <p className="text-sm lg:text-base text-slate-600">Enter tracking number to get real-time updates</p>
+                <p className="text-sm lg:text-base text-muted-foreground">Enter tracking number to get real-time updates</p>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-3 mb-6">
                   <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={16} />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={16} />
                     <Input 
                       placeholder="Enter tracking number..." 
                       className="pl-10 pr-4 py-2"
@@ -121,10 +121,10 @@ export default function Tracking() {
 
                 {trackingData && (
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+                    <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
                       <div>
-                        <h4 className="font-medium text-slate-900">Tracking Number</h4>
-                        <p className="text-sm text-slate-600">{trackingNumber}</p>
+                        <h4 className="font-medium text-foreground">Tracking Number</h4>
+                        <p className="text-sm text-muted-foreground">{trackingNumber}</p>
                       </div>
                       <Badge className={getStatusColor(trackingData.status || 'unknown')}>
                         {trackingData.status || 'Unknown'}
@@ -133,22 +133,22 @@ export default function Tracking() {
 
                     {trackingData.events && trackingData.events.length > 0 && (
                       <div className="space-y-3">
-                        <h4 className="font-medium text-slate-900">Tracking Events</h4>
+                        <h4 className="font-medium text-foreground">Tracking Events</h4>
                         <div className="space-y-3">
                           {trackingData.events.map((event: any, index: number) => (
-                            <div key={index} className="flex items-start space-x-3 p-3 border border-slate-200 rounded-lg">
+                            <div key={index} className="flex items-start space-x-3 p-3 border border-border rounded-lg">
                               <div className="mt-1">
                                 {getStatusIcon(event.status)}
                               </div>
                               <div className="flex-1">
                                 <div className="flex items-center justify-between">
-                                  <h5 className="font-medium text-slate-900">{event.description}</h5>
-                                  <span className="text-sm text-slate-500">
+                                  <h5 className="font-medium text-foreground">{event.description}</h5>
+                                  <span className="text-sm text-muted-foreground">
                                     {new Date(event.timestamp).toLocaleString()}
                                   </span>
                                 </div>
                                 {event.location && (
-                                  <p className="text-sm text-slate-600 mt-1">{event.location}</p>
+                                  <p className="text-sm text-muted-foreground mt-1">{event.location}</p>
                                 )}
                               </div>
                             </div>
@@ -166,20 +166,20 @@ export default function Tracking() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Recent Shipments</CardTitle>
-                <p className="text-slate-600">Quick access to your shipments</p>
+                <p className="text-muted-foreground">Quick access to your shipments</p>
               </CardHeader>
               <CardContent>
                 {!shipments || shipments.length === 0 ? (
                   <div className="text-center py-8">
-                    <Truck className="mx-auto h-8 w-8 text-slate-400 mb-2" />
-                    <p className="text-sm text-slate-500">No shipments found</p>
+                    <Truck className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
+                    <p className="text-sm text-muted-foreground">No shipments found</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {shipments.slice(0, 5).map((shipment: any) => (
                       <div
                         key={shipment.id}
-                        className="p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
+                        className="p-3 border border-border rounded-lg hover:bg-muted cursor-pointer transition-colors"
                         onClick={() => {
                           setTrackingNumber(shipment.trackingNumber);
                           trackingMutation.mutate(shipment.trackingNumber);
@@ -187,10 +187,10 @@ export default function Tracking() {
                       >
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="font-medium text-slate-900 text-sm">
+                            <p className="font-medium text-foreground text-sm">
                               {shipment.trackingNumber}
                             </p>
-                            <p className="text-xs text-slate-500">
+                            <p className="text-xs text-muted-foreground">
                               Order #{shipment.orderId}
                             </p>
                           </div>

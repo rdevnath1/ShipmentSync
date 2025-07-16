@@ -163,7 +163,7 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
           </div>
 
           <div className="border-t border-slate-200 pt-6">
-            <h4 className="text-md font-medium text-slate-800 mb-4">Recipient Information</h4>
+            <h4 className="text-md font-medium text-foreground mb-4">Recipient Information</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label>Name</Label>
@@ -203,7 +203,7 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
           </div>
 
           <div className="border-t border-slate-200 pt-6">
-            <h4 className="text-md font-medium text-slate-800 mb-4">Package Details</h4>
+            <h4 className="text-md font-medium text-foreground mb-4">Package Details</h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <Label htmlFor="weight">Weight (kg)</Label>

@@ -65,20 +65,20 @@ export default function Dashboard() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between py-2 lg:py-3 px-3 lg:px-4 bg-slate-50 rounded-lg">
+              <div className="flex items-center justify-between py-2 lg:py-3 px-3 lg:px-4 bg-muted rounded-lg">
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                  <span className="text-sm font-medium text-slate-700">API Connection</span>
+                  <span className="text-sm font-medium text-foreground">API Connection</span>
                 </div>
                 <span className="text-xs text-emerald-600 font-medium">Active</span>
               </div>
 
-              <div className="flex items-center justify-between py-2 lg:py-3 px-3 lg:px-4 bg-slate-50 rounded-lg">
+              <div className="flex items-center justify-between py-2 lg:py-3 px-3 lg:px-4 bg-muted rounded-lg">
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span className="text-sm font-medium text-slate-700">Last Sync</span>
+                  <span className="text-sm font-medium text-foreground">Last Sync</span>
                 </div>
-                <span className="text-xs text-slate-500">2 mins ago</span>
+                <span className="text-xs text-muted-foreground">2 mins ago</span>
               </div>
 
               <Button 
@@ -96,28 +96,28 @@ export default function Dashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-base lg:text-lg">Carrier</CardTitle>
-                  <p className="text-sm lg:text-base text-slate-600">Create shipments & generate labels</p>
+                  <p className="text-sm lg:text-base text-muted-foreground">Create shipments & generate labels</p>
                 </div>
-                <div className="w-10 h-10 lg:w-12 lg:h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
-                  <Truck className="text-emerald-600" size={16} />
+                <div className="w-10 h-10 lg:w-12 lg:h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center">
+                  <Truck className="text-emerald-600 dark:text-emerald-400" size={16} />
                 </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between py-2 lg:py-3 px-3 lg:px-4 bg-slate-50 rounded-lg">
+              <div className="flex items-center justify-between py-2 lg:py-3 px-3 lg:px-4 bg-muted rounded-lg">
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                  <span className="text-sm font-medium text-slate-700">API Status</span>
+                  <span className="text-sm font-medium text-foreground">API Status</span>
                 </div>
                 <span className="text-xs text-emerald-600 font-medium">Online</span>
               </div>
 
-              <div className="flex items-center justify-between py-2 lg:py-3 px-3 lg:px-4 bg-slate-50 rounded-lg">
+              <div className="flex items-center justify-between py-2 lg:py-3 px-3 lg:px-4 bg-muted rounded-lg">
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                  <span className="text-sm font-medium text-slate-700">Pending Labels</span>
+                  <span className="text-sm font-medium text-foreground">Pending Labels</span>
                 </div>
-                <span className="text-xs text-slate-500">
+                <span className="text-xs text-muted-foreground">
                   {orders?.filter((o: any) => o.status === "pending").length || 0} orders
                 </span>
               </div>
