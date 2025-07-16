@@ -202,19 +202,22 @@ export class JiayouService {
 
   async getTracking(trackingNumber: string): Promise<any> {
     try {
-      console.log(`Tracking ${trackingNumber} using correct endpoint`);
+      console.log(`Tracking ${trackingNumber} using official V3.8 endpoint`);
       
-      // Use the correct tracking endpoint from ChatGPT's feedback
+      // Use the official tracking endpoint from V3.8 documentation
       const response = await axios.post(
-        `${this.baseUrl}/api/orderNew/getTrackInfo`,
-        { referenceNo: trackingNumber }, // Can also use trackingNo or array format
+        `${this.baseUrl}/api/tracking/query/trackInfo`,
+        [trackingNumber], // Array of tracking numbers as per documentation
         { 
-          headers: this.getAuthHeaders(),
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': this.apiKey  // Only apikey required for tracking
+          },
           timeout: 30000
         }
       );
 
-      console.log('Tracking response:', response.data);
+      console.log('Official tracking response:', response.data);
       
       if (response.data.code === 1) {
         return response.data;
@@ -230,7 +233,7 @@ export class JiayouService {
       console.error('Error getting tracking from Jiayou:', error);
       
       if (error.response?.status === 404) {
-        console.error('404 error - checking endpoint configuration');
+        console.error('404 error - endpoint may have moved');
       }
       
       return {
@@ -241,30 +244,31 @@ export class JiayouService {
     }
   }
 
-  // Alternative method using the public tracking endpoint (no auth required)
-  async getPublicTracking(trackingNumber: string): Promise<any> {
+  // Bulk tracking method supporting multiple tracking numbers
+  async getBulkTracking(trackingNumbers: string[]): Promise<any> {
     try {
-      console.log(`Getting public tracking for ${trackingNumber}`);
+      console.log(`Bulk tracking for ${trackingNumbers.length} tracking numbers`);
       
+      // Official API supports up to 100 tracking numbers per request
       const response = await axios.post(
-        `${this.baseUrl}/outerApi/getTracking`,
-        { trackingNo: trackingNumber },
+        `${this.baseUrl}/api/tracking/query/trackInfo`,
+        trackingNumbers,
         { 
           headers: {
             'Content-Type': 'application/json',
-            'apiKey': this.apiKey
+            'apikey': this.apiKey
           },
           timeout: 30000
         }
       );
 
-      console.log('Public tracking response:', response.data);
+      console.log('Bulk tracking response:', response.data);
       return response.data;
     } catch (error: any) {
-      console.error('Error getting public tracking:', error);
+      console.error('Error getting bulk tracking:', error);
       return {
         code: 0,
-        message: 'Unable to retrieve public tracking information',
+        message: 'Unable to retrieve bulk tracking information',
         data: null
       };
     }

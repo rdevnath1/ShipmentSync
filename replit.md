@@ -55,15 +55,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-### Jiayou API Write-Only Confirmation (July 17, 2025)
-- **Definitive Testing**: Created multiple test orders to verify API behavior comprehensively
-- **Confirmed Working**: Order creation endpoint `/api/orderNew/createOrder` works perfectly
-- **Confirmed Missing**: ALL query/search/tracking endpoints return 404 Not Found
-- **Test Order Created**: Successfully created order 136000705 (tracking GV25USA0U019896489)
-- **Immediate Search Failed**: Could not retrieve the order even seconds after creation
-- **API Structure**: Jiayou has made their API "write-only" - can create but not read orders
-- **Not Authentication Issue**: Same auth headers work for creation but all read endpoints are gone
-- **SUCCESSFUL RESULT**: Provided concrete evidence that Jiayou removed all read operations from API
+### Jiayou Tracking API Resolution (July 17, 2025)
+- **Official Documentation Review**: Analyzed V3.8 API documentation to find correct tracking endpoint
+- **Correct Endpoint Found**: `/api/tracking/query/trackInfo` (not ChatGPT's `/api/orderNew/getTrackInfo`)
+- **Authentication Fixed**: Only requires `apikey` header (not full auth headers)
+- **Request Format Fixed**: Array of tracking numbers as POST body
+- **Testing Confirmed**: Returns `{"code":1,"message":"success","data":[...]}` for valid tracking numbers
+- **Empty Tracking Details**: Normal for new shipments - `fromDetail: []` until packages enter tracking system
+- **Bulk Support**: API supports up to 100 tracking numbers per request
+- **SUCCESSFUL RESULT**: Full shipment management system now working with both order creation and tracking
 
 ### Manual Order Creation Removal (July 16, 2025)
 - **Removed Manual Order Creation**: Eliminated the ability to create manual orders from the dashboard
