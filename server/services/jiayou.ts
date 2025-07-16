@@ -202,26 +202,69 @@ export class JiayouService {
 
   async getTracking(trackingNumber: string): Promise<any> {
     try {
-      console.log(`Attempting to track ${trackingNumber} - Note: Jiayou tracking endpoints may be unavailable`);
+      console.log(`Tracking ${trackingNumber} using correct endpoint`);
       
-      // Based on comprehensive testing, all tracking endpoints return 404
-      // This appears to be a Jiayou API structural change, not an authentication issue
-      
-      // Return a realistic response indicating the limitation
-      return {
-        code: 0,
-        message: 'Jiayou tracking endpoints are currently unavailable. The tracking number exists in our system but cannot be queried from Jiayou at this time. This may be due to API changes or endpoint deprecation.',
-        data: {
-          trackingNumber: trackingNumber,
-          status: 'tracking_unavailable',
-          note: 'Tracking information cannot be retrieved from Jiayou API. The shipment may still be in transit.'
+      // Use the correct tracking endpoint from ChatGPT's feedback
+      const response = await axios.post(
+        `${this.baseUrl}/api/orderNew/getTrackInfo`,
+        { referenceNo: trackingNumber }, // Can also use trackingNo or array format
+        { 
+          headers: this.getAuthHeaders(),
+          timeout: 30000
         }
-      };
+      );
+
+      console.log('Tracking response:', response.data);
+      
+      if (response.data.code === 1) {
+        return response.data;
+      } else {
+        console.log('No tracking data found:', response.data.message);
+        return {
+          code: 0,
+          message: response.data.message || 'No tracking information found',
+          data: null
+        };
+      }
     } catch (error: any) {
       console.error('Error getting tracking from Jiayou:', error);
+      
+      if (error.response?.status === 404) {
+        console.error('404 error - checking endpoint configuration');
+      }
+      
       return {
         code: 0,
-        message: 'Tracking service temporarily unavailable',
+        message: 'Unable to retrieve tracking information',
+        data: null
+      };
+    }
+  }
+
+  // Alternative method using the public tracking endpoint (no auth required)
+  async getPublicTracking(trackingNumber: string): Promise<any> {
+    try {
+      console.log(`Getting public tracking for ${trackingNumber}`);
+      
+      const response = await axios.post(
+        `${this.baseUrl}/outerApi/getTracking`,
+        { trackingNo: trackingNumber },
+        { 
+          headers: {
+            'Content-Type': 'application/json',
+            'apiKey': this.apiKey
+          },
+          timeout: 30000
+        }
+      );
+
+      console.log('Public tracking response:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('Error getting public tracking:', error);
+      return {
+        code: 0,
+        message: 'Unable to retrieve public tracking information',
         data: null
       };
     }

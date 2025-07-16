@@ -1,6 +1,5 @@
 import crypto from 'crypto';
 
-// Jiayou API credentials
 const API_KEY = 'd370d0ee7e704117bfca9184bc03f590';
 const CLIENT_ID = '769908';
 const BASE_URL = 'https://api.jygjexp.com/v1';
@@ -10,77 +9,110 @@ function generateSignature(code, apiKey) {
 }
 
 function getAuthHeaders() {
-  const code = Date.now().toString();
-  const signature = generateSignature(code, API_KEY);
-  
+  const timestamp = new Date().toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  }).replace(/\//g, '-');
+
+  const sign = generateSignature(CLIENT_ID, API_KEY);
+
   return {
     'Content-Type': 'application/json',
-    'code': code,
-    'signature': signature,
-    'clientId': CLIENT_ID,
-    'accesskey': API_KEY  // Added the missing accesskey header
+    'code': CLIENT_ID,
+    'apiKey': API_KEY,
+    'timestamp': timestamp,
+    'sign': sign,
   };
 }
 
 async function testTrackingWithFixedAuth() {
-  console.log('🔍 Testing tracking with fixed authentication...');
+  console.log('🔍 Testing tracking with ChatGPT\'s correct endpoint');
   
-  const trackingNumber = 'GV25USA0U019889705';
-  
-  const trackingEndpoints = [
-    '/track',
-    '/tracking',
-    '/order/track',
-    '/order/tracking',
-    '/api/track',
-    '/api/tracking',
-    '/api/orderNew/getOrderTrack'
+  // Test both reference numbers and tracking numbers
+  const testCases = [
+    { name: 'Recent Order Reference', value: '100002-1752702363375-1-a9gdsxewl' },
+    { name: 'Recent Tracking Number', value: 'GV25USA0U019900646' },
+    { name: 'Original Order Reference', value: 'f687f803-aba5-6956-fc76-af247ce5acfc' },
+    { name: 'Original Tracking Number', value: 'GV25USA0U019889705' }
   ];
   
-  for (const endpoint of trackingEndpoints) {
+  for (const testCase of testCases) {
+    console.log(`\n📋 Testing ${testCase.name}: ${testCase.value}`);
+    
     try {
-      console.log(`\nTesting ${endpoint}...`);
-      const response = await fetch(`${BASE_URL}${endpoint}`, {
+      // Test the correct endpoint from ChatGPT
+      const response = await fetch(`${BASE_URL}/api/orderNew/getTrackInfo`, {
         method: 'POST',
         headers: getAuthHeaders(),
-        body: JSON.stringify({ trackingNo: trackingNumber })
+        body: JSON.stringify({ referenceNo: testCase.value })
       });
       
       const data = await response.json();
-      console.log(`Response from ${endpoint}:`, JSON.stringify(data, null, 2));
       
-      if (data.code === 200 || data.code === 1) {
-        console.log(`✅ SUCCESS: Found tracking data at ${endpoint}`);
-        return data;
-      } else if (data.code === 0 && data.message !== 'Not Found') {
-        console.log(`⚠️  Tracking endpoint works but no data: ${data.message}`);
+      if (response.status === 200 && data.code === 1) {
+        console.log('✅ SUCCESS! Found tracking data:');
+        console.log(JSON.stringify(data, null, 2));
+      } else if (response.status === 200 && data.code === 0) {
+        console.log('⚠️  Endpoint works but no data found:', data.message);
+      } else if (response.status === 404) {
+        console.log('❌ Still getting 404 - endpoint may not exist');
+      } else {
+        console.log(`❌ Error: ${response.status} - ${JSON.stringify(data)}`);
       }
     } catch (error) {
-      console.log(`❌ Error with ${endpoint}:`, error.message);
+      console.log(`❌ Request failed: ${error.message}`);
+    }
+    
+    // Also test the public tracking endpoint
+    if (testCase.value.startsWith('GV25USA')) {
+      console.log(`   Testing public endpoint for ${testCase.value}`);
+      try {
+        const publicResponse = await fetch(`${BASE_URL}/outerApi/getTracking`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apiKey': API_KEY
+          },
+          body: JSON.stringify({ trackingNo: testCase.value })
+        });
+        
+        const publicData = await publicResponse.json();
+        
+        if (publicResponse.status === 200 && publicData.code === 1) {
+          console.log('   ✅ Public tracking works!');
+          console.log('   ' + JSON.stringify(publicData, null, 2));
+        } else {
+          console.log('   ⚠️  Public tracking:', publicData.message);
+        }
+      } catch (error) {
+        console.log(`   ❌ Public tracking failed: ${error.message}`);
+      }
     }
   }
-  
-  console.log('\n❌ No tracking data found in any endpoint');
-  return null;
 }
 
 async function testOrderCreation() {
-  console.log('\n📦 Testing order creation with fixed authentication...');
+  console.log('\n🚀 Testing order creation to get fresh reference');
   
   const testOrder = {
     channelCode: "US001",
-    referenceNo: "TEST-FIXED-" + Date.now(),
+    referenceNo: "TRACK-FIX-" + Date.now(),
     productType: 1,
-    pweight: 0.227,
+    pweight: 0.5,
     pieces: 1,
     insured: 0,
-    consigneeName: "John Doe",
+    consigneeName: "Track Fix Test",
     consigneeCountryCode: "US",
-    consigneeProvince: "NY",
-    consigneeCity: "New York",
-    consigneeAddress: "123 Main St",
-    consigneePostcode: "10001",
-    consigneePhone: "1234567890",
+    consigneeProvince: "CA",
+    consigneeCity: "Los Angeles",
+    consigneeAddress: "456 Test Ave",
+    consigneePostcode: "90210",
+    consigneePhone: "3105551234",
     shipperName: "Test Shipper",
     shipperCountryCode: "CN",
     shipperProvince: "Beijing",
@@ -91,51 +123,66 @@ async function testOrderCreation() {
     apiOrderItemList: [{
       ename: "Test Item",
       sku: "TEST-001",
-      price: 10.00,
+      price: 25.00,
       quantity: 1,
-      weight: 0.227,
+      weight: 0.5,
       unitCode: "PCS"
     }],
     fromAddressId: "JFK"
   };
   
   try {
-    const response = await fetch(`${BASE_URL}/order/create`, {
+    const response = await fetch(`${BASE_URL}/api/orderNew/createOrder`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(testOrder)
     });
     
     const data = await response.json();
-    console.log('Order creation response:', JSON.stringify(data, null, 2));
     
-    if (data.code === 200 || data.code === 1) {
-      console.log('✅ SUCCESS: Order created successfully');
-      return data;
+    if (data.code === 1) {
+      console.log('✅ Created fresh order for tracking test:');
+      console.log(`   Order ID: ${data.data.orderId}`);
+      console.log(`   Tracking: ${data.data.trackingNo}`);
+      console.log(`   Reference: ${testOrder.referenceNo}`);
+      
+      // Now test tracking this fresh order
+      console.log('\n📡 Testing tracking for fresh order...');
+      
+      const trackResponse = await fetch(`${BASE_URL}/api/orderNew/getTrackInfo`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ referenceNo: testOrder.referenceNo })
+      });
+      
+      const trackData = await trackResponse.json();
+      
+      if (trackResponse.status === 200 && trackData.code === 1) {
+        console.log('✅ TRACKING WORKS! Fresh order is trackable:');
+        console.log(JSON.stringify(trackData, null, 2));
+      } else {
+        console.log('❌ Fresh order not trackable:', trackData.message);
+      }
     } else {
       console.log('❌ Order creation failed:', data.message);
-      return null;
     }
   } catch (error) {
-    console.log('❌ Error creating order:', error.message);
-    return null;
+    console.log('❌ Order creation error:', error.message);
   }
 }
 
 async function runFixedAuthTests() {
-  console.log('🚀 Running tests with fixed authentication...');
-  console.log('=' * 50);
+  console.log('🔧 TESTING CHATGPT\'S TRACKING FIXES');
+  console.log('=' * 40);
   
-  // Test order creation first
-  const orderResult = await testOrderCreation();
+  await testOrderCreation();
+  await testTrackingWithFixedAuth();
   
-  // Test tracking
-  const trackingResult = await testTrackingWithFixedAuth();
-  
-  console.log('\n🏁 Tests complete!');
-  console.log('Order creation:', orderResult ? 'SUCCESS' : 'FAILED');
-  console.log('Tracking search:', trackingResult ? 'SUCCESS' : 'FAILED');
+  console.log('\n📊 SUMMARY:');
+  console.log('- Using correct endpoint: /api/orderNew/getTrackInfo');
+  console.log('- Using correct auth headers format');
+  console.log('- Testing both reference numbers and tracking numbers');
+  console.log('- Also testing public endpoint: /outerApi/getTracking');
 }
 
-// Run the tests
 runFixedAuthTests().catch(console.error);

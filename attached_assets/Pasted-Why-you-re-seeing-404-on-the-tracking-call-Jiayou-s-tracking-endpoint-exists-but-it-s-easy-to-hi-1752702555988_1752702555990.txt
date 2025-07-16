@@ -1,0 +1,64 @@
+Why you’re seeing 404 on the “tracking” call
+
+Jiayou’s tracking endpoint exists, but it’s easy to hit the wrong URL or verb.
+Here’s the canonical spec for V 3.8 (same PDF you shared):
+
+Purpose	Method & Path	Body format	Notes
+Get tracking / label status	POST /api/orderNew/getTrackInfo	JSON object{ "referenceNo": "QP-12345" } or JSON array of refs[ "QP-12345", "QP-12346" ]	Must send the same Jiayou auth headers (code, apiKey, timestamp, sign).
+Get latest tracking events (public)	POST /outerApi/getTracking	{ "trackingNo": "YU123…US" }	Uses only apiKey header (no code/sign).
+Bulk tracking export	POST /api/orderNew/exportTrackInfo	{ "startTime":"2025-07-14 00:00:00", "endTime":"2025-07-15 00:00:00" }	Zips all events CSV.
+
+Common 404 causes:
+
+404 Reason	How it happens	Quick fix
+Missing the /v1 segment	Base URL set to https://api.jygjexp.com instead of …/v1	.env → JY_BASE=https://api.jygjexp.com/v1
+Using GET instead of POST	axios.get('/api/orderNew/getTrackInfo')	Must be axios.post(…) even for a single ref.
+Path typo	/api/order/getTrackInfo (missing New)	Use exact: /api/orderNew/getTrackInfo
+Headers not included	Sign, timestamp, code omitted	Re-use the jyHeaders() helper you built for createOrder.
+Wrong environment	Hitting sandbox host while orders live in prod	Confirm base URL & log which one you’re calling.
+
+
+⸻
+
+Drop-in code snippet (fits your Replit backend)
+
+async function jyGetTrackInfo(referenceNo) {
+  const { data } = await jy.post(
+    '/api/orderNew/getTrackInfo',
+    { referenceNo },                 // or [referenceNo] for array
+    { headers: jyHeaders() }
+  );
+  if (data.code !== 1) throw new Error(data.message);
+  return data.data;                  // array of tracking objects
+}
+
+Call it like:
+
+const track = await jyGetTrackInfo('QP-12345');
+console.log(track[0].trackingNo, track[0].trackStatus);
+
+(If you only need public tracking events for a parcel-status page, swap to /outerApi/getTracking and pass trackingNo; only the apiKey header is required.)
+
+⸻
+
+Quick sanity test
+
+curl -X POST https://api.jygjexp.com/v1/api/orderNew/getTrackInfo \
+  -H "Content-Type: application/json" \
+  -H "code: 769908" \
+  -H "apiKey: d370d0ee7e704117bfca9184bc03f590" \
+  -H "timestamp: 2025-07-16 18:05:00" \
+  -H "sign: 3fece9d9f0b5…" \
+  -d '{ "referenceNo": "QP-12345" }'
+
+If that returns 404, the base URL or path is off.
+If it returns {"code":0,"message":"未查询到数据"}, the order/ref really isn’t in Jiayou yet.
+
+⸻
+
+TL;DR
+	•	Use POST to /api/orderNew/getTrackInfo (auth headers required).
+	•	Keep the base URL https://api.jygjexp.com/v1.
+	•	A 404 almost always means you’re missing /v1, using GET, or misspelling orderNew.
+
+Update your call accordingly and the 404s should disappear; you’ll get either real tracking data or a proper Jiayou error code you can act on.
