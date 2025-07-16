@@ -9,6 +9,7 @@ import {
   X
 } from "lucide-react";
 import logoPath from "@assets/logo_1752442395960.png";
+import { ThemeToggle } from "./theme-toggle";
 
 const navItems = [
   { path: "/", icon: LayoutDashboard, label: "Dashboard" },
@@ -47,7 +48,7 @@ export default function Sidebar() {
       <nav className={`
         bg-background border-r border-border h-full overflow-y-auto z-50
         fixed top-0 left-0 transition-transform duration-300 ease-in-out
-        w-64 lg:w-64
+        w-64 lg:w-64 flex flex-col
         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         <div className="p-4 lg:p-6">
@@ -61,7 +62,7 @@ export default function Sidebar() {
             </div>
           </div>
         </div>
-        <div className="px-3 lg:px-4 pb-4">
+        <div className="px-3 lg:px-4 pb-4 flex-1">
           <ul className="space-y-1 lg:space-y-2">
             {navItems.map(({ path, icon: Icon, label }) => {
               const isActive = location === path;
@@ -83,6 +84,14 @@ export default function Sidebar() {
               );
             })}
           </ul>
+        </div>
+        
+        {/* Theme Toggle */}
+        <div className="px-3 lg:px-4 pb-4 border-t border-border">
+          <div className="flex items-center justify-between px-3 lg:px-4 py-3">
+            <span className="text-sm text-muted-foreground">Theme</span>
+            <ThemeToggle />
+          </div>
         </div>
       </nav>
     </>
