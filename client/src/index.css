@@ -2,6 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  /* Ensure proper touch targets */
+  button, 
+  input, 
+  select, 
+  textarea {
+    min-height: 44px;
+  }
+  
+  /* Prevent zoom on focus */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  textarea {
+    font-size: 16px;
+  }
+  
+  /* Better touch scrolling */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 :root {
   --background: hsl(0, 0%, 100%);
   --foreground: hsl(210, 24%, 16%);

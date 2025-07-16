@@ -1,9 +1,12 @@
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { 
   LayoutDashboard, 
   Package, 
   Route, 
-  Settings 
+  Settings,
+  Menu,
+  X
 } from "lucide-react";
 import logoPath from "@assets/logo_1752442395960.png";
 
@@ -16,39 +19,72 @@ const navItems = [
 
 export default function Sidebar() {
   const [location] = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
 
   return (
-    <nav className="bg-background border-r border-border w-64 fixed h-full left-0 top-0 overflow-y-auto">
-      <div className="p-6">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 flex items-center justify-center">
-            <img src={logoPath} alt="Quikpik Logo" className="w-8 h-8" />
-          </div>
-          <div>
-            <h1 className="text-xl font-semibold text-foreground">Quikpik</h1>
-            <p className="text-sm text-muted-foreground">Shipment Management</p>
+    <>
+      {/* Mobile menu button */}
+      <button
+        onClick={toggleMobileMenu}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-background border border-border shadow-sm"
+      >
+        {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
+
+      {/* Mobile overlay */}
+      {isMobileMenuOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/50 z-40"
+          onClick={toggleMobileMenu}
+        />
+      )}
+
+      {/* Sidebar */}
+      <nav className={`
+        bg-background border-r border-border h-full overflow-y-auto z-50
+        fixed top-0 left-0 transition-transform duration-300 ease-in-out
+        w-64 lg:w-64
+        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+      `}>
+        <div className="p-4 lg:p-6">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 lg:w-10 lg:h-10 flex items-center justify-center">
+              <img src={logoPath} alt="Quikpik Logo" className="w-6 h-6 lg:w-8 lg:h-8" />
+            </div>
+            <div>
+              <h1 className="text-lg lg:text-xl font-semibold text-foreground">Quikpik</h1>
+              <p className="text-xs lg:text-sm text-muted-foreground">Shipment Management</p>
+            </div>
           </div>
         </div>
-      </div>
-      <div className="px-4 pb-4">
-        <ul className="space-y-2">
-          {navItems.map(({ path, icon: Icon, label }) => {
-            const isActive = location === path;
-            return (
-              <li key={path}>
-                <Link href={path} className={`flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors ${
-                  isActive 
-                    ? "text-primary bg-accent" 
-                    : "text-muted-foreground hover:text-primary hover:bg-accent"
-                }`}>
-                  <Icon size={20} />
-                  <span>{label}</span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-    </nav>
+        <div className="px-3 lg:px-4 pb-4">
+          <ul className="space-y-1 lg:space-y-2">
+            {navItems.map(({ path, icon: Icon, label }) => {
+              const isActive = location === path;
+              return (
+                <li key={path}>
+                  <Link 
+                    href={path} 
+                    className={`flex items-center space-x-3 px-3 lg:px-4 py-3 rounded-lg font-medium transition-colors touch-manipulation ${
+                      isActive 
+                        ? "text-primary bg-accent" 
+                        : "text-muted-foreground hover:text-primary hover:bg-accent"
+                    }`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Icon size={20} />
+                    <span>{label}</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </nav>
+    </>
   );
 }

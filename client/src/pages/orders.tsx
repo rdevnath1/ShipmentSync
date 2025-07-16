@@ -29,16 +29,17 @@ export default function Orders() {
         description="Manage all your orders from ShipStation"
       />
       
-      <div className="p-6">
+      <div className="p-4 lg:p-6">
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="text-lg">Order Filters</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
               <Button
                 variant={filter === "all" ? "default" : "outline"}
                 onClick={() => setFilter("all")}
+                className="w-full sm:w-auto"
               >
                 All Orders
                 <Badge variant="secondary" className="ml-2">
@@ -48,6 +49,7 @@ export default function Orders() {
               <Button
                 variant={filter === "pending" ? "default" : "outline"}
                 onClick={() => setFilter("pending")}
+                className="w-full sm:w-auto"
               >
                 Pending
                 <Badge variant="secondary" className="ml-2">
@@ -57,6 +59,7 @@ export default function Orders() {
               <Button
                 variant={filter === "shipped" ? "default" : "outline"}
                 onClick={() => setFilter("shipped")}
+                className="w-full sm:w-auto"
               >
                 Shipped
                 <Badge variant="secondary" className="ml-2">

@@ -48,24 +48,24 @@ export default function Dashboard() {
         title="Dashboard" 
         description="Manage your shipments and orders"
       />
-      <div className="p-6">
+      <div className="p-4 lg:p-6">
         <StatsCards stats={stats} />
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mb-6 lg:mb-8">
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-lg">ShipStation Integration</CardTitle>
-                  <p className="text-slate-600">Pull orders from ShipStation</p>
+                  <CardTitle className="text-base lg:text-lg">ShipStation Integration</CardTitle>
+                  <p className="text-sm lg:text-base text-slate-600">Pull orders from ShipStation</p>
                 </div>
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Download className="text-blue-600" size={20} />
+                <div className="w-10 h-10 lg:w-12 lg:h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Download className="text-blue-600" size={16} />
                 </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between py-3 px-4 bg-slate-50 rounded-lg">
+              <div className="flex items-center justify-between py-2 lg:py-3 px-3 lg:px-4 bg-slate-50 rounded-lg">
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
                   <span className="text-sm font-medium text-slate-700">API Connection</span>
@@ -73,7 +73,7 @@ export default function Dashboard() {
                 <span className="text-xs text-emerald-600 font-medium">Active</span>
               </div>
 
-              <div className="flex items-center justify-between py-3 px-4 bg-slate-50 rounded-lg">
+              <div className="flex items-center justify-between py-2 lg:py-3 px-3 lg:px-4 bg-slate-50 rounded-lg">
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                   <span className="text-sm font-medium text-slate-700">Last Sync</span>
@@ -95,16 +95,16 @@ export default function Dashboard() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-lg">Carrier</CardTitle>
-                  <p className="text-slate-600">Create shipments & generate labels</p>
+                  <CardTitle className="text-base lg:text-lg">Carrier</CardTitle>
+                  <p className="text-sm lg:text-base text-slate-600">Create shipments & generate labels</p>
                 </div>
-                <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
-                  <Truck className="text-emerald-600" size={20} />
+                <div className="w-10 h-10 lg:w-12 lg:h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
+                  <Truck className="text-emerald-600" size={16} />
                 </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between py-3 px-4 bg-slate-50 rounded-lg">
+              <div className="flex items-center justify-between py-2 lg:py-3 px-3 lg:px-4 bg-slate-50 rounded-lg">
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
                   <span className="text-sm font-medium text-slate-700">API Status</span>
@@ -112,7 +112,7 @@ export default function Dashboard() {
                 <span className="text-xs text-emerald-600 font-medium">Online</span>
               </div>
 
-              <div className="flex items-center justify-between py-3 px-4 bg-slate-50 rounded-lg">
+              <div className="flex items-center justify-between py-2 lg:py-3 px-3 lg:px-4 bg-slate-50 rounded-lg">
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
                   <span className="text-sm font-medium text-slate-700">Pending Labels</span>

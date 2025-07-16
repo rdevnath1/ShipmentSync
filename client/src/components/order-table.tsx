@@ -126,22 +126,22 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
     <>
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0">
             <div>
               <CardTitle className="text-lg">Recent Orders</CardTitle>
               <p className="text-slate-600">Orders imported from ShipStation</p>
             </div>
-            <div className="flex items-center space-x-3">
-              <div className="relative">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+              <div className="relative flex-1 sm:flex-none">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={16} />
                 <Input 
                   placeholder="Search orders..." 
-                  className="pl-10 pr-4 py-2"
+                  className="pl-10 pr-4 py-2 w-full sm:w-64"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <Button onClick={() => setShowCreateOrderModal(true)}>
+              <Button onClick={() => setShowCreateOrderModal(true)} className="w-full sm:w-auto">
                 <Plus className="mr-2" size={16} />
                 Manual Order
               </Button>
@@ -157,79 +157,81 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
               <p className="text-slate-500">Pull orders from ShipStation to get started</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-slate-50">
-                  <tr>
-                    <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                      Order ID
-                    </th>
-                    <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                      Customer
-                    </th>
-                    <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                      Destination
-                    </th>
-                    <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                      Date
-                    </th>
-                    <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-slate-200">
-                  {filteredOrders.map((order: any) => {
-                    const shippingAddress = order.shippingAddress as any;
-                    return (
-                      <tr key={order.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-slate-900">
-                            #{order.orderNumber}
-                          </div>
-                          <div className="text-sm text-slate-500">
-                            {order.referenceNumber}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-slate-900">
-                            {order.customerName}
-                          </div>
-                          <div className="text-sm text-slate-500">
-                            {order.customerEmail}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-slate-900">
-                            {shippingAddress?.city}
-                          </div>
-                          <div className="text-sm text-slate-500">
-                            {shippingAddress?.country}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <Badge className={getStatusColor(order.status)}>
-                            {order.status}
-                          </Badge>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                          {new Date(order.createdAt).toLocaleDateString()}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <div className="flex items-center space-x-2">
-                            {order.status === 'pending' ? (
-                              <>
-                                <Button 
-                                  size="sm" 
-                                  variant="outline"
-                                  onClick={() => handleCreateShipment(order)}
-                                >
-                                  <Package className="mr-1" size={12} />
-                                  Ship
-                                </Button>
+            <>
+              {/* Desktop Table View */}
+              <div className="hidden lg:block overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-slate-50">
+                    <tr>
+                      <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                        Order ID
+                      </th>
+                      <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                        Customer
+                      </th>
+                      <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                        Destination
+                      </th>
+                      <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                        Date
+                      </th>
+                      <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-slate-200">
+                    {filteredOrders.map((order: any) => {
+                      const shippingAddress = order.shippingAddress as any;
+                      return (
+                        <tr key={order.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-slate-900">
+                              #{order.orderNumber}
+                            </div>
+                            <div className="text-sm text-slate-500">
+                              {order.referenceNumber}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-slate-900">
+                              {order.customerName}
+                            </div>
+                            <div className="text-sm text-slate-500">
+                              {order.customerEmail}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-slate-900">
+                              {shippingAddress?.city}
+                            </div>
+                            <div className="text-sm text-slate-500">
+                              {shippingAddress?.country}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <Badge className={getStatusColor(order.status)}>
+                              {order.status}
+                            </Badge>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                            {new Date(order.createdAt).toLocaleDateString()}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div className="flex items-center space-x-2">
+                              {order.status === 'pending' ? (
+                                <>
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => handleCreateShipment(order)}
+                                  >
+                                    <Package className="mr-1" size={12} />
+                                    Ship
+                                  </Button>
                                 <Button 
                                   size="sm" 
                                   variant="outline"
@@ -290,9 +292,119 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
                       </tr>
                     );
                   })}
-                </tbody>
-              </table>
-            </div>
+                  </tbody>
+                </table>
+              </div>
+              
+              {/* Mobile Card View */}
+              <div className="lg:hidden space-y-4">
+                {filteredOrders.map((order: any) => {
+                  const shippingAddress = order.shippingAddress as any;
+                  return (
+                    <Card key={order.id} className="p-4">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <h3 className="font-semibold text-sm">#{order.orderNumber}</h3>
+                          <p className="text-xs text-slate-500">{order.referenceNumber}</p>
+                        </div>
+                        <Badge className={getStatusColor(order.status)}>
+                          {order.status}
+                        </Badge>
+                      </div>
+                      
+                      <div className="space-y-2 mb-4">
+                        <div>
+                          <p className="text-sm font-medium">{order.customerName}</p>
+                          <p className="text-xs text-slate-500">{order.customerEmail}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm">{shippingAddress?.city}</p>
+                          <p className="text-xs text-slate-500">{shippingAddress?.country}</p>
+                        </div>
+                        <p className="text-xs text-slate-500">
+                          {new Date(order.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      
+                      <div className="flex flex-wrap gap-2">
+                        {order.status === 'pending' ? (
+                          <>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleCreateShipment(order)}
+                              className="flex-1 min-w-0"
+                            >
+                              <Package className="mr-1" size={16} />
+                              Ship
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleEditOrder(order)}
+                              className="flex-1 min-w-0"
+                            >
+                              <Edit className="mr-1" size={16} />
+                              Edit
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleViewOrder(order)}
+                              className="flex-1 min-w-0"
+                            >
+                              <Eye className="mr-1" size={16} />
+                              View
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleDeleteOrder(order)}
+                              disabled={deleteOrderMutation.isPending}
+                              className="flex-1 min-w-0"
+                            >
+                              <Trash2 className="mr-1" size={16} />
+                              Delete
+                            </Button>
+                          </>
+                        ) : (
+                          <>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleEditShipment(order)}
+                              className="flex-1 min-w-0"
+                            >
+                              <Edit className="mr-1" size={16} />
+                              Edit
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handlePrintLabel(order)}
+                              disabled={printMutation.isPending}
+                              className="flex-1 min-w-0"
+                            >
+                              <Printer className="mr-1" size={16} />
+                              {printMutation.isPending ? "Printing..." : "Print"}
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleViewOrder(order)}
+                              className="flex-1 min-w-0"
+                            >
+                              <Eye className="mr-1" size={16} />
+                              View
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            </>
           )}
         </CardContent>
       </Card>

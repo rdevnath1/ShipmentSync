@@ -90,16 +90,16 @@ export default function Tracking() {
         description="Track your shipments in real-time"
       />
       
-      <div className="p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="p-4 lg:p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
           <div className="lg:col-span-2">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Track Package</CardTitle>
-                <p className="text-slate-600">Enter tracking number to get real-time updates</p>
+                <CardTitle className="text-base lg:text-lg">Track Package</CardTitle>
+                <p className="text-sm lg:text-base text-slate-600">Enter tracking number to get real-time updates</p>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center space-x-3 mb-6">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-3 mb-6">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={16} />
                     <Input 
@@ -113,7 +113,7 @@ export default function Tracking() {
                   <Button
                     onClick={handleTrackPackage}
                     disabled={trackingMutation.isPending}
-                    className="bg-blue-600 hover:bg-blue-700"
+                    className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
                   >
                     {trackingMutation.isPending ? "Tracking..." : "Track"}
                   </Button>
