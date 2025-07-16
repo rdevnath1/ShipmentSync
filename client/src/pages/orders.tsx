@@ -4,14 +4,14 @@ import OrderTable from "@/components/order-table";
 
 export default function Orders() {
   const { data: orders } = useQuery({
-    queryKey: ["/api/orders"],
+    queryKey: ["/api/orders/pending"],
   });
 
   return (
     <>
       <Header 
         title="Orders" 
-        description="Manage your orders from ShipStation"
+        description="Manage your pending orders from ShipStation"
       />
       
       <div className="p-6">

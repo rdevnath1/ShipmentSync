@@ -32,7 +32,7 @@ export default function OrderTable({ orders }: OrderTableProps) {
         title: "Success",
         description: "Order deleted successfully",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/orders/pending"] });
     },
     onError: (error: any) => {
       toast({

@@ -82,8 +82,9 @@ export default function Shipments() {
   };
 
   const filteredShipments = shipments?.filter(shipment => 
-    shipment.trackingNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    shipment.orderId.toString().includes(searchTerm.toLowerCase())
+    shipment.trackingNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    shipment.id.toString().includes(searchTerm.toLowerCase()) ||
+    shipment.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
   const getStatusColor = (status: string) => {
@@ -92,6 +93,8 @@ export default function Shipments() {
         return "bg-emerald-100 text-emerald-800";
       case "in_transit":
         return "bg-blue-100 text-blue-800";
+      case "shipped":
+        return "bg-emerald-100 text-emerald-800";
       case "created":
         return "bg-amber-100 text-amber-800";
       default:
@@ -144,7 +147,7 @@ export default function Shipments() {
                         Tracking Number
                       </th>
                       <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                        Order ID
+                        Order Info
                       </th>
                       <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
                         Status
@@ -176,7 +179,10 @@ export default function Shipments() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-slate-900">
-                            Order #{shipment.orderId}
+                            Order #{shipment.orderNumber}
+                          </div>
+                          <div className="text-sm text-slate-500">
+                            {shipment.customerName}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">

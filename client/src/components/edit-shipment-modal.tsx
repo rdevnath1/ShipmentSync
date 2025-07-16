@@ -85,18 +85,18 @@ export default function EditShipmentModal({ isOpen, onClose, shipment }: EditShi
       form.setValue("dimensions", shipment.dimensions || { length: 10, width: 10, height: 10 });
       form.setValue("status", shipment.status || "created");
       
-      // Set address from related order
-      if (shipment.order && shipment.order.shippingAddress) {
+      // Set address from the order (shipment is now the order)
+      if (shipment.shippingAddress) {
         form.setValue("shippingAddress", {
-          name: shipment.order.shippingAddress.name || "",
-          company: shipment.order.shippingAddress.company || "",
-          street1: shipment.order.shippingAddress.street1 || "",
-          street2: shipment.order.shippingAddress.street2 || "",
-          city: shipment.order.shippingAddress.city || "",
-          state: shipment.order.shippingAddress.state || "",
-          postalCode: shipment.order.shippingAddress.postalCode || "",
-          country: shipment.order.shippingAddress.country || "US",
-          phone: shipment.order.shippingAddress.phone || "",
+          name: shipment.shippingAddress.name || "",
+          company: shipment.shippingAddress.company || "",
+          street1: shipment.shippingAddress.street1 || "",
+          street2: shipment.shippingAddress.street2 || "",
+          city: shipment.shippingAddress.city || "",
+          state: shipment.shippingAddress.state || "",
+          postalCode: shipment.shippingAddress.postalCode || "",
+          country: shipment.shippingAddress.country || "US",
+          phone: shipment.shippingAddress.phone || "",
         });
       }
     }
@@ -114,6 +114,7 @@ export default function EditShipmentModal({ isOpen, onClose, shipment }: EditShi
       });
       queryClient.invalidateQueries({ queryKey: ["/api/shipments"] });
       queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/orders/pending"] });
       onClose();
     },
     onError: (error: any) => {

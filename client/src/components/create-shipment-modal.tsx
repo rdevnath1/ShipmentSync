@@ -119,6 +119,7 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
       });
       queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
       queryClient.invalidateQueries({ queryKey: ["/api/shipments"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/orders/pending"] });
       onClose();
     },
     onError: (error: any) => {

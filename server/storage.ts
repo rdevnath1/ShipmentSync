@@ -1,4 +1,4 @@
-import { users, orders, shipments, trackingEvents, type User, type InsertUser, type Order, type InsertOrder, type Shipment, type InsertShipment, type TrackingEvent, type InsertTrackingEvent } from "@shared/schema";
+import { users, orders, trackingEvents, type User, type InsertUser, type Order, type InsertOrder, type TrackingEvent, type InsertTrackingEvent } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
 
@@ -8,24 +8,19 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   
-  // Order methods
+  // Order methods (now includes shipment functionality)
   getOrder(id: number): Promise<Order | undefined>;
   getOrderByShipstationId(shipstationOrderId: string): Promise<Order | undefined>;
   createOrder(order: InsertOrder): Promise<Order>;
   updateOrder(id: number, order: Partial<InsertOrder>): Promise<Order>;
   getAllOrders(): Promise<Order[]>;
+  getPendingOrders(): Promise<Order[]>;
+  getShippedOrders(): Promise<Order[]>;
   deleteOrder(id: number): Promise<void>;
-  
-  // Shipment methods
-  getShipment(id: number): Promise<Shipment | undefined>;
-  getShipmentByOrderId(orderId: number): Promise<Shipment | undefined>;
-  createShipment(shipment: InsertShipment): Promise<Shipment>;
-  updateShipment(id: number, shipment: Partial<InsertShipment>): Promise<Shipment>;
-  getAllShipments(): Promise<Shipment[]>;
   
   // Tracking methods
   createTrackingEvent(event: InsertTrackingEvent): Promise<TrackingEvent>;
-  getTrackingEventsByShipmentId(shipmentId: number): Promise<TrackingEvent[]>;
+  getTrackingEventsByOrderId(orderId: number): Promise<TrackingEvent[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -88,50 +83,23 @@ export class DatabaseStorage implements IStorage {
     await db.delete(orders).where(eq(orders.id, id));
   }
 
-  async getShipment(id: number): Promise<Shipment | undefined> {
-    const shipment = await db.query.shipments.findFirst({
-      where: eq(shipments.id, id),
+  async getPendingOrders(): Promise<Order[]> {
+    return await db.query.orders.findMany({
+      where: eq(orders.status, 'pending'),
       with: {
-        order: true,
+        trackingEvents: true,
       },
+      orderBy: desc(orders.createdAt),
     });
-    return shipment || undefined;
   }
 
-  async getShipmentByOrderId(orderId: number): Promise<Shipment | undefined> {
-    const [shipment] = await db.select().from(shipments).where(eq(shipments.orderId, orderId));
-    return shipment || undefined;
-  }
-
-  async createShipment(insertShipment: InsertShipment): Promise<Shipment> {
-    const [shipment] = await db
-      .insert(shipments)
-      .values({
-        ...insertShipment,
-        updatedAt: new Date(),
-      })
-      .returning();
-    return shipment;
-  }
-
-  async updateShipment(id: number, shipmentUpdate: Partial<InsertShipment>): Promise<Shipment> {
-    const [shipment] = await db
-      .update(shipments)
-      .set({
-        ...shipmentUpdate,
-        updatedAt: new Date(),
-      })
-      .where(eq(shipments.id, id))
-      .returning();
-    return shipment;
-  }
-
-  async getAllShipments(): Promise<Shipment[]> {
-    return await db.query.shipments.findMany({
+  async getShippedOrders(): Promise<Order[]> {
+    return await db.query.orders.findMany({
+      where: eq(orders.status, 'shipped'),
       with: {
-        order: true,
+        trackingEvents: true,
       },
-      orderBy: desc(shipments.createdAt),
+      orderBy: desc(orders.createdAt),
     });
   }
 
@@ -143,8 +111,8 @@ export class DatabaseStorage implements IStorage {
     return event;
   }
 
-  async getTrackingEventsByShipmentId(shipmentId: number): Promise<TrackingEvent[]> {
-    return await db.select().from(trackingEvents).where(eq(trackingEvents.shipmentId, shipmentId)).orderBy(desc(trackingEvents.timestamp));
+  async getTrackingEventsByOrderId(orderId: number): Promise<TrackingEvent[]> {
+    return await db.select().from(trackingEvents).where(eq(trackingEvents.orderId, orderId)).orderBy(desc(trackingEvents.timestamp));
   }
 }
 

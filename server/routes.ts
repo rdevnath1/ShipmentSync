@@ -3,20 +3,30 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { ShipStationService } from "./services/shipstation";
 import { JiayouService } from "./services/jiayou";
-import { insertOrderSchema, insertShipmentSchema } from "@shared/schema";
+import { insertOrderSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const shipStationService = new ShipStationService();
   const jiayouService = new JiayouService();
 
-  // Get all orders
+  // Get all orders (pending and shipped)
   app.get("/api/orders", async (req, res) => {
     try {
       const orders = await storage.getAllOrders();
       res.json(orders);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch orders" });
+    }
+  });
+
+  // Get pending orders (not yet shipped)
+  app.get("/api/orders/pending", async (req, res) => {
+    try {
+      const orders = await storage.getPendingOrders();
+      res.json(orders);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch pending orders" });
     }
   });
 
@@ -136,10 +146,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all shipments
+  // Get all shipments (shipped orders)
   app.get("/api/shipments", async (req, res) => {
     try {
-      const shipments = await storage.getAllShipments();
+      const shipments = await storage.getShippedOrders();
       res.json(shipments);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch shipments" });
@@ -149,21 +159,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Print label for shipment
   app.post("/api/shipments/:id/print", async (req, res) => {
     try {
-      const shipmentId = parseInt(req.params.id);
-      const shipment = await storage.getShipment(shipmentId);
+      const orderId = parseInt(req.params.id);
+      const order = await storage.getOrder(orderId);
       
-      if (!shipment) {
-        return res.status(404).json({ error: "Shipment not found" });
+      if (!order) {
+        return res.status(404).json({ error: "Order not found" });
       }
 
-      if (!shipment.labelPath) {
-        return res.status(400).json({ error: "No label available for this shipment" });
+      if (!order.labelPath) {
+        return res.status(400).json({ error: "No label available for this order" });
       }
 
       // Return the label path for frontend to open
       res.json({ 
-        labelPath: shipment.labelPath,
-        trackingNumber: shipment.trackingNumber 
+        labelPath: order.labelPath,
+        trackingNumber: order.trackingNumber 
       });
     } catch (error) {
       console.error("Error printing label:", error);
@@ -174,30 +184,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Test ShipStation mark as shipped for existing shipment
   app.post("/api/shipments/:id/mark-shipped", async (req, res) => {
     try {
-      const shipmentId = parseInt(req.params.id);
-      const shipment = await storage.getShipment(shipmentId);
+      const orderId = parseInt(req.params.id);
+      const order = await storage.getOrder(orderId);
       
-      if (!shipment) {
-        return res.status(404).json({ error: "Shipment not found" });
+      if (!order) {
+        return res.status(404).json({ error: "Order not found" });
       }
 
-      // Get the associated order
-      const order = await storage.getOrder(shipment.orderId);
-      if (!order || !order.shipstationOrderId) {
-        return res.status(400).json({ error: "Order not found or no ShipStation order ID" });
+      if (!order.shipstationOrderId) {
+        return res.status(400).json({ error: "Order has no ShipStation order ID" });
+      }
+
+      if (!order.trackingNumber) {
+        return res.status(400).json({ error: "Order has no tracking number" });
       }
 
       // Mark as shipped in ShipStation
       const updateResult = await shipStationService.markAsShipped(
         parseInt(order.shipstationOrderId),
-        shipment.trackingNumber,
-        shipment.labelPath
+        order.trackingNumber,
+        order.labelPath
       );
 
       if (updateResult) {
         res.json({ 
           message: "Successfully marked as shipped in ShipStation",
-          trackingNumber: shipment.trackingNumber,
+          trackingNumber: order.trackingNumber,
           shipstationOrderId: order.shipstationOrderId
         });
       } else {
@@ -414,9 +426,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: jiayouResponse.message });
       }
 
-      // Create shipment record
-      const shipmentData = {
-        orderId: order.id,
+      // Update order with shipment data and mark as shipped
+      const shipmentUpdate = {
         jiayouOrderId: jiayouResponse.data.orderId,
         trackingNumber: jiayouResponse.data.trackingNo,
         markNo: jiayouResponse.data.markNo,
@@ -425,14 +436,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         serviceType: serviceType || "standard",
         weight: weight?.toString() || "1",
         dimensions: dimensions || null,
-        status: "created",
+        status: "shipped",
       };
 
-      const validatedShipment = insertShipmentSchema.parse(shipmentData);
-      const createdShipment = await storage.createShipment(validatedShipment);
-
-      // Update order status
-      await storage.updateOrder(order.id, { status: "shipped" });
+      const updatedOrder = await storage.updateOrder(order.id, shipmentUpdate);
 
       // Update ShipStation with tracking info using mark as shipped
       if (order.shipstationOrderId) {
@@ -451,7 +458,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({
         message: "Shipment created successfully",
-        shipment: createdShipment,
+        order: updatedOrder,
         jiayouResponse: jiayouResponse.data,
       });
     } catch (error) {
@@ -460,18 +467,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update shipment
+  // Update shipment (actually updates the order with shipment data)
   app.put("/api/shipments/:id", async (req, res) => {
     try {
-      const shipmentId = parseInt(req.params.id);
+      const orderId = parseInt(req.params.id);
       const { trackingNumber, channelCode, serviceType, weight, dimensions, status, shippingAddress } = req.body;
       
-      const shipment = await storage.getShipment(shipmentId);
-      if (!shipment) {
-        return res.status(404).json({ error: "Shipment not found" });
+      const order = await storage.getOrder(orderId);
+      if (!order) {
+        return res.status(404).json({ error: "Order not found" });
       }
 
-      // Update shipment data
+      // Update order with shipment data and address if provided
       const updateData = {
         trackingNumber,
         channelCode: channelCode || "US001",
@@ -479,22 +486,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         weight: weight?.toString(),
         dimensions,
         status,
+        ...(shippingAddress && { shippingAddress }),
       };
 
-      const updatedShipment = await storage.updateShipment(shipmentId, updateData);
-      
-      // Update shipping address in the related order if provided
-      if (shippingAddress && shipment.orderId) {
-        console.log(`Updating order ${shipment.orderId} with new shipping address:`, shippingAddress);
-        await storage.updateOrder(shipment.orderId, {
-          shippingAddress,
-        });
-        console.log(`Successfully updated order ${shipment.orderId} address`);
-      }
+      const updatedOrder = await storage.updateOrder(orderId, updateData);
       
       res.json({
         message: "Shipment updated successfully",
-        shipment: updatedShipment,
+        order: updatedOrder,
       });
     } catch (error) {
       console.error("Error updating shipment:", error);
@@ -568,11 +567,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/dashboard/stats", async (req, res) => {
     try {
       const orders = await storage.getAllOrders();
-      const shipments = await storage.getAllShipments();
+      const shipments = orders.filter(order => order.status === 'shipped');
       
       const stats = {
         totalOrders: orders.length,
-        activeShipments: shipments.filter(s => s.status === "created" || s.status === "in_transit").length,
+        activeShipments: shipments.filter(s => s.status === "shipped").length,
         deliveredToday: shipments.filter(s => {
           const today = new Date().toDateString();
           return s.status === "delivered" && new Date(s.updatedAt!).toDateString() === today;

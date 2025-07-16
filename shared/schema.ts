@@ -22,14 +22,8 @@ export const orders = pgTable("orders", {
   items: jsonb("items").notNull(),
   totalAmount: decimal("total_amount", { precision: 10, scale: 2 }),
   currency: text("currency").default("USD"),
-  status: text("status").notNull().default("pending"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
-export const shipments = pgTable("shipments", {
-  id: serial("id").primaryKey(),
-  orderId: integer("order_id").references(() => orders.id),
+  status: text("status").notNull().default("pending"), // pending, shipped, delivered, cancelled
+  // Shipment fields (populated when shipped)
   jiayouOrderId: text("jiayou_order_id"),
   trackingNumber: text("tracking_number"),
   markNo: text("mark_no"),
@@ -38,14 +32,15 @@ export const shipments = pgTable("shipments", {
   serviceType: text("service_type"),
   weight: decimal("weight", { precision: 8, scale: 3 }),
   dimensions: jsonb("dimensions"),
-  status: text("status").notNull().default("created"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Removed shipments table - shipment data is now part of orders table
+
 export const trackingEvents = pgTable("tracking_events", {
   id: serial("id").primaryKey(),
-  shipmentId: integer("shipment_id").references(() => shipments.id),
+  orderId: integer("order_id").references(() => orders.id),
   event: text("event").notNull(),
   description: text("description"),
   location: text("location"),
@@ -54,21 +49,13 @@ export const trackingEvents = pgTable("tracking_events", {
 });
 
 export const ordersRelations = relations(orders, ({ many }) => ({
-  shipments: many(shipments),
-}));
-
-export const shipmentsRelations = relations(shipments, ({ one, many }) => ({
-  order: one(orders, {
-    fields: [shipments.orderId],
-    references: [orders.id],
-  }),
   trackingEvents: many(trackingEvents),
 }));
 
 export const trackingEventsRelations = relations(trackingEvents, ({ one }) => ({
-  shipment: one(shipments, {
-    fields: [trackingEvents.shipmentId],
-    references: [shipments.id],
+  order: one(orders, {
+    fields: [trackingEvents.orderId],
+    references: [orders.id],
   }),
 }));
 
@@ -83,11 +70,7 @@ export const insertOrderSchema = createInsertSchema(orders).omit({
   updatedAt: true,
 });
 
-export const insertShipmentSchema = createInsertSchema(shipments).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
+// Removed shipment schema - using order schema instead
 
 export const insertTrackingEventSchema = createInsertSchema(trackingEvents).omit({
   id: true,
@@ -100,8 +83,7 @@ export type User = typeof users.$inferSelect;
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type Order = typeof orders.$inferSelect;
 
-export type InsertShipment = z.infer<typeof insertShipmentSchema>;
-export type Shipment = typeof shipments.$inferSelect;
+// Removed shipment types - using order types instead
 
 export type InsertTrackingEvent = z.infer<typeof insertTrackingEventSchema>;
 export type TrackingEvent = typeof trackingEvents.$inferSelect;
