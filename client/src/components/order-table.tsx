@@ -10,6 +10,7 @@ import { apiRequest } from "@/lib/queryClient";
 import CreateShipmentModal from "./create-shipment-modal";
 import CreateOrderModal from "./create-order-modal";
 import EditShipmentModal from "./edit-shipment-modal";
+import EditOrderModal from "./edit-order-modal";
 
 interface OrderTableProps {
   orders: any[];
@@ -20,6 +21,7 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showCreateOrderModal, setShowCreateOrderModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showEditOrderModal, setShowEditOrderModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
@@ -80,6 +82,11 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
   const handleEditShipment = (order: any) => {
     setSelectedOrder(order);
     setShowEditModal(true);
+  };
+
+  const handleEditOrder = (order: any) => {
+    setSelectedOrder(order);
+    setShowEditOrderModal(true);
   };
 
   const printMutation = useMutation({
@@ -226,6 +233,14 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
                                 <Button 
                                   size="sm" 
                                   variant="outline"
+                                  onClick={() => handleEditOrder(order)}
+                                >
+                                  <Edit className="mr-1" size={12} />
+                                  Edit
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
                                   onClick={() => handleViewOrder(order)}
                                 >
                                   <Eye className="mr-1" size={12} />
@@ -297,6 +312,12 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
         isOpen={showEditModal}
         onClose={() => setShowEditModal(false)}
         shipment={selectedOrder}
+      />
+      
+      <EditOrderModal
+        isOpen={showEditOrderModal}
+        onClose={() => setShowEditOrderModal(false)}
+        order={selectedOrder}
       />
     </>
   );

@@ -56,6 +56,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update order
+  app.put("/api/orders/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { customerName, customerEmail, customerPhone, shippingAddress, totalAmount } = req.body;
+      
+      const order = await storage.getOrder(parseInt(id));
+      if (!order) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+      
+      const updatedOrder = await storage.updateOrder(parseInt(id), { 
+        customerName,
+        customerEmail,
+        customerPhone,
+        shippingAddress,
+        totalAmount
+      });
+      
+      res.json(updatedOrder);
+    } catch (error) {
+      console.error("Error updating order:", error);
+      res.status(500).json({ error: "Failed to update order" });
+    }
+  });
+
   // Update order address (for testing)
   app.put("/api/orders/:id/address", async (req, res) => {
     try {
