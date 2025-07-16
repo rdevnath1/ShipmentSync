@@ -55,6 +55,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Manual Order Creation Removal (July 16, 2025)
+- **Removed Manual Order Creation**: Eliminated the ability to create manual orders from the dashboard
+- **ShipStation-Only Workflow**: System now only accepts orders imported from ShipStation
+- **Cleaned Up UI**: Removed "Create Manual Order" button from order table
+- **Updated Descriptions**: Changed header text to reflect ShipStation-only workflow
+- **Removed Backend Endpoint**: Deleted `/api/orders/manual` endpoint for security and simplicity
+- **Streamlined User Experience**: Orders now have a clear single source of truth from ShipStation
+- **SUCCESSFUL RESULT**: Clean workflow where all orders must come from ShipStation, eliminating manual data entry errors
+
 ### Dashboard UI Improvements (July 16, 2025)
 - **Combined Integration Boxes**: Merged ShipStation and carrier integration into single "API Integration Status" card
 - **Fixed Notifications**: Added working notification functionality with toast messages showing recent activity

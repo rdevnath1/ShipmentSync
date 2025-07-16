@@ -9,7 +9,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import CreateShipmentModal from "./create-shipment-modal";
-import CreateOrderModal from "./create-order-modal";
+
 import EditShipmentModal from "./edit-shipment-modal";
 import EditOrderModal from "./edit-order-modal";
 import DebugJiayouModal from "./debug-jiayou-modal";
@@ -21,7 +21,7 @@ interface OrderTableProps {
 
 export default function OrderTable({ orders, showShipmentActions = false }: OrderTableProps) {
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showCreateOrderModal, setShowCreateOrderModal] = useState(false);
+
   const [showEditModal, setShowEditModal] = useState(false);
   const [showEditOrderModal, setShowEditOrderModal] = useState(false);
   const [showDebugModal, setShowDebugModal] = useState(false);
@@ -157,10 +157,7 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <Button onClick={() => setShowCreateOrderModal(true)} className="w-full sm:w-auto">
-                <Plus className="mr-2" size={16} />
-                Manual Order
-              </Button>
+
             </div>
           </div>
         </CardHeader>
@@ -448,11 +445,7 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
         order={selectedOrder}
       />
       
-      <CreateOrderModal
-        isOpen={showCreateOrderModal}
-        onClose={() => setShowCreateOrderModal(false)}
-      />
-      
+
       <EditShipmentModal
         isOpen={showEditModal}
         onClose={() => setShowEditModal(false)}

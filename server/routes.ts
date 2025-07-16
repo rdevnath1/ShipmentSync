@@ -103,33 +103,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create manual order
-  app.post("/api/orders/manual", async (req, res) => {
-    try {
-      const orderData = {
-        orderNumber: req.body.orderNumber,
-        referenceNumber: `MANUAL-${Date.now()}`,
-        customerName: req.body.customerName,
-        customerEmail: req.body.customerEmail,
-        customerPhone: req.body.customerPhone,
-        shippingAddress: req.body.shippingAddress,
-        billingAddress: req.body.shippingAddress, // Use shipping as billing for manual orders
-        items: req.body.items,
-        totalAmount: req.body.totalAmount,
-        currency: "USD",
-        status: "pending",
-      };
-
-      const validatedOrder = insertOrderSchema.parse(orderData);
-      const createdOrder = await storage.createOrder(validatedOrder);
-      
-      res.json(createdOrder);
-    } catch (error) {
-      console.error("Error creating manual order:", error);
-      res.status(500).json({ error: "Failed to create manual order" });
-    }
-  });
-
   // Pull orders from ShipStation
   app.post("/api/orders/pull-shipstation", async (req, res) => {
     try {

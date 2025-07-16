@@ -26,7 +26,7 @@ export default function Orders() {
     <>
       <Header 
         title="Orders" 
-        description="Manage all your orders from ShipStation"
+        description="Manage orders imported from ShipStation"
       />
       
       <div className="p-4 lg:p-6">
