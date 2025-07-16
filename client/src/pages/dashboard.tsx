@@ -51,7 +51,13 @@ export default function Dashboard() {
       <div className="p-4 lg:p-6">
         <StatsCards stats={stats} />
         
-        <div className="mb-6 lg:mb-8">
+
+
+        <OrderTable orders={orders || []} />
+        
+        <TrackingSection />
+        
+        <div className="mt-8">
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -114,46 +120,6 @@ export default function Dashboard() {
                 <FolderSync className="mr-2" size={16} />
                 Pull New Orders
               </Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        <OrderTable orders={orders || []} />
-        
-        <TrackingSection />
-        
-        <div className="mt-8">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Quick Actions</CardTitle>
-              <p className="text-muted-foreground">Manage your shipments and orders</p>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <Button 
-                  className="w-full bg-emerald-600 hover:bg-emerald-700"
-                  onClick={() => setLocation('/orders')}
-                >
-                  <Plus className="mr-2" size={16} />
-                  Create Shipments
-                </Button>
-                <Button 
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => setLocation('/tracking')}
-                >
-                  <Truck className="mr-2" size={16} />
-                  Track Shipments
-                </Button>
-                <Button 
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => setLocation('/settings')}
-                >
-                  <Download className="mr-2" size={16} />
-                  Settings
-                </Button>
-              </div>
             </CardContent>
           </Card>
         </div>
