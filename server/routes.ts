@@ -290,7 +290,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      if (
+      // Check if coverage check was successful (has totalFee and no errMsg)
+      if (coverageCheck.code === 1 && coverageCheck.data[0].totalFee && !coverageCheck.data[0].errMsg) {
+        console.log(`✓ Coverage check passed for ${shippingAddress.postalCode}. Cost: $${coverageCheck.data[0].totalFee}`);
+      } else if (
         coverageCheck.code === 1 &&
         coverageCheck.data[0].errMsg &&
         !coverageCheck.data[0].errMsg.includes("未维护报价")
@@ -305,6 +308,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             error: `ZIP ${shippingAddress.postalCode} is a PO Box ZIP code. US001 can only deliver to street addresses. Please provide a physical delivery address.` 
           });
         }
+        
+        // For coverage issues, provide more detailed error message
+        if (coverageCheck.data[0].errMsg.includes("不在渠道分区范围内")) {
+          return res.status(400).json({ 
+            error: `ZIP ${shippingAddress.postalCode} appears to be outside US001 coverage area according to Jiayou API. However, if customer service confirmed this ZIP is supported, you may need to contact Jiayou support to update their coverage database or check if there's a different channel code for this area.` 
+          });
+        }
+        
         // bubble the true Jiayou error (weight, dimensions, etc.)
         return res.status(400).json({ error: coverageCheck.data[0].errMsg });
       }
