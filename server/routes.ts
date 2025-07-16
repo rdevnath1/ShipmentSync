@@ -281,6 +281,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Check for invalid address formats that Jiayou rejects
+      if (/^\s*\d+\s*$/.test(shippingAddress.street1)) {
+        return res.status(400).json({ 
+          error: `Address "${shippingAddress.street1}" is invalid. Street address cannot contain only numbers. Please provide a complete street address (e.g., "123 Main Street").` 
+        });
+      }
+
       // Check postal code coverage for the channel
       console.log("Checking postal code coverage...");
       const kgWeight = convertOzToKg(weight || 8); // 8 oz = 0.227 kg safe default (above 0.05kg minimum)
@@ -449,7 +456,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (jiayouResponse.code !== 1) {
-        return res.status(400).json({ error: jiayouResponse.message });
+        // Translate common Chinese error messages to English
+        let errorMessage = jiayouResponse.message;
+        
+        // Common error message translations
+        const errorTranslations = {
+          '收件人地址【.*】不能只包含数字！': 'Street address cannot contain only numbers. Please provide a complete street address (e.g., "123 Main Street").',
+          '收件人地址格式不正确': 'Recipient address format is incorrect. Please provide a valid street address.',
+          '收件人姓名不能为空': 'Recipient name cannot be empty.',
+          '收件人邮编不能为空': 'Recipient postal code cannot be empty.',
+          '收件人电话不能为空': 'Recipient phone number cannot be empty.',
+          '收件人城市不能为空': 'Recipient city cannot be empty.',
+          '收件人州/省不能为空': 'Recipient state/province cannot be empty.',
+          '不在渠道分区范围内': 'This postal code is not supported by the US001 channel.',
+          '获取单号中，请稍后重试': 'Getting tracking number, please try again later.',
+          '重量不能为空': 'Weight cannot be empty.',
+          '尺寸不能为空': 'Dimensions cannot be empty.'
+        };
+
+        // Try to translate the error message
+        for (const [chinesePattern, englishTranslation] of Object.entries(errorTranslations)) {
+          if (new RegExp(chinesePattern).test(errorMessage)) {
+            errorMessage = englishTranslation;
+            break;
+          }
+        }
+
+        // If no translation found, keep original message but add helpful note
+        if (errorMessage === jiayouResponse.message && /[\u4e00-\u9fff]/.test(errorMessage)) {
+          errorMessage = `Shipping service error: ${jiayouResponse.message}. Please check your address format and try again.`;
+        }
+
+        return res.status(400).json({ error: errorMessage });
       }
 
       // Update order with shipment data and mark as shipped
