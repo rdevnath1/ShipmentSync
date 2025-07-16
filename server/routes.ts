@@ -485,9 +485,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Update shipping address in the related order if provided
       if (shippingAddress && shipment.orderId) {
+        console.log(`Updating order ${shipment.orderId} with new shipping address:`, shippingAddress);
         await storage.updateOrder(shipment.orderId, {
           shippingAddress,
         });
+        console.log(`Successfully updated order ${shipment.orderId} address`);
       }
       
       res.json({
