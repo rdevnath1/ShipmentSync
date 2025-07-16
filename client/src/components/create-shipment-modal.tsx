@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -150,28 +150,12 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
         </DialogHeader>
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6">
             <div>
               <Label htmlFor="orderId">Order ID</Label>
               <Input
                 id="orderId"
                 value={`#${order.orderNumber}`}
-                disabled
-              />
-            </div>
-            <div>
-              <Label htmlFor="channelCode">Shipping Channel</Label>
-              <Input
-                id="channelCode"
-                value="US001 - US Standard"
-                disabled
-              />
-            </div>
-            <div>
-              <Label htmlFor="serviceType">Service Type</Label>
-              <Input
-                id="serviceType"
-                value="Standard"
                 disabled
               />
             </div>
@@ -273,27 +257,7 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
                   </p>
                 )}
               </div>
-              <div>
-                <Label htmlFor="channelCode">Channel Code</Label>
-                <Select
-                  value={form.watch("channelCode")}
-                  onValueChange={(value) => form.setValue("channelCode", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select channel" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="CA002">CA002 - Canada Express</SelectItem>
-                    <SelectItem value="US001">US001 - US Standard</SelectItem>
-                    <SelectItem value="UK001">UK001 - UK Express</SelectItem>
-                  </SelectContent>
-                </Select>
-                {form.formState.errors.channelCode && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {form.formState.errors.channelCode.message}
-                  </p>
-                )}
-              </div>
+
             </div>
           </div>
 

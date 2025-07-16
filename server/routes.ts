@@ -209,37 +209,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get available Jiayou channel codes
-  app.get("/api/jiayou/channels", async (req, res) => {
-    try {
-      const channels = await jiayouService.getChannelCodes();
-      res.json(channels);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch channel codes" });
-    }
-  });
 
-  // Get channel delivery range/coverage info
-  app.get("/api/jiayou/channel-info", async (req, res) => {
-    try {
-      const { channelCode } = req.query;
-      if (!channelCode) {
-        return res.status(400).json({ error: "Channel code is required" });
-      }
-      
-      const channelInfo = await jiayouService.getChannelInfo(channelCode as string);
-      res.json(channelInfo);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch channel info" });
-    }
-  });
 
   // Create shipment with Jiayou
   app.post("/api/shipments/create", async (req, res) => {
     try {
-      const { orderId, channelCode, serviceType, weight, dimensions } = req.body;
+      const { orderId, weight, dimensions } = req.body;
       const { length = 10, width = 10, height = 2 } = dimensions ?? {};
-      console.log("Create shipment request:", { orderId, channelCode, serviceType, weight, dimensions });
+      console.log("Create shipment request:", { orderId, weight, dimensions });
 
       // Get order details
       const order = await storage.getOrder(orderId);
