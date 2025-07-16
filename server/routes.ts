@@ -192,13 +192,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Order not found" });
       }
 
-      if (!order.labelPath) {
-        return res.status(400).json({ error: "No label available for this order" });
+      if (!order.trackingNumber) {
+        return res.status(400).json({ error: "No tracking number available for this order" });
+      }
+
+      // If label path is empty, try to get it from Jiayou using the tracking number
+      let labelPath = order.labelPath;
+      if (!labelPath) {
+        console.log(`No label path found for order ${orderId}, requesting from Jiayou...`);
+        try {
+          const labelResponse = await jiayouService.printLabel([order.trackingNumber]);
+          if (labelResponse && labelResponse.code === 1 && labelResponse.data && labelResponse.data.length > 0) {
+            labelPath = labelResponse.data[0].labelPath;
+            
+            // Update the order with the new label path
+            if (labelPath) {
+              await storage.updateOrder(orderId, { labelPath });
+              console.log(`Updated order ${orderId} with label path: ${labelPath}`);
+            }
+          } else {
+            console.error("Failed to get label from Jiayou:", labelResponse);
+          }
+        } catch (jiayouError) {
+          console.error("Error requesting label from Jiayou:", jiayouError);
+        }
+      }
+
+      if (!labelPath) {
+        return res.status(400).json({ error: "No label available for this order. The label may not have been generated yet." });
       }
 
       // Return the label path for frontend to open
       res.json({ 
-        labelPath: order.labelPath,
+        labelPath: labelPath,
         trackingNumber: order.trackingNumber 
       });
     } catch (error) {
