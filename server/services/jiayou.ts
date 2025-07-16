@@ -124,31 +124,22 @@ export class JiayouService {
   }
 
   private getAuthHeaders(): Record<string, string> {
-    const timestamp = new Date().toLocaleString('zh-CN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false,
-    }).replace(/\//g, '-');
-
-    const sign = this.generateSignature(this.clientId, this.apiKey);
+    const code = Date.now().toString();
+    const signature = this.generateSignature(code, this.apiKey);
 
     return {
       'Content-Type': 'application/json',
-      'code': this.clientId,
-      'apiKey': this.apiKey,
-      'timestamp': timestamp,
-      'sign': sign,
+      'code': code,
+      'signature': signature,
+      'clientId': this.clientId,
+      'accesskey': this.apiKey  // Add the required accesskey header
     };
   }
 
   async createOrder(orderData: JiayouCreateOrderRequest): Promise<JiayouCreateOrderResponse> {
     try {
       const response = await axios.post(
-        `${this.baseUrl}/api/orderNew/createOrder`,
+        `${this.baseUrl}/order/create`,  // Use correct endpoint
         orderData,
         { 
           headers: this.getAuthHeaders(),
@@ -184,24 +175,45 @@ export class JiayouService {
 
   async getTracking(trackingNumber: string): Promise<any> {
     try {
-      const response = await axios.post(
-        `${this.baseUrl}/api/orderNew/getOrderTrack`,
-        { trackingNo: trackingNumber },
-        { headers: this.getAuthHeaders() }
-      );
-
-      return response.data;
-    } catch (error: any) {
-      // Check if it's a 404 error (tracking not found)
-      if (error.response?.status === 404) {
-        console.log(`Tracking not found for ${trackingNumber} - may be too early to track`);
-        return {
-          code: 0,
-          message: 'Tracking information not available yet. Please try again later.',
-          data: null
-        };
+      // First, let's try to find the correct tracking endpoint
+      const trackingEndpoints = [
+        '/track',
+        '/tracking',
+        '/order/track',
+        '/order/tracking',
+        '/api/track',
+        '/api/tracking',
+        '/api/orderNew/getOrderTrack'
+      ];
+      
+      let lastError = null;
+      
+      for (const endpoint of trackingEndpoints) {
+        try {
+          const response = await axios.post(
+            `${this.baseUrl}${endpoint}`,
+            { trackingNo: trackingNumber },
+            { headers: this.getAuthHeaders() }
+          );
+          
+          if (response.data && response.data.code !== 404) {
+            console.log(`Found tracking data at ${endpoint}:`, response.data);
+            return response.data;
+          }
+        } catch (error: any) {
+          lastError = error;
+          console.log(`Endpoint ${endpoint} failed:`, error.response?.data?.message || error.message);
+        }
       }
       
+      // If no endpoint worked, return a meaningful message
+      console.log(`Tracking not found for ${trackingNumber} - may be too early to track or endpoint changed`);
+      return {
+        code: 0,
+        message: 'Tracking information not available yet. Please try again later.',
+        data: null
+      };
+    } catch (error: any) {
       console.error('Error getting tracking from Jiayou:', error);
       throw new Error('Failed to get tracking from Jiayou');
     }
