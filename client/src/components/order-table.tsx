@@ -66,11 +66,9 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
     setShowCreateModal(true);
   };
 
-  const handleViewOrder = (order: any) => {
-    toast({
-      title: "Order Details",
-      description: `Order #${order.orderNumber} - ${order.customerName}`,
-    });
+  const handleViewEditOrder = (order: any) => {
+    setSelectedOrder(order);
+    setShowEditOrderModal(true);
   };
 
   const handleDeleteOrder = (order: any) => {
@@ -84,10 +82,7 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
     setShowEditModal(true);
   };
 
-  const handleEditOrder = (order: any) => {
-    setSelectedOrder(order);
-    setShowEditOrderModal(true);
-  };
+
 
   const printMutation = useMutation({
     mutationFn: async (orderId: number) => {
@@ -235,18 +230,10 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
                                 <Button 
                                   size="sm" 
                                   variant="outline"
-                                  onClick={() => handleEditOrder(order)}
+                                  onClick={() => handleViewEditOrder(order)}
                                 >
                                   <Edit className="mr-1" size={12} />
                                   Edit
-                                </Button>
-                                <Button 
-                                  size="sm" 
-                                  variant="outline"
-                                  onClick={() => handleViewOrder(order)}
-                                >
-                                  <Eye className="mr-1" size={12} />
-                                  View
                                 </Button>
                                 <Button 
                                   size="sm" 
@@ -277,14 +264,7 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
                                   <Printer className="mr-1" size={12} />
                                   {printMutation.isPending ? "Printing..." : "Print"}
                                 </Button>
-                                <Button 
-                                  size="sm" 
-                                  variant="outline"
-                                  onClick={() => handleViewOrder(order)}
-                                >
-                                  <Eye className="mr-1" size={12} />
-                                  View
-                                </Button>
+
                               </>
                             )}
                           </div>
@@ -341,20 +321,11 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
                             <Button 
                               size="sm" 
                               variant="outline"
-                              onClick={() => handleEditOrder(order)}
+                              onClick={() => handleViewEditOrder(order)}
                               className="flex-1 min-w-0"
                             >
                               <Edit className="mr-1" size={16} />
                               Edit
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleViewOrder(order)}
-                              className="flex-1 min-w-0"
-                            >
-                              <Eye className="mr-1" size={16} />
-                              View
                             </Button>
                             <Button 
                               size="sm" 
@@ -388,15 +359,7 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
                               <Printer className="mr-1" size={16} />
                               {printMutation.isPending ? "Printing..." : "Print"}
                             </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleViewOrder(order)}
-                              className="flex-1 min-w-0"
-                            >
-                              <Eye className="mr-1" size={16} />
-                              View
-                            </Button>
+
                           </>
                         )}
                       </div>

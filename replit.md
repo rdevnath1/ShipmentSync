@@ -55,6 +55,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Dashboard UI Improvements (July 16, 2025)
+- **Combined Integration Boxes**: Merged ShipStation and carrier integration into single "API Integration Status" card
+- **Fixed Notifications**: Added working notification functionality with toast messages showing recent activity
+- **Streamlined Order Actions**: Combined View/Edit buttons for pending orders; removed View button for shipped orders
+- **Relocated Create Shipments**: Moved create shipment action to bottom Quick Actions section for better flow
+- **Improved Quick Actions**: Added comprehensive Quick Actions section with Create Shipments, Track Shipments, and Settings buttons
+- **Enhanced UX**: Shipped orders now show "Edit Shipment" and "Print" buttons only, removing redundant View option
+- **SUCCESSFUL RESULT**: Cleaner, more intuitive dashboard with consolidated integration status and streamlined actions
+
 ### Unified Orders Interface (July 16, 2025)
 - **Single Orders Page**: Consolidated 3 separate tabs (Orders, Shipments, Labels) into one unified interface
 - **Smart Filtering**: Added filter buttons for All, Pending, and Shipped orders with live counts

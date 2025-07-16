@@ -1,5 +1,6 @@
 import { Bell, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 interface HeaderProps {
   title: string;
@@ -7,6 +8,15 @@ interface HeaderProps {
 }
 
 export default function Header({ title, description }: HeaderProps) {
+  const { toast } = useToast();
+  
+  const handleNotifications = () => {
+    toast({
+      title: "Notifications",
+      description: "You have 3 new notifications: 2 shipments delivered, 1 order imported",
+    });
+  };
+
   return (
     <header className="bg-background border-b border-border px-4 lg:px-6 py-4 pt-16 lg:pt-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
@@ -15,7 +25,7 @@ export default function Header({ title, description }: HeaderProps) {
           <p className="text-sm lg:text-base text-muted-foreground">{description}</p>
         </div>
         <div className="flex items-center space-x-2 lg:space-x-4">
-          <Button variant="ghost" size="sm" className="relative">
+          <Button variant="ghost" size="sm" className="relative" onClick={handleNotifications}>
             <Bell className="text-muted-foreground" size={20} />
             <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
           </Button>

@@ -51,34 +51,60 @@ export default function Dashboard() {
       <div className="p-4 lg:p-6">
         <StatsCards stats={stats} />
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mb-6 lg:mb-8">
+        <div className="mb-6 lg:mb-8">
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-base lg:text-lg">ShipStation Integration</CardTitle>
-                  <p className="text-sm lg:text-base text-slate-600">Pull orders from ShipStation</p>
+                  <CardTitle className="text-base lg:text-lg">API Integration Status</CardTitle>
+                  <p className="text-sm lg:text-base text-muted-foreground">ShipStation & Jiayou carrier integration</p>
                 </div>
-                <div className="w-10 h-10 lg:w-12 lg:h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Download className="text-blue-600" size={16} />
+                <div className="flex items-center space-x-2">
+                  <div className="w-8 h-8 lg:w-10 lg:h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                    <Download className="text-blue-600 dark:text-blue-400" size={14} />
+                  </div>
+                  <div className="w-8 h-8 lg:w-10 lg:h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center">
+                    <Truck className="text-emerald-600 dark:text-emerald-400" size={14} />
+                  </div>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between py-2 lg:py-3 px-3 lg:px-4 bg-muted rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                  <span className="text-sm font-medium text-foreground">API Connection</span>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between py-2 lg:py-3 px-3 lg:px-4 bg-muted rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                      <span className="text-sm font-medium text-foreground">ShipStation API</span>
+                    </div>
+                    <span className="text-xs text-emerald-600 font-medium">Active</span>
+                  </div>
+                  <div className="flex items-center justify-between py-2 lg:py-3 px-3 lg:px-4 bg-muted rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <span className="text-sm font-medium text-foreground">Last Sync</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">2 mins ago</span>
+                  </div>
                 </div>
-                <span className="text-xs text-emerald-600 font-medium">Active</span>
-              </div>
-
-              <div className="flex items-center justify-between py-2 lg:py-3 px-3 lg:px-4 bg-muted rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span className="text-sm font-medium text-foreground">Last Sync</span>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between py-2 lg:py-3 px-3 lg:px-4 bg-muted rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                      <span className="text-sm font-medium text-foreground">Jiayou API</span>
+                    </div>
+                    <span className="text-xs text-emerald-600 font-medium">Online</span>
+                  </div>
+                  <div className="flex items-center justify-between py-2 lg:py-3 px-3 lg:px-4 bg-muted rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                      <span className="text-sm font-medium text-foreground">Pending Labels</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {orders?.filter((o: any) => o.status === "pending").length || 0} orders
+                    </span>
+                  </div>
                 </div>
-                <span className="text-xs text-muted-foreground">2 mins ago</span>
               </div>
 
               <Button 
@@ -90,52 +116,47 @@ export default function Dashboard() {
               </Button>
             </CardContent>
           </Card>
-
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-base lg:text-lg">Carrier</CardTitle>
-                  <p className="text-sm lg:text-base text-muted-foreground">Create shipments & generate labels</p>
-                </div>
-                <div className="w-10 h-10 lg:w-12 lg:h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center">
-                  <Truck className="text-emerald-600 dark:text-emerald-400" size={16} />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between py-2 lg:py-3 px-3 lg:px-4 bg-muted rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                  <span className="text-sm font-medium text-foreground">API Status</span>
-                </div>
-                <span className="text-xs text-emerald-600 font-medium">Online</span>
-              </div>
-
-              <div className="flex items-center justify-between py-2 lg:py-3 px-3 lg:px-4 bg-muted rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                  <span className="text-sm font-medium text-foreground">Pending Labels</span>
-                </div>
-                <span className="text-xs text-muted-foreground">
-                  {orders?.filter((o: any) => o.status === "pending").length || 0} orders
-                </span>
-              </div>
-
-              <Button 
-                className="w-full bg-emerald-600 hover:bg-emerald-700"
-                onClick={() => setLocation('/orders')}
-              >
-                <Plus className="mr-2" size={16} />
-                Create Shipments
-              </Button>
-            </CardContent>
-          </Card>
         </div>
 
         <OrderTable orders={orders || []} />
         
         <TrackingSection />
+        
+        <div className="mt-8">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Quick Actions</CardTitle>
+              <p className="text-muted-foreground">Manage your shipments and orders</p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <Button 
+                  className="w-full bg-emerald-600 hover:bg-emerald-700"
+                  onClick={() => setLocation('/orders')}
+                >
+                  <Plus className="mr-2" size={16} />
+                  Create Shipments
+                </Button>
+                <Button 
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setLocation('/tracking')}
+                >
+                  <Truck className="mr-2" size={16} />
+                  Track Shipments
+                </Button>
+                <Button 
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setLocation('/settings')}
+                >
+                  <Download className="mr-2" size={16} />
+                  Settings
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </>
   );
