@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import Header from "@/components/header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,15 +41,19 @@ export default function Tracking() {
     },
   });
 
-  // Check for tracking parameter in URL
+  // Check for tracking parameter in URL and trigger tracking immediately
   useEffect(() => {
-    const urlParams = new URLSearchParams(location.split('?')[1]);
-    const trackParam = urlParams.get('track');
-    if (trackParam) {
-      setTrackingNumber(trackParam);
-      trackingMutation.mutate(trackParam);
+    const searchParams = location.split('?')[1];
+    if (searchParams) {
+      const urlParams = new URLSearchParams(searchParams);
+      const trackParam = urlParams.get('track');
+      if (trackParam && trackParam !== trackingNumber) {
+        setTrackingNumber(trackParam);
+        // Trigger tracking lookup immediately
+        trackingMutation.mutate(trackParam);
+      }
     }
-  }, [location, trackingMutation]);
+  }, [location]); // Only depend on location to prevent loops
 
   const handleTrackPackage = () => {
     if (!trackingNumber.trim()) {
@@ -143,7 +147,42 @@ export default function Tracking() {
                       </Badge>
                     </div>
 
-                    {trackingData.events && trackingData.events.length > 0 && (
+                    {/* Show tracking response based on API structure */}
+                    {trackingData.code === 0 && trackingData.message ? (
+                      <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                        <div className="flex items-center">
+                          <Clock className="text-amber-600 mr-2" size={16} />
+                          <div>
+                            <h4 className="font-medium text-amber-800">Tracking Not Available Yet</h4>
+                            <p className="text-sm text-amber-700">{trackingData.message}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : trackingData.data && trackingData.data.trackingEvents ? (
+                      <div className="space-y-3">
+                        <h4 className="font-medium text-foreground">Tracking Events</h4>
+                        <div className="space-y-3">
+                          {trackingData.data.trackingEvents.map((event: any, index: number) => (
+                            <div key={index} className="flex items-start space-x-3 p-3 border border-border rounded-lg">
+                              <div className="mt-1">
+                                {getStatusIcon(event.status || 'unknown')}
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-center justify-between">
+                                  <h5 className="font-medium text-foreground">{event.description || event.eventDescription}</h5>
+                                  <span className="text-sm text-muted-foreground">
+                                    {event.timestamp ? new Date(event.timestamp).toLocaleString() : event.eventTime}
+                                  </span>
+                                </div>
+                                {event.location && (
+                                  <p className="text-sm text-muted-foreground mt-1">{event.location}</p>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : trackingData.events && trackingData.events.length > 0 ? (
                       <div className="space-y-3">
                         <h4 className="font-medium text-foreground">Tracking Events</h4>
                         <div className="space-y-3">
@@ -165,6 +204,17 @@ export default function Tracking() {
                               </div>
                             </div>
                           ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="flex items-center">
+                          <Package className="text-blue-600 mr-2" size={16} />
+                          <div>
+                            <h4 className="font-medium text-blue-800">Tracking Found</h4>
+                            <p className="text-sm text-blue-700">Tracking information retrieved successfully.</p>
+                            <pre className="text-xs text-blue-600 mt-2 bg-blue-100 p-2 rounded">{JSON.stringify(trackingData, null, 2)}</pre>
+                          </div>
                         </div>
                       </div>
                     )}
