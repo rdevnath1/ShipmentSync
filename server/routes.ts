@@ -615,6 +615,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Debug endpoint to verify Jiayou order synchronization
+  app.get("/api/debug/jiayou/:orderId", async (req, res) => {
+    try {
+      const { verifyJiayouOrder } = await import('./debug-jiayou.js');
+      const orderId = parseInt(req.params.orderId);
+      const result = await verifyJiayouOrder(orderId);
+      res.json(result);
+    } catch (error) {
+      console.error("Error in Jiayou debug:", error);
+      res.status(500).json({ error: "Failed to debug Jiayou order" });
+    }
+  });
+
+  // Debug endpoint to check all orders
+  app.get("/api/debug/jiayou-all", async (req, res) => {
+    try {
+      const { debugAllOrders } = await import('./debug-jiayou.js');
+      const results = await debugAllOrders();
+      res.json(results);
+    } catch (error) {
+      console.error("Error in Jiayou debug all:", error);
+      res.status(500).json({ error: "Failed to debug all orders" });
+    }
+  });
+
   // Get channel codes
   app.get("/api/jiayou/channels", async (req, res) => {
     try {
