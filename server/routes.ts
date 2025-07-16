@@ -598,6 +598,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const trackingData = await jiayouService.getTracking(trackingNumber);
       
+      // If tracking is not available yet, return a user-friendly message
+      if (trackingData.code === 0) {
+        res.json({
+          code: 0,
+          message: "Tracking information not available yet. New shipments may take a few hours to appear in the tracking system.",
+          data: null
+        });
+        return;
+      }
+      
       res.json(trackingData);
     } catch (error) {
       console.error("Error fetching tracking:", error);

@@ -191,7 +191,17 @@ export class JiayouService {
       );
 
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
+      // Check if it's a 404 error (tracking not found)
+      if (error.response?.status === 404) {
+        console.log(`Tracking not found for ${trackingNumber} - may be too early to track`);
+        return {
+          code: 0,
+          message: 'Tracking information not available yet. Please try again later.',
+          data: null
+        };
+      }
+      
       console.error('Error getting tracking from Jiayou:', error);
       throw new Error('Failed to get tracking from Jiayou');
     }
