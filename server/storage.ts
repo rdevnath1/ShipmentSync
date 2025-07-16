@@ -89,7 +89,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getShipment(id: number): Promise<Shipment | undefined> {
-    const [shipment] = await db.select().from(shipments).where(eq(shipments.id, id));
+    const shipment = await db.query.shipments.findFirst({
+      where: eq(shipments.id, id),
+      with: {
+        order: true,
+      },
+    });
     return shipment || undefined;
   }
 
@@ -122,7 +127,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllShipments(): Promise<Shipment[]> {
-    return await db.select().from(shipments).orderBy(desc(shipments.createdAt));
+    return await db.query.shipments.findMany({
+      with: {
+        order: true,
+      },
+      orderBy: desc(shipments.createdAt),
+    });
   }
 
   async createTrackingEvent(insertEvent: InsertTrackingEvent): Promise<TrackingEvent> {

@@ -23,6 +23,17 @@ const editShipmentSchema = z.object({
     height: z.number().min(1, "Height is required"),
   }),
   status: z.string().min(1, "Status is required"),
+  shippingAddress: z.object({
+    name: z.string().min(1, "Name is required"),
+    company: z.string().optional(),
+    street1: z.string().min(1, "Street address is required"),
+    street2: z.string().optional(),
+    city: z.string().min(1, "City is required"),
+    state: z.string().min(1, "State is required"),
+    postalCode: z.string().min(1, "Postal code is required"),
+    country: z.string().min(1, "Country is required"),
+    phone: z.string().optional(),
+  }),
 });
 
 type EditShipmentForm = z.infer<typeof editShipmentSchema>;
@@ -50,6 +61,17 @@ export default function EditShipmentModal({ isOpen, onClose, shipment }: EditShi
         height: 10,
       },
       status: "created",
+      shippingAddress: {
+        name: "",
+        company: "",
+        street1: "",
+        street2: "",
+        city: "",
+        state: "",
+        postalCode: "",
+        country: "US",
+        phone: "",
+      },
     },
   });
 
@@ -62,6 +84,21 @@ export default function EditShipmentModal({ isOpen, onClose, shipment }: EditShi
       form.setValue("weight", parseFloat(shipment.weight) || 0.227);
       form.setValue("dimensions", shipment.dimensions || { length: 10, width: 10, height: 10 });
       form.setValue("status", shipment.status || "created");
+      
+      // Set address from related order
+      if (shipment.order && shipment.order.shippingAddress) {
+        form.setValue("shippingAddress", {
+          name: shipment.order.shippingAddress.name || "",
+          company: shipment.order.shippingAddress.company || "",
+          street1: shipment.order.shippingAddress.street1 || "",
+          street2: shipment.order.shippingAddress.street2 || "",
+          city: shipment.order.shippingAddress.city || "",
+          state: shipment.order.shippingAddress.state || "",
+          postalCode: shipment.order.shippingAddress.postalCode || "",
+          country: shipment.order.shippingAddress.country || "US",
+          phone: shipment.order.shippingAddress.phone || "",
+        });
+      }
     }
   }, [shipment, form]);
 
@@ -165,6 +202,105 @@ export default function EditShipmentModal({ isOpen, onClose, shipment }: EditShi
                 className="bg-gray-50"
               />
               <p className="text-sm text-gray-500 mt-1">Standard is the only supported service</p>
+            </div>
+          </div>
+
+          <div className="border-t border-slate-200 pt-6">
+            <h4 className="text-md font-medium text-slate-800 mb-4">Shipping Address</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="name">Recipient Name</Label>
+                <Input
+                  id="name"
+                  {...form.register("shippingAddress.name")}
+                />
+                {form.formState.errors.shippingAddress?.name && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {form.formState.errors.shippingAddress.name.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <Label htmlFor="company">Company (Optional)</Label>
+                <Input
+                  id="company"
+                  {...form.register("shippingAddress.company")}
+                />
+              </div>
+              <div className="md:col-span-2">
+                <Label htmlFor="street1">Street Address</Label>
+                <Input
+                  id="street1"
+                  {...form.register("shippingAddress.street1")}
+                />
+                {form.formState.errors.shippingAddress?.street1 && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {form.formState.errors.shippingAddress.street1.message}
+                  </p>
+                )}
+              </div>
+              <div className="md:col-span-2">
+                <Label htmlFor="street2">Street Address 2 (Optional)</Label>
+                <Input
+                  id="street2"
+                  {...form.register("shippingAddress.street2")}
+                />
+              </div>
+              <div>
+                <Label htmlFor="city">City</Label>
+                <Input
+                  id="city"
+                  {...form.register("shippingAddress.city")}
+                />
+                {form.formState.errors.shippingAddress?.city && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {form.formState.errors.shippingAddress.city.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <Label htmlFor="state">State</Label>
+                <Input
+                  id="state"
+                  {...form.register("shippingAddress.state")}
+                />
+                {form.formState.errors.shippingAddress?.state && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {form.formState.errors.shippingAddress.state.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <Label htmlFor="postalCode">Postal Code</Label>
+                <Input
+                  id="postalCode"
+                  {...form.register("shippingAddress.postalCode")}
+                />
+                {form.formState.errors.shippingAddress?.postalCode && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {form.formState.errors.shippingAddress.postalCode.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <Label htmlFor="country">Country</Label>
+                <Input
+                  id="country"
+                  {...form.register("shippingAddress.country")}
+                />
+                {form.formState.errors.shippingAddress?.country && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {form.formState.errors.shippingAddress.country.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <Label htmlFor="phone">Phone (Optional)</Label>
+                <Input
+                  id="phone"
+                  {...form.register("shippingAddress.phone")}
+                />
+              </div>
             </div>
           </div>
 

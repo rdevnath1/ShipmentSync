@@ -464,13 +464,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/shipments/:id", async (req, res) => {
     try {
       const shipmentId = parseInt(req.params.id);
-      const { trackingNumber, channelCode, serviceType, weight, dimensions, status } = req.body;
+      const { trackingNumber, channelCode, serviceType, weight, dimensions, status, shippingAddress } = req.body;
       
       const shipment = await storage.getShipment(shipmentId);
       if (!shipment) {
         return res.status(404).json({ error: "Shipment not found" });
       }
 
+      // Update shipment data
       const updateData = {
         trackingNumber,
         channelCode: channelCode || "US001",
@@ -481,6 +482,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       const updatedShipment = await storage.updateShipment(shipmentId, updateData);
+      
+      // Update shipping address in the related order if provided
+      if (shippingAddress && shipment.orderId) {
+        await storage.updateOrder(shipment.orderId, {
+          shippingAddress,
+        });
+      }
       
       res.json({
         message: "Shipment updated successfully",

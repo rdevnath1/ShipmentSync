@@ -62,8 +62,10 @@ Preferred communication style: Simple, everyday language.
 - **Form Validation**: Implemented validation for tracking number, weight, dimensions, and status
 - **Status Management**: Users can update shipment status (created, shipped, in_transit, delivered, cancelled)
 - **Weight & Dimensions**: Editable package details with proper validation
+- **Address Editing**: Added full shipping address editing capability with validation
+- **Database Relations**: Enhanced shipment queries to include order data for address population
 - **Channel Lock**: Channel code (US001) and service type (Standard) remain locked but visible
-- **SUCCESSFUL RESULT**: Users can now manually edit shipments after creation with full validation
+- **SUCCESSFUL RESULT**: Users can now manually edit shipments after creation with full validation including shipping addresses
 
 ### PO Box Detection Implementation (July 15, 2025)
 - **Smart PO Box Detection**: Added dual-layer PO Box detection for addresses and ZIP codes
