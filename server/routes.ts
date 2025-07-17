@@ -179,14 +179,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!labelPath) {
         console.log(`No label path found for order ${orderId}, requesting from Jiayou...`);
         try {
-          const labelResponse = await jiayouService.printLabel([order.trackingNumber]);
+          // Convert QP tracking number back to GV format for Jiayou API
+          const jiayouTrackingNumber = TrackingTransform.transformToGV(order.trackingNumber);
+          console.log(`Label retrieval: ${order.trackingNumber} → ${jiayouTrackingNumber} (for Jiayou API)`);
+          
+          // Use enhanced label retrieval with retry logic
+          const labelResponse = await jiayouService.getLabelWithRetry(jiayouTrackingNumber, 3);
+          
           if (labelResponse && labelResponse.code === 1 && labelResponse.data && labelResponse.data.length > 0) {
-            labelPath = labelResponse.data[0].labelPath;
+            const originalLabelUrl = labelResponse.data[0].labelPath;
             
-            // Update the order with the new label path
-            if (labelPath) {
+            if (originalLabelUrl) {
+              // Process the label with Quikpik branding
+              const labelProcessor = new LabelProcessor();
+              const processedLabelBuffer = await labelProcessor.processLabelWithLogo(
+                originalLabelUrl, 
+                jiayouTrackingNumber
+              );
+              
+              // Save the processed label
+              labelPath = await labelProcessor.saveLabelToFile(processedLabelBuffer, jiayouTrackingNumber);
+              
+              // Update the order with the processed label path
               await storage.updateOrder(orderId, { labelPath });
-              console.log(`Updated order ${orderId} with label path: ${labelPath}`);
+              console.log(`Label processed and saved for order ${orderId}: ${labelPath}`);
             }
           } else {
             console.error("Failed to get label from Jiayou:", labelResponse);
@@ -652,6 +668,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error in Jiayou debug all:", error);
       res.status(500).json({ error: "Failed to debug all orders" });
+    }
+  });
+
+  // Debug endpoint to test label retrieval
+  app.post("/api/debug/jiayou-label", async (req, res) => {
+    try {
+      const { trackingNumber } = req.body;
+      
+      if (!trackingNumber) {
+        return res.status(400).json({ error: "Missing trackingNumber" });
+      }
+      
+      console.log(`Debug: Testing label retrieval for ${trackingNumber}`);
+      
+      // Test with enhanced retry logic
+      const labelResponse = await jiayouService.getLabelWithRetry(trackingNumber, 3);
+      
+      res.json({
+        trackingNumber,
+        labelResponse,
+        message: "Label retrieval test completed"
+      });
+    } catch (error) {
+      console.error("Error in label debug:", error);
+      res.status(500).json({ error: "Failed to debug label retrieval" });
     }
   });
 

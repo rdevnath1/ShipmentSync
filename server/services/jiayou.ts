@@ -200,6 +200,44 @@ export class JiayouService {
     }
   }
 
+  // Enhanced label retrieval with retry logic
+  async getLabelWithRetry(trackingNumber: string, maxRetries = 3): Promise<any> {
+    let lastError: any = null;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`Attempting to get label for ${trackingNumber} (attempt ${attempt}/${maxRetries})`);
+        
+        const response = await axios.post(
+          `${this.baseUrl}/api/orderNew/printOrder`,
+          [trackingNumber],
+          { headers: this.getAuthHeaders() }
+        );
+
+        if (response.data.code === 1 && response.data.data) {
+          console.log(`✅ Label retrieved successfully for ${trackingNumber}`);
+          return response.data;
+        } else {
+          console.log(`Label not ready yet for ${trackingNumber}: ${response.data.message}`);
+          lastError = response.data;
+        }
+      } catch (error: any) {
+        console.log(`Label retrieval failed for ${trackingNumber} (attempt ${attempt}):`, error.response?.data || error.message);
+        lastError = error;
+      }
+      
+      // Wait before retrying (exponential backoff)
+      if (attempt < maxRetries) {
+        const delay = Math.pow(2, attempt) * 1000; // 2s, 4s, 8s
+        console.log(`Waiting ${delay}ms before retry...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+    
+    // If all retries failed, throw the last error
+    throw lastError;
+  }
+
   async getTracking(trackingNumber: string): Promise<any> {
     try {
       console.log(`Tracking ${trackingNumber} using official V3.8 endpoint`);
