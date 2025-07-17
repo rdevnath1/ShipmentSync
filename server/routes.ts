@@ -46,10 +46,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Order not found" });
       }
 
-      // Check if order has associated shipments
-      const shipment = await storage.getShipmentByOrderId(orderId);
-      if (shipment) {
-        return res.status(400).json({ error: "Cannot delete order with associated shipments" });
+      // Check if order has been shipped (has shipment data)
+      if (order.status === 'shipped' || order.jiayouOrderId || order.trackingNumber) {
+        return res.status(400).json({ error: "Cannot delete order that has been shipped" });
       }
 
       // Delete the order (implement this in storage)
