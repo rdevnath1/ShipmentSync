@@ -3,12 +3,16 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { ShipStationService } from "./services/shipstation";
 import { JiayouService } from "./services/jiayou";
+import { LabelProcessor } from "./services/labelProcessor";
 import { insertOrderSchema } from "@shared/schema";
 import { z } from "zod";
+import fs from 'fs/promises';
+import path from 'path';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const shipStationService = new ShipStationService();
   const jiayouService = new JiayouService();
+  const labelProcessor = new LabelProcessor();
 
   // Get all orders (pending and shipped)
   app.get("/api/orders", async (req, res) => {
@@ -493,14 +497,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // If we get here, Jiayou succeeded (code === 1)
-      console.log("✅ Jiayou succeeded - proceeding with ShipStation update");
+      console.log("✅ Jiayou succeeded - proceeding with label processing and ShipStation update");
+
+      // Process the shipping label with logo if labelPath is available
+      let processedLabelUrl = jiayouResponse.data.labelPath;
+      if (jiayouResponse.data.labelPath) {
+        try {
+          console.log("Processing shipping label with company logo...");
+          const processedLabelPath = await labelProcessor.processAndSaveLabel(
+            jiayouResponse.data.labelPath,
+            jiayouResponse.data.trackingNo
+          );
+          
+          // Generate the URL for the processed label
+          processedLabelUrl = labelProcessor.generateLabelUrl(jiayouResponse.data.trackingNo);
+          console.log(`Label processed successfully: ${processedLabelUrl}`);
+        } catch (error) {
+          console.error("Error processing label with logo:", error);
+          // Continue with original label if processing fails
+          console.log("Using original label from Jiayou");
+        }
+      }
 
       // Update order with shipment data and mark as shipped
       const shipmentUpdate = {
         jiayouOrderId: jiayouResponse.data.orderId,
         trackingNumber: jiayouResponse.data.trackingNo,
         markNo: jiayouResponse.data.markNo,
-        labelPath: jiayouResponse.data.labelPath,
+        labelPath: processedLabelUrl, // Use processed label with logo
         channelCode: defaultChannelCode || "US001",
         serviceType: "standard",
         weight: weight?.toString() || "8",
@@ -515,11 +539,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const updateResult = await shipStationService.markAsShipped(
           parseInt(order.shipstationOrderId),
           jiayouResponse.data.trackingNo,
-          jiayouResponse.data.labelPath // Pass the Jiayou label URL
+          processedLabelUrl // Pass the processed label URL with logo
         );
         
         if (updateResult) {
-          console.log(`Successfully marked ShipStation order ${order.shipstationOrderId} as shipped`);
+          console.log(`Successfully marked ShipStation order ${order.shipstationOrderId} as shipped with branded label`);
         } else {
           console.error(`Failed to mark ShipStation order ${order.shipstationOrderId} as shipped`);
         }
@@ -616,6 +640,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error in Jiayou debug all:", error);
       res.status(500).json({ error: "Failed to debug all orders" });
+    }
+  });
+
+  // Serve processed shipping labels with logo
+  app.get("/api/labels/:filename", async (req, res) => {
+    try {
+      const { filename } = req.params;
+      
+      // Validate filename to prevent directory traversal
+      if (!filename.match(/^[a-zA-Z0-9_-]+\.pdf$/)) {
+        return res.status(400).json({ error: "Invalid filename format" });
+      }
+      
+      const labelsDir = path.join(process.cwd(), 'labels');
+      const filePath = path.join(labelsDir, filename);
+      
+      // Check if file exists
+      try {
+        await fs.access(filePath);
+      } catch (error) {
+        return res.status(404).json({ error: "Label file not found" });
+      }
+      
+      // Set appropriate headers for PDF download
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      
+      // Stream the file
+      const fileBuffer = await fs.readFile(filePath);
+      res.send(fileBuffer);
+      
+    } catch (error) {
+      console.error("Error serving label:", error);
+      res.status(500).json({ error: "Failed to serve label" });
     }
   });
 
