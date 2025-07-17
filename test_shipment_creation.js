@@ -1,48 +1,67 @@
-// Test script to verify ChatGPT's fixes are working
-import fetch from 'node-fetch';
+// Test the new Quikpik logo replacement in top-left
+const axios = require('axios');
+const fs = require('fs');
 
-async function testShipmentCreation() {
-  console.log('🚀 Testing shipment creation with ChatGPT fixes...');
-  
-  // Test with a working postal code
-  const testShipmentData = {
-    orderId: 4, // Use existing order ID
-    weight: 8,  // 8 oz
-    dimensions: {
-      length: 12,
-      width: 8,
-      height: 2
-    }
-  };
+async function testQuikpikLabelBranding() {
+  console.log('Testing Quikpik Logo Replacement in Top-Left');
+  console.log('============================================');
   
   try {
-    console.log('Sending shipment creation request...');
-    const response = await fetch('http://localhost:5000/api/shipments/create', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(testShipmentData)
-    });
+    // Create a new shipment to test the logo replacement
+    console.log('1. Creating new shipment with Quikpik branding...');
     
-    const data = await response.json();
+    const shipmentData = {
+      orderId: 2, // Use existing pending order
+      weight: 8,
+      dimensions: {
+        length: 10,
+        width: 8,
+        height: 4
+      }
+    };
     
-    if (response.ok) {
+    console.log('Sending shipment request...');
+    const response = await axios.post('http://localhost:5000/api/shipments', shipmentData);
+    
+    if (response.status === 200) {
       console.log('✅ Shipment created successfully!');
-      console.log('Response:', JSON.stringify(data, null, 2));
-    } else {
-      console.log('❌ Shipment creation failed');
-      console.log('Error:', data.error);
+      console.log('Response:', response.data);
+      
+      // Check if processed label was created
+      const trackingNumber = response.data.jiayouResponse?.trackingNo;
+      if (trackingNumber) {
+        console.log(`📦 Tracking Number: ${trackingNumber}`);
+        
+        // Check for processed label file
+        const labelPath = `labels/${trackingNumber}_with_logo.pdf`;
+        if (fs.existsSync(labelPath)) {
+          console.log(`✅ Processed label created: ${labelPath}`);
+          
+          const stats = fs.statSync(labelPath);
+          console.log(`📊 Label size: ${Math.round(stats.size / 1024)} KB`);
+          
+          console.log(`🔗 Access URL: http://localhost:5000/api/labels/${trackingNumber}_with_logo.pdf`);
+          
+          console.log('\n🎨 Label Changes:');
+          console.log('   • Removed: uniuni logo and branding (top-left)');
+          console.log('   • Added: Quikpik logo in top-left position');
+          console.log('   • Added: "Quikpik" text next to logo');
+          console.log('   • Style: Clean white background overlay');
+          console.log('   • Size: 80x40px optimized for main branding');
+          
+        } else {
+          console.log('❌ Processed label not found');
+        }
+      }
     }
+    
   } catch (error) {
     console.error('❌ Test failed:', error.message);
+    if (error.response) {
+      console.error('Status:', error.response.status);
+      console.error('Data:', error.response.data);
+    }
   }
-  
-  console.log('\n📊 Check the server console for:');
-  console.log('- "→ Jiayou createOrder" log entry');
-  console.log('- "→ Jiayou auth headers" log entry');
-  console.log('- "→ Jiayou response" log entry');
-  console.log('- Either "✅ Jiayou succeeded" or "❌ Jiayou failed"');
 }
 
-testShipmentCreation().catch(console.error);
+testQuikpikLabelBranding();

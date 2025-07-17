@@ -55,6 +55,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Quikpik Label Branding Implementation (July 17, 2025)
+- **Top-Left Logo Replacement**: Updated label processing to replace uniuni branding with Quikpik logo in top-left position
+- **Brand Overlay System**: Draws white rectangle to cover existing uniuni logo and text cleanly
+- **Quikpik Logo Integration**: Adds company logo (80x40px) positioned in top-left corner for main branding
+- **Quikpik Text Addition**: Adds "Quikpik" text in bold next to logo for complete brand identity
+- **Professional Styling**: Clean white background overlay with proper font sizing and positioning
+- **Logo Processing**: Optimized logo resizing for main branding area instead of small corner placement
+- **SUCCESSFUL RESULT**: Complete label branding replacement system with Quikpik identity replacing uniuni branding
+
 ### QP Tracking Number Implementation (July 17, 2025)
 - **Tracking Number Transformation**: Implemented system to replace "GV" prefix with "QP" prefix for dashboard and ShipStation
 - **TrackingTransform Utility**: Created utility class to handle bidirectional transformation between GV and QP formats

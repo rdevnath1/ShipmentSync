@@ -31,15 +31,25 @@ export class LabelProcessor {
       const logoBuffer = await this.prepareLogo();
       const logoImage = await pdfDoc.embedPng(logoBuffer);
       
-      // Calculate logo position (top-right corner)
-      const logoWidth = 60; // Adjust size as needed
-      const logoHeight = 60;
-      const margin = 10;
+      // Replace top-left branding area with Quikpik logo and text
+      const logoWidth = 80; // Larger size for main branding
+      const logoHeight = 40;
+      const margin = 15;
       
-      const logoX = width - logoWidth - margin;
+      // Position in top-left to replace uniuni branding
+      const logoX = margin;
       const logoY = height - logoHeight - margin;
       
-      // Add logo to the label
+      // Draw white rectangle to cover existing uniuni branding
+      firstPage.drawRectangle({
+        x: logoX - 5,
+        y: logoY - 5,
+        width: logoWidth + 60, // Cover the entire branding area
+        height: logoHeight + 10,
+        color: rgb(1, 1, 1), // White background
+      });
+      
+      // Add Quikpik logo in top-left
       firstPage.drawImage(logoImage, {
         x: logoX,
         y: logoY,
@@ -47,14 +57,14 @@ export class LabelProcessor {
         height: logoHeight,
       });
       
-      // Add subtle branding text (optional)
-      const font = await pdfDoc.embedFont('Helvetica');
-      firstPage.drawText('Powered by Your Company', {
-        x: logoX - 20,
-        y: logoY - 15,
-        size: 8,
+      // Add "Quikpik" text next to the logo
+      const font = await pdfDoc.embedFont('Helvetica-Bold');
+      firstPage.drawText('Quikpik', {
+        x: logoX + logoWidth + 10,
+        y: logoY + (logoHeight / 2) - 5,
+        size: 16,
         font: font,
-        color: rgb(0.4, 0.4, 0.4),
+        color: rgb(0, 0, 0), // Black text
       });
       
       // Save the modified PDF
@@ -76,12 +86,12 @@ export class LabelProcessor {
       // Load the original logo
       const logoBuffer = await fs.readFile(this.logoPath);
       
-      // Process the logo with sharp:
-      // - Resize to appropriate size for label
+      // Process the logo with sharp for main branding area:
+      // - Resize to appropriate size for top-left branding
       // - Convert to PNG format
       // - Add transparency if needed
       const processedLogo = await sharp(logoBuffer)
-        .resize(120, 120, { 
+        .resize(80, 40, { 
           fit: 'contain',
           background: { r: 255, g: 255, b: 255, alpha: 0 } // Transparent background
         })
