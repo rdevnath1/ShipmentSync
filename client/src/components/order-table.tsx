@@ -112,10 +112,7 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
     },
     onSuccess: (data) => {
       if (data.labelPath) {
-        // Extract filename from full path and construct API URL
-        const filename = data.labelPath.split('/').pop();
-        const apiUrl = `/api/labels/${filename}`;
-        window.open(apiUrl, '_blank');
+        window.open(data.labelPath, '_blank');
         toast({
           title: "Label Opened",
           description: `Label for tracking #${data.trackingNumber} opened in new tab`,

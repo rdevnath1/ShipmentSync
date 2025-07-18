@@ -3,17 +3,12 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { ShipStationService } from "./services/shipstation";
 import { JiayouService } from "./services/jiayou";
-import { LabelProcessor } from "./services/labelProcessor";
-import { TrackingTransform } from "./utils/trackingTransform";
 import { insertOrderSchema } from "@shared/schema";
 import { z } from "zod";
-import fs from 'fs/promises';
-import path from 'path';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const shipStationService = new ShipStationService();
   const jiayouService = new JiayouService();
-  const labelProcessor = new LabelProcessor();
 
   // Get all orders (pending and shipped)
   app.get("/api/orders", async (req, res) => {
@@ -46,9 +41,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Order not found" });
       }
 
-      // Check if order has been shipped (has shipment data)
-      if (order.status === 'shipped' || order.jiayouOrderId || order.trackingNumber) {
-        return res.status(400).json({ error: "Cannot delete order that has been shipped" });
+      // Check if order has associated shipments
+      const shipment = await storage.getShipmentByOrderId(orderId);
+      if (shipment) {
+        return res.status(400).json({ error: "Cannot delete order with associated shipments" });
       }
 
       // Delete the order (implement this in storage)
@@ -178,30 +174,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!labelPath) {
         console.log(`No label path found for order ${orderId}, requesting from Jiayou...`);
         try {
-          // Convert QP tracking number back to GV format for Jiayou API
-          const jiayouTrackingNumber = TrackingTransform.transformToGV(order.trackingNumber);
-          console.log(`Label retrieval: ${order.trackingNumber} → ${jiayouTrackingNumber} (for Jiayou API)`);
-          
-          // Use enhanced label retrieval with retry logic
-          const labelResponse = await jiayouService.getLabelWithRetry(jiayouTrackingNumber, 3);
-          
+          const labelResponse = await jiayouService.printLabel([order.trackingNumber]);
           if (labelResponse && labelResponse.code === 1 && labelResponse.data && labelResponse.data.length > 0) {
-            const originalLabelUrl = labelResponse.data[0].labelPath;
+            labelPath = labelResponse.data[0].labelPath;
             
-            if (originalLabelUrl) {
-              // Process the label with Quikpik branding
-              const labelProcessor = new LabelProcessor();
-              const processedLabelBuffer = await labelProcessor.processLabelWithLogo(
-                originalLabelUrl, 
-                jiayouTrackingNumber
-              );
-              
-              // Save the processed label
-              labelPath = await labelProcessor.saveLabelToFile(processedLabelBuffer, jiayouTrackingNumber);
-              
-              // Update the order with the processed label path
+            // Update the order with the new label path
+            if (labelPath) {
               await storage.updateOrder(orderId, { labelPath });
-              console.log(`Label processed and saved for order ${orderId}: ${labelPath}`);
+              console.log(`Updated order ${orderId} with label path: ${labelPath}`);
             }
           } else {
             console.error("Failed to get label from Jiayou:", labelResponse);
@@ -244,10 +224,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Order has no tracking number" });
       }
 
-      // Mark as shipped in ShipStation (trackingNumber is already in QP format from database)
+      // Mark as shipped in ShipStation
       const updateResult = await shipStationService.markAsShipped(
         parseInt(order.shipstationOrderId),
-        order.trackingNumber, // Already in QP format
+        order.trackingNumber,
         order.labelPath
       );
 
@@ -513,40 +493,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // If we get here, Jiayou succeeded (code === 1)
-      console.log("✅ Jiayou succeeded - proceeding with label processing and ShipStation update");
-
-      // Process the shipping label with logo if labelPath is available
-      let processedLabelUrl = jiayouResponse.data.labelPath;
-      if (jiayouResponse.data.labelPath) {
-        try {
-          console.log("Processing shipping label with company logo...");
-          const processedLabelPath = await labelProcessor.processAndSaveLabel(
-            jiayouResponse.data.labelPath,
-            jiayouResponse.data.trackingNo
-          );
-          
-          // Generate the URL for the processed label
-          processedLabelUrl = labelProcessor.generateLabelUrl(jiayouResponse.data.trackingNo);
-          console.log(`Label processed successfully: ${processedLabelUrl}`);
-        } catch (error) {
-          console.error("Error processing label with logo:", error);
-          // Continue with original label if processing fails
-          console.log("Using original label from Jiayou");
-        }
-      }
-
-      // Transform tracking number from GV to QP format for dashboard and ShipStation
-      const originalTrackingNo = jiayouResponse.data.trackingNo;
-      const qpTrackingNumber = TrackingTransform.transformToQP(originalTrackingNo);
-      
-      console.log(`Tracking number transformation: ${originalTrackingNo} → ${qpTrackingNumber}`);
+      console.log("✅ Jiayou succeeded - proceeding with ShipStation update");
 
       // Update order with shipment data and mark as shipped
       const shipmentUpdate = {
         jiayouOrderId: jiayouResponse.data.orderId,
-        trackingNumber: qpTrackingNumber, // Use QP format for dashboard display
+        trackingNumber: jiayouResponse.data.trackingNo,
         markNo: jiayouResponse.data.markNo,
-        labelPath: processedLabelUrl, // Use processed label with logo
+        labelPath: jiayouResponse.data.labelPath,
         channelCode: defaultChannelCode || "US001",
         serviceType: "standard",
         weight: weight?.toString() || "8",
@@ -556,16 +510,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const updatedOrder = await storage.updateOrder(order.id, shipmentUpdate);
 
-      // Update ShipStation with tracking info using mark as shipped (send QP format)
+      // Update ShipStation with tracking info using mark as shipped
       if (order.shipstationOrderId) {
         const updateResult = await shipStationService.markAsShipped(
           parseInt(order.shipstationOrderId),
-          qpTrackingNumber, // Send QP format to ShipStation
-          processedLabelUrl // Pass the processed label URL with logo
+          jiayouResponse.data.trackingNo,
+          jiayouResponse.data.labelPath // Pass the Jiayou label URL
         );
         
         if (updateResult) {
-          console.log(`Successfully marked ShipStation order ${order.shipstationOrderId} as shipped with QP tracking: ${qpTrackingNumber}`);
+          console.log(`Successfully marked ShipStation order ${order.shipstationOrderId} as shipped`);
         } else {
           console.error(`Failed to mark ShipStation order ${order.shipstationOrderId} as shipped`);
         }
@@ -621,12 +575,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { trackingNumber } = req.params;
       
-      // Transform QP tracking number back to GV format for Jiayou API
-      const jiayouTrackingNumber = TrackingTransform.transformToGV(trackingNumber);
-      
-      console.log(`Tracking lookup: ${trackingNumber} → ${jiayouTrackingNumber} (for Jiayou API)`);
-      
-      const trackingData = await jiayouService.getTracking(jiayouTrackingNumber);
+      const trackingData = await jiayouService.getTracking(trackingNumber);
       
       // If tracking is not available yet, return a user-friendly message
       if (trackingData.code === 0) {
@@ -667,71 +616,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error in Jiayou debug all:", error);
       res.status(500).json({ error: "Failed to debug all orders" });
-    }
-  });
-
-  // Debug endpoint to test label retrieval
-  app.post("/api/debug/jiayou-label", async (req, res) => {
-    try {
-      const { trackingNumber } = req.body;
-      
-      if (!trackingNumber) {
-        return res.status(400).json({ error: "Missing trackingNumber" });
-      }
-      
-      console.log(`Debug: Testing label retrieval for ${trackingNumber}`);
-      
-      // Test with enhanced retry logic
-      const labelResponse = await jiayouService.getLabelWithRetry(trackingNumber, 3);
-      
-      res.json({
-        trackingNumber,
-        labelResponse,
-        message: "Label retrieval test completed"
-      });
-    } catch (error) {
-      console.error("Error in label debug:", error);
-      res.status(500).json({ error: "Failed to debug label retrieval" });
-    }
-  });
-
-  // Serve processed shipping labels with logo
-  app.get("/api/labels/:filename", async (req, res) => {
-    try {
-      const { filename } = req.params;
-      
-      // Validate filename to prevent directory traversal
-      if (!filename.match(/^[a-zA-Z0-9_-]+\.pdf$/)) {
-        return res.status(400).json({ error: "Invalid filename format" });
-      }
-      
-      const labelsDir = path.join(process.cwd(), 'labels');
-      const filePath = path.join(labelsDir, filename);
-      
-      // Check if file exists
-      try {
-        await fs.access(filePath);
-      } catch (error) {
-        return res.status(404).json({ error: "Label file not found" });
-      }
-      
-      // Set CORS headers for proper access
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.setHeader('Access-Control-Allow-Methods', 'GET');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-      
-      // Set appropriate headers for PDF viewing/download
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
-      res.setHeader('Cache-Control', 'no-cache');
-      
-      // Stream the file
-      const fileBuffer = await fs.readFile(filePath);
-      res.send(fileBuffer);
-      
-    } catch (error) {
-      console.error("Error serving label:", error);
-      res.status(500).json({ error: "Failed to serve label" });
     }
   });
 

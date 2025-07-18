@@ -55,25 +55,6 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-### Quikpik Label Branding Implementation (July 17, 2025)
-- **Top-Left Logo Replacement**: Updated label processing to replace uniuni branding with Quikpik logo in top-left position
-- **Brand Overlay System**: Draws white rectangle to cover existing uniuni logo and text cleanly
-- **Quikpik Logo Integration**: Adds company logo (80x40px) positioned in top-left corner for main branding
-- **Quikpik Text Addition**: Adds "Quikpik" text in bold next to logo for complete brand identity
-- **Professional Styling**: Clean white background overlay with proper font sizing and positioning
-- **Logo Processing**: Optimized logo resizing for main branding area instead of small corner placement
-- **SUCCESSFUL RESULT**: Complete label branding replacement system with Quikpik identity replacing uniuni branding
-
-### QP Tracking Number Implementation (July 17, 2025)
-- **Tracking Number Transformation**: Implemented system to replace "GV" prefix with "QP" prefix for dashboard and ShipStation
-- **TrackingTransform Utility**: Created utility class to handle bidirectional transformation between GV and QP formats
-- **Dashboard Display**: All tracking numbers now show as QP format (e.g., "QP25USA0U019900646") in the UI
-- **ShipStation Integration**: Tracking numbers sent to ShipStation are now in QP format for consistent branding
-- **API Layer**: Jiayou API calls automatically convert QP tracking numbers back to GV format for compatibility
-- **Tracking Lookup**: System handles both QP and GV tracking number formats for flexible lookup
-- **Backward Compatibility**: Existing GV tracking numbers are automatically converted to QP format
-- **SUCCESSFUL RESULT**: Complete tracking number transformation system with QP branding throughout the application
-
 ### Jiayou Tracking API Resolution (July 17, 2025)
 - **Official Documentation Review**: Analyzed V3.8 API documentation to find correct tracking endpoint
 - **Correct Endpoint Found**: `/api/tracking/query/trackInfo` (not ChatGPT's `/api/orderNew/getTrackInfo`)
