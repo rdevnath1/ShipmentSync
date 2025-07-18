@@ -276,8 +276,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Mark as shipped in ShipStation
       const updateResult = await shipStationService.markAsShipped(
         parseInt(order.shipstationOrderId),
-        order.trackingNumber,
-        order.labelPath
+        order.trackingNumber
       );
 
       if (updateResult) {
@@ -677,12 +676,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (order.shipstationOrderId) {
         const updateResult = await shipStationService.markAsShipped(
           parseInt(order.shipstationOrderId),
-          jiayouResponse.data.trackingNo,
-          labelPath // Pass the actual label URL (not empty string)
+          jiayouResponse.data.trackingNo
         );
         
         if (updateResult) {
-          console.log(`Successfully marked ShipStation order ${order.shipstationOrderId} as shipped with label URL: ${labelPath}`);
+          console.log(`Successfully marked ShipStation order ${order.shipstationOrderId} as shipped with tracking ${jiayouResponse.data.trackingNo}`);
+          console.log(`Label URL available at: ${labelPath}`);
         } else {
           console.error(`Failed to mark ShipStation order ${order.shipstationOrderId} as shipped`);
         }

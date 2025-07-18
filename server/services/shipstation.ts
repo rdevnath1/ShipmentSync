@@ -114,7 +114,6 @@ export class ShipStationService {
         shipDate: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
         notifyCustomer: true,
         notifySalesChannel: true,
-        ...(labelUrl && { labelUrl }) // Only include labelUrl if provided
       };
 
       const response = await axios.post(
