@@ -276,7 +276,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Mark as shipped in ShipStation
       const updateResult = await shipStationService.markAsShipped(
         parseInt(order.shipstationOrderId),
-        order.trackingNumber
+        order.trackingNumber,
+        order.labelPath
       );
 
       if (updateResult) {
@@ -672,18 +673,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const updatedOrder = await storage.updateOrder(order.id, shipmentUpdate);
 
-      // Update ShipStation with tracking info using mark as shipped
+      // Update ShipStation with tracking info and label data
       if (order.shipstationOrderId) {
         const updateResult = await shipStationService.markAsShipped(
           parseInt(order.shipstationOrderId),
-          jiayouResponse.data.trackingNo
+          jiayouResponse.data.trackingNo,
+          labelPath
         );
         
         if (updateResult) {
-          console.log(`Successfully marked ShipStation order ${order.shipstationOrderId} as shipped with tracking ${jiayouResponse.data.trackingNo}`);
-          console.log(`Label URL available at: ${labelPath}`);
+          console.log(`Successfully created ShipStation shipment for order ${order.shipstationOrderId}`);
+          console.log(`Tracking: ${jiayouResponse.data.trackingNo}, Label: ${labelPath}`);
         } else {
-          console.error(`Failed to mark ShipStation order ${order.shipstationOrderId} as shipped`);
+          console.error(`Failed to create ShipStation shipment for order ${order.shipstationOrderId}`);
         }
       }
 

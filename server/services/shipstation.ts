@@ -105,32 +105,99 @@ export class ShipStationService {
 
   async markAsShipped(orderId: number, trackingNumber: string, labelUrl?: string): Promise<boolean> {
     try {
-      console.log(`Marking ShipStation order ${orderId} as shipped with tracking ${trackingNumber}`);
+      console.log(`Creating ShipStation shipment for order ${orderId} with tracking ${trackingNumber}`);
       
+      // First, get the order details to create proper shipment
+      const order = await this.getOrder(orderId);
+      if (!order) {
+        console.error('Could not fetch order details from ShipStation');
+        return false;
+      }
+
+      // Create shipment with label data if available
       const shipmentData = {
         orderId,
         carrierCode: 'other',
+        serviceCode: 'other',
+        packageCode: 'package',
+        confirmation: 'none',
+        shipDate: new Date().toISOString(),
         trackingNumber,
-        shipDate: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
         notifyCustomer: true,
         notifySalesChannel: true,
+        shipTo: order.shipTo,
+        weight: {
+          value: 1,
+          units: 'pounds'
+        },
+        dimensions: {
+          units: 'inches',
+          length: 10,
+          width: 10,
+          height: 4
+        },
+        ...(labelUrl && {
+          labelData: await this.getLabelDataFromUrl(labelUrl)
+        })
       };
 
+      console.log('Creating shipment with data:', { ...shipmentData, labelData: labelUrl ? '[PDF_DATA]' : undefined });
+
       const response = await axios.post(
-        `${this.baseUrl}/orders/markasshipped`,
+        `${this.baseUrl}/orders/createlabelfororder`,
         shipmentData,
         { headers: this.getAuthHeaders() }
       );
 
-      console.log('ShipStation mark as shipped response:', response.data);
+      console.log('ShipStation create shipment response:', response.data);
       return true;
     } catch (error) {
-      console.error('Error marking order as shipped in ShipStation:', error);
+      console.error('Error creating shipment in ShipStation:', error);
       if (error.response) {
         console.error('Response data:', error.response.data);
         console.error('Response status:', error.response.status);
       }
-      return false;
+      
+      // Fallback to mark as shipped if shipment creation fails
+      try {
+        console.log('Falling back to mark as shipped...');
+        const fallbackData = {
+          orderId,
+          carrierCode: 'other',
+          trackingNumber,
+          shipDate: new Date().toISOString().split('T')[0],
+          notifyCustomer: true,
+          notifySalesChannel: true,
+        };
+
+        const fallbackResponse = await axios.post(
+          `${this.baseUrl}/orders/markasshipped`,
+          fallbackData,
+          { headers: this.getAuthHeaders() }
+        );
+
+        console.log('Fallback mark as shipped successful:', fallbackResponse.data);
+        return true;
+      } catch (fallbackError) {
+        console.error('Fallback also failed:', fallbackError);
+        return false;
+      }
+    }
+  }
+
+  private async getLabelDataFromUrl(labelUrl: string): Promise<string | null> {
+    try {
+      const response = await axios.get(labelUrl, {
+        responseType: 'arraybuffer',
+        timeout: 10000
+      });
+      
+      const base64Data = Buffer.from(response.data).toString('base64');
+      console.log(`Downloaded label data: ${base64Data.length} characters`);
+      return base64Data;
+    } catch (error) {
+      console.error('Error downloading label data:', error);
+      return null;
     }
   }
 

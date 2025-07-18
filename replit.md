@@ -55,12 +55,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-### ShipStation Label Printing Fix (July 18, 2025)
-- **Fixed Carrier Code**: Changed from "jiayou" to "other" for proper ShipStation recognition
-- **Enabled Label Printing**: ShipStation now recognizes shipments and allows label printing from external sources
-- **Removed Invalid Parameters**: Eliminated unsupported labelUrl parameter from mark-as-shipped API calls
-- **Proper API Integration**: Now uses standard ShipStation API correctly for external carrier shipments
-- **SUCCESSFUL RESULT**: Labels should now be printable from ShipStation interface using "other" carrier code
+### ShipStation Integration Analysis (July 18, 2025)
+- **Root Cause Identified**: ShipStation only allows label printing for shipments created through their own system
+- **External Label Limitation**: "Mark as Shipped" API doesn't create printable shipments, only updates order status
+- **Carrier Code Update**: Changed from "jiayou" to "other" for proper ShipStation recognition
+- **Tracking Numbers Working**: Orders now show tracking numbers correctly in ShipStation for customer notifications
+- **Label Access Solution**: Jiayou labels remain accessible through our dashboard's "Print" button
+- **Current Status**: ShipStation shows tracking info, our system handles label printing operations
 
 ### Enhanced Pull Orders Functionality (July 18, 2025)
 - **Bidirectional Sync**: Pull orders now supports bidirectional synchronization - updates existing orders when changes made in ShipStation
