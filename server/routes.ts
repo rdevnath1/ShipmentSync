@@ -668,6 +668,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         serviceType: "standard",
         weight: weight?.toString() || "8",
         dimensions: dimensions || null,
+        shippingCost: coverageResult.cost.toString(),
         status: "shipped",
       };
 

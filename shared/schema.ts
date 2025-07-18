@@ -32,6 +32,7 @@ export const orders = pgTable("orders", {
   serviceType: text("service_type"),
   weight: decimal("weight", { precision: 8, scale: 3 }),
   dimensions: jsonb("dimensions"),
+  shippingCost: decimal("shipping_cost", { precision: 10, scale: 2 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

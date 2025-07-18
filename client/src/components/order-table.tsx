@@ -192,6 +192,9 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
                         Tracking
                       </th>
                       <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        Cost
+                      </th>
+                      <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Date
                       </th>
                       <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
@@ -246,6 +249,13 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
                               </Button>
                             ) : (
                               <span className="text-sm text-muted-foreground">No tracking</span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
+                            {order.shippingCost ? (
+                              <span className="font-medium text-green-600">${parseFloat(order.shippingCost).toFixed(2)}</span>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
                             )}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
@@ -349,6 +359,11 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
                         <p className="text-xs text-muted-foreground">
                           {new Date(order.createdAt).toLocaleDateString()}
                         </p>
+                        {order.shippingCost && (
+                          <p className="text-sm font-medium text-green-600">
+                            Cost: ${parseFloat(order.shippingCost).toFixed(2)}
+                          </p>
+                        )}
                         {order.trackingNumber && (
                           <div className="mt-2">
                             <Button
