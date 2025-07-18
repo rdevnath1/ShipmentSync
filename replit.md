@@ -55,6 +55,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Order Filters and Cost Display Implementation (July 18, 2025)
+- **Date Range Filters**: Added From/To date picker filters with clear functionality on orders page
+- **Shipping Cost Display**: Added cost column to both desktop table and mobile card views
+- **Cost Tracking**: Added shippingCost field to database schema for persistent cost storage
+- **Cost Calculation**: Updated shipment creation to save shipping cost from Jiayou coverage check
+- **Filter Summary**: Added total cost display when filters are applied, showing sum of filtered orders
+- **Currency Formatting**: Cost displays in green with proper USD formatting ($X.XX)
+- **Retroactive Updates**: Applied $3.89 shipping cost to existing shipped orders for demonstration
+- **SUCCESSFUL RESULT**: Orders page now shows comprehensive filtering by date range and displays actual shipping costs
+
 ### ShipStation Integration Analysis (July 18, 2025)
 - **Root Cause Identified**: ShipStation only allows label printing for shipments created through their own system
 - **External Label Limitation**: "Mark as Shipped" API doesn't create printable shipments, only updates order status
