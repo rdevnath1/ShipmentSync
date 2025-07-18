@@ -109,7 +109,7 @@ export class ShipStationService {
       
       const shipmentData = {
         orderId,
-        carrierCode: 'jiayou',
+        carrierCode: 'other',
         trackingNumber,
         shipDate: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
         notifyCustomer: true,

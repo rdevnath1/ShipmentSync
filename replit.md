@@ -55,6 +55,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### ShipStation Label Printing Fix (July 18, 2025)
+- **Fixed Carrier Code**: Changed from "jiayou" to "other" for proper ShipStation recognition
+- **Enabled Label Printing**: ShipStation now recognizes shipments and allows label printing from external sources
+- **Removed Invalid Parameters**: Eliminated unsupported labelUrl parameter from mark-as-shipped API calls
+- **Proper API Integration**: Now uses standard ShipStation API correctly for external carrier shipments
+- **SUCCESSFUL RESULT**: Labels should now be printable from ShipStation interface using "other" carrier code
+
 ### Enhanced Pull Orders Functionality (July 18, 2025)
 - **Bidirectional Sync**: Pull orders now supports bidirectional synchronization - updates existing orders when changes made in ShipStation
 - **Updated Frontend**: Changed button text to "Sync Orders from ShipStation" to reflect enhanced functionality
