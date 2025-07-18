@@ -103,18 +103,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Pull orders from ShipStation
+  // Pull and sync orders from ShipStation
   app.post("/api/orders/pull-shipstation", async (req, res) => {
     try {
       const shipStationOrders = await shipStationService.getOrders();
       const createdOrders = [];
+      const updatedOrders = [];
 
       for (const ssOrder of shipStationOrders) {
         // Check if order already exists
         const existingOrder = await storage.getOrderByShipstationId(ssOrder.orderId.toString());
-        if (existingOrder) continue;
-
-        // Create new order
+        
+        // Prepare order data from ShipStation
         const orderData = {
           shipstationOrderId: ssOrder.orderId.toString(),
           orderNumber: ssOrder.orderNumber,
@@ -127,21 +127,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
           items: ssOrder.items,
           totalAmount: ssOrder.orderTotal.toString(),
           currency: "USD",
-          status: "pending",
+          status: existingOrder?.status || "pending", // Preserve existing shipment status
         };
 
-        const validatedOrder = insertOrderSchema.parse(orderData);
-        const createdOrder = await storage.createOrder(validatedOrder);
-        createdOrders.push(createdOrder);
+        if (existingOrder) {
+          // Update existing order with changes from ShipStation
+          const hasChanges = (
+            existingOrder.customerName !== orderData.customerName ||
+            existingOrder.customerEmail !== orderData.customerEmail ||
+            existingOrder.customerPhone !== orderData.customerPhone ||
+            existingOrder.totalAmount !== orderData.totalAmount ||
+            JSON.stringify(existingOrder.shippingAddress) !== JSON.stringify(orderData.shippingAddress) ||
+            JSON.stringify(existingOrder.billingAddress) !== JSON.stringify(orderData.billingAddress) ||
+            JSON.stringify(existingOrder.items) !== JSON.stringify(orderData.items)
+          );
+
+          if (hasChanges) {
+            console.log(`Syncing changes for order ${ssOrder.orderNumber} from ShipStation`);
+            
+            // Only update fields that can be synced from ShipStation
+            // Preserve shipping-related fields (trackingNumber, labelPath, etc.)
+            const syncData = {
+              customerName: orderData.customerName,
+              customerEmail: orderData.customerEmail,
+              customerPhone: orderData.customerPhone,
+              shippingAddress: orderData.shippingAddress,
+              billingAddress: orderData.billingAddress,
+              items: orderData.items,
+              totalAmount: orderData.totalAmount,
+            };
+
+            const updatedOrder = await storage.updateOrder(existingOrder.id, syncData);
+            updatedOrders.push(updatedOrder);
+          }
+        } else {
+          // Create new order
+          const validatedOrder = insertOrderSchema.parse(orderData);
+          const createdOrder = await storage.createOrder(validatedOrder);
+          createdOrders.push(createdOrder);
+        }
+      }
+
+      const totalSynced = createdOrders.length + updatedOrders.length;
+      let message = '';
+      
+      if (createdOrders.length > 0 && updatedOrders.length > 0) {
+        message = `Successfully synced ${totalSynced} orders: ${createdOrders.length} new, ${updatedOrders.length} updated`;
+      } else if (createdOrders.length > 0) {
+        message = `Successfully pulled ${createdOrders.length} new orders from ShipStation`;
+      } else if (updatedOrders.length > 0) {
+        message = `Successfully synced ${updatedOrders.length} updated orders from ShipStation`;
+      } else {
+        message = 'All orders are already up to date';
       }
 
       res.json({ 
-        message: `Successfully pulled ${createdOrders.length} new orders from ShipStation`,
-        orders: createdOrders
+        message,
+        created: createdOrders.length,
+        updated: updatedOrders.length,
+        total: totalSynced,
+        orders: [...createdOrders, ...updatedOrders]
       });
     } catch (error) {
-      console.error("Error pulling orders from ShipStation:", error);
-      res.status(500).json({ error: "Failed to pull orders from ShipStation" });
+      console.error("Error pulling/syncing orders from ShipStation:", error);
+      res.status(500).json({ error: "Failed to pull/sync orders from ShipStation" });
     }
   });
 

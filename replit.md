@@ -55,6 +55,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Enhanced Pull Orders Functionality (July 18, 2025)
+- **Bidirectional Sync**: Pull orders now supports bidirectional synchronization - updates existing orders when changes made in ShipStation
+- **Updated Frontend**: Changed button text to "Sync Orders from ShipStation" to reflect enhanced functionality
+- **Detailed Feedback**: System now displays sync status showing both created and updated order counts
+- **Preserves Shipment Data**: Updates only customer/order data from ShipStation while preserving shipping-related fields
+- **Smart Change Detection**: Only updates orders when actual changes detected in customer info, addresses, or items
+- **SUCCESSFUL RESULT**: Orders stay synchronized between ShipStation and dashboard with full bidirectional sync
+
 ### ShipStation Label Integration Fix (July 18, 2025)
 - **Fixed Label URL Issue**: Jiayou initially returns empty `labelPath` field after order creation
 - **Immediate Label Request**: System now requests label URL immediately after successful order creation

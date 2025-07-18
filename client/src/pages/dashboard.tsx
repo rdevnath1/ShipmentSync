@@ -27,16 +27,22 @@ export default function Dashboard() {
       const response = await apiRequest("POST", "/api/orders/pull-shipstation");
       const data = await response.json();
       
+      // Show detailed feedback about what was synced
+      let description = data.message;
+      if (data.created > 0 || data.updated > 0) {
+        description += ` (${data.created} new, ${data.updated} updated)`;
+      }
+      
       toast({
-        title: "Success",
-        description: data.message,
+        title: "Sync Complete",
+        description: description,
       });
       
       refetchOrders();
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to pull orders from ShipStation",
+        description: "Failed to sync orders from ShipStation",
         variant: "destructive",
       });
     }
@@ -118,7 +124,7 @@ export default function Dashboard() {
                 className="w-full"
               >
                 <FolderSync className="mr-2" size={16} />
-                Pull New Orders
+                Sync Orders from ShipStation
               </Button>
             </CardContent>
           </Card>
