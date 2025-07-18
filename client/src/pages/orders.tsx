@@ -157,7 +157,11 @@ export default function Orders() {
           </CardContent>
         </Card>
         
-        <OrderTable orders={filteredOrders} showShipmentActions={filter === "shipped" || filter === "all"} />
+        <OrderTable 
+          orders={filteredOrders} 
+          showShipmentActions={filter === "shipped" || filter === "all"}
+          showBatchActions={true}
+        />
       </div>
     </>
   );

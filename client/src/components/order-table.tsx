@@ -15,7 +15,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import CreateShipmentModal from "./create-shipment-modal";
-
+import BatchPrintModal from "./batch-print-modal";
 import EditShipmentModal from "./edit-shipment-modal";
 import EditOrderModal from "./edit-order-modal";
 import DebugJiayouModal from "./debug-jiayou-modal";
@@ -23,11 +23,12 @@ import DebugJiayouModal from "./debug-jiayou-modal";
 interface OrderTableProps {
   orders: any[];
   showShipmentActions?: boolean;
+  showBatchActions?: boolean;
 }
 
-export default function OrderTable({ orders, showShipmentActions = false }: OrderTableProps) {
+export default function OrderTable({ orders, showShipmentActions = false, showBatchActions = false }: OrderTableProps) {
   const [showCreateModal, setShowCreateModal] = useState(false);
-
+  const [showBatchPrintModal, setShowBatchPrintModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showEditOrderModal, setShowEditOrderModal] = useState(false);
   const [showDebugModal, setShowDebugModal] = useState(false);
@@ -237,7 +238,17 @@ Send these links to your customer for easy label printing!`.trim();
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-
+              
+              {showBatchActions && (
+                <Button
+                  onClick={() => setShowBatchPrintModal(true)}
+                  disabled={!orders.some(order => order.status === 'shipped' && order.trackingNumber)}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  <Printer className="mr-2" size={16} />
+                  Batch Print Labels
+                </Button>
+              )}
             </div>
           </div>
         </CardHeader>
@@ -587,6 +598,11 @@ Send these links to your customer for easy label printing!`.trim();
         order={selectedOrder}
       />
       
+      <BatchPrintModal
+        isOpen={showBatchPrintModal}
+        onClose={() => setShowBatchPrintModal(false)}
+        orders={orders}
+      />
 
       <EditShipmentModal
         isOpen={showEditModal}

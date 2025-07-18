@@ -1081,6 +1081,49 @@ Jiayou Shipping Team`,
     }
   });
 
+  // Batch print labels for e-commerce operations
+  app.post("/api/labels/batch-print", async (req, res) => {
+    try {
+      const { trackingNumbers } = req.body;
+      
+      if (!Array.isArray(trackingNumbers) || trackingNumbers.length === 0) {
+        return res.status(400).json({ error: "trackingNumbers must be a non-empty array" });
+      }
+
+      console.log(`Batch printing ${trackingNumbers.length} labels:`, trackingNumbers);
+
+      // Get label data from Jiayou
+      const labelData = await jiayouService.printLabel(trackingNumbers);
+      
+      if (labelData && labelData.code === 1 && labelData.data) {
+        // Update orders with label paths if they don't have them
+        const orders = await storage.getAllOrders();
+        for (const labelInfo of labelData.data) {
+          const order = orders.find(o => o.trackingNumber === labelInfo.orderNumber);
+          if (order && !order.labelPath && labelInfo.labelPath) {
+            await storage.updateOrder(order.id, { labelPath: labelInfo.labelPath });
+            console.log(`Updated order ${order.id} with label path: ${labelInfo.labelPath}`);
+          }
+        }
+
+        res.json({
+          success: true,
+          count: labelData.data.length,
+          labels: labelData.data,
+          message: `Successfully prepared ${labelData.data.length} labels for batch printing`
+        });
+      } else {
+        res.status(400).json({ 
+          error: "Failed to retrieve labels from Jiayou",
+          details: labelData 
+        });
+      }
+    } catch (error) {
+      console.error("Error batch printing labels:", error);
+      res.status(500).json({ error: "Failed to batch print labels" });
+    }
+  });
+
   // Dashboard stats
   app.get("/api/dashboard/stats", async (req, res) => {
     try {
