@@ -46,10 +46,7 @@ export default function Orders() {
   const pendingCount = orders?.filter(order => order.status === "pending").length || 0;
   const shippedCount = orders?.filter(order => order.status === "shipped").length || 0;
   
-  // Calculate total cost of filtered orders
-  const totalCost = filteredOrders
-    .filter(order => order.shippingCost)
-    .reduce((sum, order) => sum + parseFloat(order.shippingCost || "0"), 0);
+
 
   const clearDateFilters = () => {
     setStartDate("");
@@ -146,11 +143,6 @@ export default function Orders() {
               <div className="pt-2 border-t">
                 <div className="flex flex-col sm:flex-row gap-4 text-sm text-muted-foreground">
                   <span>Showing {filteredOrders.length} of {orders?.length || 0} orders</span>
-                  {totalCost > 0 && (
-                    <span className="font-medium">
-                      Total Shipping Cost: <span className="text-green-600">${totalCost.toFixed(2)}</span>
-                    </span>
-                  )}
                 </div>
               </div>
             )}
