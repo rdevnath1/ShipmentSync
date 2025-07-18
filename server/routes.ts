@@ -592,12 +592,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // If we get here, Jiayou succeeded (code === 1)
       console.log("✅ Jiayou succeeded - proceeding with ShipStation update");
 
+      // Get label URL immediately after order creation
+      let labelPath = jiayouResponse.data.labelPath;
+      if (!labelPath) {
+        console.log(`No label path in initial response, requesting label for tracking ${jiayouResponse.data.trackingNo}`);
+        try {
+          const labelResponse = await jiayouService.printLabel([jiayouResponse.data.trackingNo]);
+          if (labelResponse && labelResponse.code === 1 && labelResponse.data && labelResponse.data.length > 0) {
+            labelPath = labelResponse.data[0].labelPath;
+            console.log(`Got label path: ${labelPath}`);
+          } else {
+            console.error("Failed to get label from Jiayou immediately after order creation:", labelResponse);
+          }
+        } catch (labelError) {
+          console.error("Error requesting label immediately after order creation:", labelError);
+        }
+      }
+
       // Update order with shipment data and mark as shipped
       const shipmentUpdate = {
         jiayouOrderId: jiayouResponse.data.orderId,
         trackingNumber: jiayouResponse.data.trackingNo,
         markNo: jiayouResponse.data.markNo,
-        labelPath: jiayouResponse.data.labelPath,
+        labelPath: labelPath || jiayouResponse.data.labelPath,
         channelCode: defaultChannelCode || "US001",
         serviceType: "standard",
         weight: weight?.toString() || "8",
@@ -612,11 +629,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const updateResult = await shipStationService.markAsShipped(
           parseInt(order.shipstationOrderId),
           jiayouResponse.data.trackingNo,
-          jiayouResponse.data.labelPath // Pass the Jiayou label URL
+          labelPath // Pass the actual label URL (not empty string)
         );
         
         if (updateResult) {
-          console.log(`Successfully marked ShipStation order ${order.shipstationOrderId} as shipped`);
+          console.log(`Successfully marked ShipStation order ${order.shipstationOrderId} as shipped with label URL: ${labelPath}`);
         } else {
           console.error(`Failed to mark ShipStation order ${order.shipstationOrderId} as shipped`);
         }

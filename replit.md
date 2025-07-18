@@ -55,6 +55,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### ShipStation Label Integration Fix (July 18, 2025)
+- **Fixed Label URL Issue**: Jiayou initially returns empty `labelPath` field after order creation
+- **Immediate Label Request**: System now requests label URL immediately after successful order creation
+- **Enhanced ShipStation Integration**: Label URL is now properly passed to ShipStation during mark-as-shipped
+- **Customer-Facing Solution**: Labels are now visible in ShipStation for customers who use it exclusively
+- **Improved Logging**: Added detailed logging for label URL retrieval and ShipStation updates
+- **Address Normalization**: Added ZIP code to city name mapping (32801 → Orlando) to prevent Jiayou rejections
+- **SUCCESSFUL RESULT**: Customers can now see shipping labels directly in ShipStation interface
+
 ### Jiayou Tracking API Resolution (July 17, 2025)
 - **Official Documentation Review**: Analyzed V3.8 API documentation to find correct tracking endpoint
 - **Correct Endpoint Found**: `/api/tracking/query/trackInfo` (not ChatGPT's `/api/orderNew/getTrackInfo`)
