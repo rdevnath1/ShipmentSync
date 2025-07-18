@@ -255,6 +255,183 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Customer-friendly label access endpoint - direct label URL by tracking number
+  app.get("/api/labels/:trackingNumber", async (req, res) => {
+    try {
+      const trackingNumber = req.params.trackingNumber;
+      
+      // Find order by tracking number
+      const orders = await storage.getAllOrders();
+      const order = orders.find(o => o.trackingNumber === trackingNumber);
+      
+      if (!order) {
+        return res.status(404).json({ error: "Tracking number not found" });
+      }
+
+      // If label path is empty, try to get it from Jiayou
+      let labelPath = order.labelPath;
+      if (!labelPath) {
+        try {
+          const labelResponse = await jiayouService.printLabel([trackingNumber]);
+          if (labelResponse && labelResponse.code === 1 && labelResponse.data && labelResponse.data.length > 0) {
+            labelPath = labelResponse.data[0].labelPath;
+            
+            // Update the order with the new label path
+            if (labelPath) {
+              await storage.updateOrder(order.id, { labelPath });
+            }
+          }
+        } catch (jiayouError) {
+          console.error("Error requesting label from Jiayou:", jiayouError);
+        }
+      }
+
+      if (!labelPath) {
+        return res.status(404).json({ error: "Label not available for this tracking number" });
+      }
+
+      // Redirect directly to the label PDF
+      res.redirect(labelPath);
+    } catch (error) {
+      console.error("Error accessing label:", error);
+      res.status(500).json({ error: "Failed to access label" });
+    }
+  });
+
+  // Generate customer-friendly label sharing URL
+  app.get("/api/orders/:id/share-label", async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const order = await storage.getOrder(orderId);
+      
+      if (!order || !order.trackingNumber) {
+        return res.status(404).json({ error: "Order or tracking number not found" });
+      }
+
+      const baseUrl = req.headers.host ? `${req.protocol}://${req.headers.host}` : 'http://localhost:5000';
+      const shareUrl = `${baseUrl}/api/labels/${order.trackingNumber}`;
+      const customerAccessUrl = `${baseUrl}/label-access?track=${order.trackingNumber}`;
+      
+      res.json({
+        shareUrl,
+        customerAccessUrl,
+        trackingNumber: order.trackingNumber,
+        orderNumber: order.orderNumber,
+        customerName: order.customerName,
+        customerEmail: order.customerEmail
+      });
+    } catch (error) {
+      console.error("Error generating share URL:", error);
+      res.status(500).json({ error: "Failed to generate share URL" });
+    }
+  });
+
+  // Generate customer email template for label access
+  app.get("/api/orders/:id/email-template", async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const order = await storage.getOrder(orderId);
+      
+      if (!order || !order.trackingNumber) {
+        return res.status(404).json({ error: "Order or tracking number not found" });
+      }
+
+      const baseUrl = req.headers.host ? `${req.protocol}://${req.headers.host}` : 'http://localhost:5000';
+      const labelUrl = `${baseUrl}/api/labels/${order.trackingNumber}`;
+      const customerAccessUrl = `${baseUrl}/label-access?track=${order.trackingNumber}`;
+      const trackingUrl = `${baseUrl}/tracking?track=${order.trackingNumber}`;
+
+      const emailTemplate = {
+        subject: `Your Shipping Label is Ready - Order #${order.orderNumber}`,
+        body: `Dear ${order.customerName},
+
+Your order #${order.orderNumber} has been shipped via Jiayou!
+
+🚚 Tracking Number: ${order.trackingNumber}
+
+📋 SHIPPING LABEL ACCESS:
+You can access your shipping label in these ways:
+
+1. Direct Label Link (PDF): ${labelUrl}
+2. Customer Portal: ${customerAccessUrl}
+3. Track Your Package: ${trackingUrl}
+
+💡 TIPS:
+• The label will open as a PDF ready for printing
+• No account registration required
+• Share the link with anyone who needs to print the label
+• Keep your tracking number for future reference
+
+If you have any questions, please contact our support team.
+
+Best regards,
+Jiayou Shipping Team`,
+        
+        html: `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Your Shipping Label is Ready</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+        <h1 style="color: #2c3e50; margin-bottom: 10px;">📦 Your Shipping Label is Ready!</h1>
+        <p style="margin: 0; color: #666;">Order #${order.orderNumber}</p>
+    </div>
+    
+    <p>Dear <strong>${order.customerName}</strong>,</p>
+    
+    <p>Your order has been shipped via Jiayou! Here are your shipping details:</p>
+    
+    <div style="background: #e3f2fd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+        <strong>🚚 Tracking Number: ${order.trackingNumber}</strong>
+    </div>
+    
+    <h3 style="color: #2c3e50;">📋 Access Your Shipping Label:</h3>
+    
+    <div style="margin: 20px 0;">
+        <p style="margin-bottom: 10px;"><strong>Option 1: Direct Label Link</strong></p>
+        <a href="${labelUrl}" style="display: inline-block; background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-bottom: 10px;">🖨️ Print Label (PDF)</a>
+    </div>
+    
+    <div style="margin: 20px 0;">
+        <p style="margin-bottom: 10px;"><strong>Option 2: Customer Portal</strong></p>
+        <a href="${customerAccessUrl}" style="display: inline-block; background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-bottom: 10px;">🌐 Access Portal</a>
+    </div>
+    
+    <div style="margin: 20px 0;">
+        <p style="margin-bottom: 10px;"><strong>Track Your Package:</strong></p>
+        <a href="${trackingUrl}" style="display: inline-block; background: #17a2b8; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-bottom: 10px;">📍 Track Package</a>
+    </div>
+    
+    <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+        <h4 style="margin-top: 0; color: #856404;">💡 Helpful Tips:</h4>
+        <ul style="margin-bottom: 0;">
+            <li>The label will open as a PDF ready for printing</li>
+            <li>No account registration required</li>
+            <li>Share the link with anyone who needs to print the label</li>
+            <li>Keep your tracking number for future reference</li>
+        </ul>
+    </div>
+    
+    <p>If you have any questions, please contact our support team.</p>
+    
+    <p style="margin-top: 30px;">
+        Best regards,<br>
+        <strong>Jiayou Shipping Team</strong>
+    </p>
+</body>
+</html>`
+      };
+
+      res.json(emailTemplate);
+    } catch (error) {
+      console.error("Error generating email template:", error);
+      res.status(500).json({ error: "Failed to generate email template" });
+    }
+  });
+
   // Test ShipStation mark as shipped for existing shipment
   app.post("/api/shipments/:id/mark-shipped", async (req, res) => {
     try {

@@ -3,7 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Eye, Trash2, Package, Printer, Edit, ExternalLink, Bug } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Search, Plus, Eye, Trash2, Package, Printer, Edit, ExternalLink, Bug, Share2, Copy, Mail, ChevronDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -130,6 +136,80 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
 
   const handlePrintLabel = (order: any) => {
     printMutation.mutate(order.id);
+  };
+
+  const shareLabelMutation = useMutation({
+    mutationFn: async (orderId: number) => {
+      const response = await apiRequest("GET", `/api/orders/${orderId}/share-label`);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      // Create a customer-friendly message with multiple access options
+      const message = `
+🚚 SHIPPING LABEL ACCESS for ${data.customerName}:
+
+📋 Direct Label Link: ${data.shareUrl}
+🌐 Customer Portal: ${data.customerAccessUrl}
+📞 Tracking: ${data.trackingNumber}
+
+Send these links to your customer for easy label printing!`.trim();
+
+      // Copy the customer portal URL (more user-friendly than direct PDF)
+      navigator.clipboard.writeText(data.customerAccessUrl).then(() => {
+        toast({
+          title: "Customer Portal Link Copied",
+          description: `Customer-friendly access link copied. Includes tracking #${data.trackingNumber}`,
+        });
+      }).catch(() => {
+        toast({
+          title: "Customer Access Links", 
+          description: message,
+        });
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Share Error",
+        description: error.message || "Failed to generate share link",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const emailTemplateMutation = useMutation({
+    mutationFn: async (orderId: number) => {
+      const response = await apiRequest("GET", `/api/orders/${orderId}/email-template`);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      // Copy the email body to clipboard
+      navigator.clipboard.writeText(data.body).then(() => {
+        toast({
+          title: "Email Template Copied",
+          description: `Ready-to-send email template copied. Subject: "${data.subject}"`,
+        });
+      }).catch(() => {
+        toast({
+          title: "Email Template Ready", 
+          description: data.subject,
+        });
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Email Template Error",
+        description: error.message || "Failed to generate email template",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleShareLabel = (order: any) => {
+    shareLabelMutation.mutate(order.id);
+  };
+
+  const handleEmailTemplate = (order: any) => {
+    emailTemplateMutation.mutate(order.id);
   };
 
   const filteredOrders = orders.filter(order => 
@@ -310,6 +390,29 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
                                   <Printer className="mr-1" size={12} />
                                   {printMutation.isPending ? "Printing..." : "Print"}
                                 </Button>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button 
+                                      size="sm" 
+                                      variant="outline"
+                                      disabled={shareLabelMutation.isPending || emailTemplateMutation.isPending}
+                                    >
+                                      <Share2 className="mr-1" size={12} />
+                                      Share
+                                      <ChevronDown className="ml-1" size={10} />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => handleShareLabel(order)}>
+                                      <Copy className="mr-2" size={14} />
+                                      Copy Customer Link
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleEmailTemplate(order)}>
+                                      <Mail className="mr-2" size={14} />
+                                      Copy Email Template
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                                 <Button 
                                   size="sm" 
                                   variant="outline"
@@ -432,6 +535,30 @@ export default function OrderTable({ orders, showShipmentActions = false }: Orde
                               <Printer className="mr-1" size={16} />
                               {printMutation.isPending ? "Printing..." : "Print"}
                             </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  disabled={shareLabelMutation.isPending || emailTemplateMutation.isPending}
+                                  className="flex-1 min-w-0"
+                                >
+                                  <Share2 className="mr-1" size={16} />
+                                  Share
+                                  <ChevronDown className="ml-1" size={12} />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => handleShareLabel(order)}>
+                                  <Copy className="mr-2" size={16} />
+                                  Copy Customer Link
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleEmailTemplate(order)}>
+                                  <Mail className="mr-2" size={16} />
+                                  Copy Email Template
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                             <Button 
                               size="sm" 
                               variant="outline"
