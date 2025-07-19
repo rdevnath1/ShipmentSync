@@ -72,11 +72,7 @@ export default function Header({ title, description }: HeaderProps) {
                   <div className="w-8 h-8 rounded-full flex items-center justify-center bg-[#64748b]">
                     <User className="text-white" size={16} />
                   </div>
-                  <div className="text-sm hidden sm:block">
-                    <p className="font-medium text-foreground">
-                      {user.firstName} {user.lastName}
-                    </p>
-                  </div>
+
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
