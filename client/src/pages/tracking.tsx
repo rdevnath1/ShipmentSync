@@ -19,7 +19,6 @@ export default function Tracking() {
   const { data: shipments } = useQuery({
     queryKey: ["/api/shipments"],
     retry: false,
-    enabled: false, // Disable shipments query for public tracking page
   });
 
   const trackingMutation = useMutation({
@@ -132,7 +131,8 @@ export default function Tracking() {
         </div>
       </div>
       <div className="p-4 lg:p-6">
-        <div className="max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+          <div className="lg:col-span-2">
             <Card>
               <CardContent>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-3 mb-6">
