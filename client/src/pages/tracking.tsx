@@ -219,7 +219,7 @@ export default function Tracking() {
                               .map((event: any, index: number) => (
                               <div key={index} className="relative flex items-start space-x-4">
                                 {/* Timeline Dot */}
-                                <div className="relative z-10 flex items-center justify-center w-12 h-12 bg-background border-2 border-primary rounded-full shadow-sm">
+                                <div className="relative z-10 flex items-center justify-center w-12 h-12 bg-background border-2 border-border rounded-full shadow-sm">
                                   {getStatusIcon(event.pathCode)}
                                 </div>
                                 
