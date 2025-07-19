@@ -5,9 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Clock, Package, Truck } from "lucide-react";
+import { Search, MapPin, Clock, Package, Truck, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 
 export default function Tracking() {
@@ -129,6 +129,12 @@ export default function Tracking() {
             <h2 className="text-xl lg:text-2xl font-semibold text-foreground">Tracking</h2>
             <p className="text-sm lg:text-base text-muted-foreground">Track your shipments in real-time</p>
           </div>
+          <Link href="/">
+            <Button variant="outline" className="flex items-center space-x-2">
+              <ArrowLeft size={16} />
+              <span>Back to Dashboard</span>
+            </Button>
+          </Link>
         </div>
       </div>
       <div className="p-4 lg:p-6">
