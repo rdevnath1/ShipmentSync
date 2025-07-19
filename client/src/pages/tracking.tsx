@@ -129,10 +129,6 @@ export default function Tracking() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
           <div className="lg:col-span-2">
             <Card>
-              <CardHeader>
-                <CardTitle className="text-base lg:text-lg">Track Package</CardTitle>
-                <p className="text-sm lg:text-base text-muted-foreground">Enter tracking number to get real-time updates</p>
-              </CardHeader>
               <CardContent>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-3 mb-6">
                   <div className="relative flex-1">
@@ -176,16 +172,6 @@ export default function Tracking() {
 
                 {trackingData && (
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-                      <div>
-                        <h4 className="font-medium text-foreground">Tracking Number</h4>
-                        <p className="text-sm text-muted-foreground">{trackingNumber}</p>
-                      </div>
-                      <Badge className={getStatusColor(trackingData.status || 'unknown')}>
-                        {trackingData.status || 'Unknown'}
-                      </Badge>
-                    </div>
-
                     {/* Show tracking response based on Quikpik API structure */}
                     {trackingData.code === 0 && trackingData.message ? (
                       <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
