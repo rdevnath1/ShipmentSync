@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { Package, Truck } from "lucide-react";
 
@@ -44,8 +44,13 @@ export default function Login() {
           description: `Welcome back, ${result.user.firstName || result.user.email}!`,
         });
         
-        // Redirect to dashboard
-        setLocation("/");
+        // Invalidate auth cache and refetch user data
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+        
+        // Small delay to ensure cache invalidation completes
+        setTimeout(() => {
+          setLocation("/");
+        }, 100);
       } else {
         toast({
           title: "Login Failed",
