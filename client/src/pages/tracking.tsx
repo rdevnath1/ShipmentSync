@@ -135,7 +135,7 @@ export default function Tracking() {
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={16} />
                     <Input 
                       placeholder="Enter tracking number..." 
-                      className="pl-10 pr-4 py-2 mt-[13px] mb-[13px]"
+                      className="pl-10 pr-4 py-2 mt-[16px] mb-[16px]"
                       value={trackingNumber}
                       onChange={(e) => setTrackingNumber(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && handleTrackPackage()}
