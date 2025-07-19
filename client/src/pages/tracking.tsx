@@ -132,7 +132,7 @@ export default function Tracking() {
           <Link href="/">
             <Button variant="outline" className="flex items-center space-x-2">
               <ArrowLeft size={16} />
-              <span>Back to Dashboard</span>
+              <span>Home</span>
             </Button>
           </Link>
         </div>
@@ -307,7 +307,6 @@ export default function Tracking() {
             </Card>
         </div>
       </div>
-      
       {/* Footer */}
       <div className="bg-background border-t border-border px-4 lg:px-6 py-4 mt-8">
         <div className="max-w-4xl mx-auto text-center">
