@@ -103,6 +103,11 @@ export default function Tracking() {
     }
   };
 
+  const cleanLocationText = (text: string) => {
+    // Replace UNI with Quikpik in tracking location text
+    return text?.replace(/UNI\b/gi, 'Quikpik') || '';
+  };
+
   return (
     <>
       <Header 
@@ -181,7 +186,7 @@ export default function Tracking() {
                                 {event.pathLocation && (
                                   <p className="text-sm text-muted-foreground mt-1 flex items-center">
                                     <MapPin size={12} className="mr-1" />
-                                    {event.pathLocation}
+                                    {cleanLocationText(event.pathLocation)}
                                   </p>
                                 )}
                                 {event.timezone && (

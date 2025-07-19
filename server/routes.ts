@@ -849,6 +849,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return;
       }
       
+      // Clean up UNI references in tracking data before sending to frontend
+      if (trackingData.data && Array.isArray(trackingData.data)) {
+        trackingData.data.forEach((item: any) => {
+          if (item.fromDetail && Array.isArray(item.fromDetail)) {
+            item.fromDetail.forEach((event: any) => {
+              if (event.pathLocation) {
+                event.pathLocation = event.pathLocation.replace(/UNI\b/gi, 'Quikpik');
+              }
+              if (event.pathInfo) {
+                event.pathInfo = event.pathInfo.replace(/UNI\b/gi, 'Quikpik');
+              }
+            });
+          }
+        });
+      }
+      
       res.json(trackingData);
     } catch (error) {
       console.error("Error fetching tracking:", error);
