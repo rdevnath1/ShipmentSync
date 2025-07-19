@@ -156,7 +156,7 @@ export default function Tracking() {
                   <Button
                     onClick={handleTrackPackage}
                     disabled={trackingMutation.isPending}
-                    className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
+                    className="bg-[#1f2933] hover:bg-blue-700 w-full sm:w-auto"
                   >
                     {trackingMutation.isPending ? (
                       <>
