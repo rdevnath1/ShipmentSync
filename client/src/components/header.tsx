@@ -69,7 +69,7 @@ export default function Header({ title, description }: HeaderProps) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center space-x-2 lg:space-x-3">
-                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center bg-[#64748b]">
                     <User className="text-white" size={16} />
                   </div>
                   <div className="text-sm hidden sm:block">
