@@ -25,24 +25,29 @@ function Router() {
     );
   }
 
-  if (!isAuthenticated) {
-    return <Login />;
-  }
-
+  // Public routes (available without authentication)
   return (
-    <div className="min-h-screen flex">
-      <Sidebar />
-      <main className="flex-1 lg:ml-64">
-        <Switch>
-          <Route path="/" component={Dashboard} />
-          <Route path="/orders" component={Orders} />
-          <Route path="/analytics" component={Analytics} />
-          <Route path="/tracking" component={Tracking} />
-          <Route path="/settings" component={Settings} />
-          <Route component={NotFound} />
-        </Switch>
-      </main>
-    </div>
+    <Switch>
+      <Route path="/tracking" component={Tracking} />
+      <Route path="*">
+        {isAuthenticated ? (
+          <div className="min-h-screen flex">
+            <Sidebar />
+            <main className="flex-1 lg:ml-64">
+              <Switch>
+                <Route path="/" component={Dashboard} />
+                <Route path="/orders" component={Orders} />
+                <Route path="/analytics" component={Analytics} />
+                <Route path="/settings" component={Settings} />
+                <Route component={NotFound} />
+              </Switch>
+            </main>
+          </div>
+        ) : (
+          <Login />
+        )}
+      </Route>
+    </Switch>
   );
 }
 

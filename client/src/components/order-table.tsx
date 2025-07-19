@@ -19,9 +19,10 @@ interface OrderTableProps {
   orders: any[];
   showShipmentActions?: boolean;
   showBatchActions?: boolean;
+  hideActions?: boolean;
 }
 
-export default function OrderTable({ orders, showShipmentActions = false, showBatchActions = false }: OrderTableProps) {
+export default function OrderTable({ orders, showShipmentActions = false, showBatchActions = false, hideActions = false }: OrderTableProps) {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showBatchPrintModal, setShowBatchPrintModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -214,9 +215,11 @@ export default function OrderTable({ orders, showShipmentActions = false, showBa
                       <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Date
                       </th>
-                      <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                        Actions
-                      </th>
+                      {!hideActions && (
+                        <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                          Actions
+                        </th>
+                      )}
                     </tr>
                   </thead>
                   <tbody className="bg-background divide-y divide-border">
@@ -272,70 +275,72 @@ export default function OrderTable({ orders, showShipmentActions = false, showBa
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                             {new Date(order.createdAt).toLocaleDateString()}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div className="flex items-center space-x-2">
-                              {order.status === 'pending' ? (
+                          {!hideActions && (
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <div className="flex items-center space-x-2">
+                                {order.status === 'pending' ? (
+                                  <>
+                                    <Button 
+                                      size="sm" 
+                                      variant="outline"
+                                      onClick={() => handleCreateShipment(order)}
+                                    >
+                                      <Package className="mr-1" size={12} />
+                                      Ship
+                                    </Button>
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => handleViewEditOrder(order)}
+                                  >
+                                    <Edit className="mr-1" size={12} />
+                                    Edit
+                                  </Button>
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => handleDeleteOrder(order)}
+                                    disabled={deleteOrderMutation.isPending}
+                                  >
+                                    <Trash2 className="mr-1" size={12} />
+                                    Delete
+                                  </Button>
+                                </>
+                              ) : (
                                 <>
                                   <Button 
                                     size="sm" 
                                     variant="outline"
-                                    onClick={() => handleCreateShipment(order)}
+                                    onClick={() => handleEditShipment(order)}
                                   >
-                                    <Package className="mr-1" size={12} />
-                                    Ship
+                                    <Edit className="mr-1" size={12} />
+                                    Edit
                                   </Button>
-                                <Button 
-                                  size="sm" 
-                                  variant="outline"
-                                  onClick={() => handleViewEditOrder(order)}
-                                >
-                                  <Edit className="mr-1" size={12} />
-                                  Edit
-                                </Button>
-                                <Button 
-                                  size="sm" 
-                                  variant="outline"
-                                  onClick={() => handleDeleteOrder(order)}
-                                  disabled={deleteOrderMutation.isPending}
-                                >
-                                  <Trash2 className="mr-1" size={12} />
-                                  Delete
-                                </Button>
-                              </>
-                            ) : (
-                              <>
-                                <Button 
-                                  size="sm" 
-                                  variant="outline"
-                                  onClick={() => handleEditShipment(order)}
-                                >
-                                  <Edit className="mr-1" size={12} />
-                                  Edit
-                                </Button>
-                                <Button 
-                                  size="sm" 
-                                  variant="outline"
-                                  onClick={() => handlePrintLabel(order)}
-                                  disabled={printMutation.isPending}
-                                >
-                                  <Printer className="mr-1" size={12} />
-                                  {printMutation.isPending ? "Printing..." : "Print"}
-                                </Button>
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => handlePrintLabel(order)}
+                                    disabled={printMutation.isPending}
+                                  >
+                                    <Printer className="mr-1" size={12} />
+                                    {printMutation.isPending ? "Printing..." : "Print"}
+                                  </Button>
 
-                                <Button 
-                                  size="sm" 
-                                  variant="outline"
-                                  onClick={() => handleDebugOrder(order)}
-                                  title="Debug Quikpik Sync"
-                                >
-                                  <Bug className="mr-1" size={12} />
-                                  Debug
-                                </Button>
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => handleDebugOrder(order)}
+                                    title="Debug Quikpik Sync"
+                                  >
+                                    <Bug className="mr-1" size={12} />
+                                    Debug
+                                  </Button>
 
-                              </>
-                            )}
-                          </div>
-                        </td>
+                                </>
+                              )}
+                            </div>
+                          </td>
+                          )}
                       </tr>
                     );
                   })}
@@ -387,73 +392,75 @@ export default function OrderTable({ orders, showShipmentActions = false, showBa
                         )}
                       </div>
                       
-                      <div className="flex flex-wrap gap-2">
-                        {order.status === 'pending' ? (
-                          <>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleCreateShipment(order)}
-                              className="flex-1 min-w-0"
-                            >
-                              <Package className="mr-1" size={16} />
-                              Ship
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleViewEditOrder(order)}
-                              className="flex-1 min-w-0"
-                            >
-                              <Edit className="mr-1" size={16} />
-                              Edit
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleDeleteOrder(order)}
-                              disabled={deleteOrderMutation.isPending}
-                              className="flex-1 min-w-0"
-                            >
-                              <Trash2 className="mr-1" size={16} />
-                              Delete
-                            </Button>
-                          </>
-                        ) : (
-                          <>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleEditShipment(order)}
-                              className="flex-1 min-w-0"
-                            >
-                              <Edit className="mr-1" size={16} />
-                              Edit
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handlePrintLabel(order)}
-                              disabled={printMutation.isPending}
-                              className="flex-1 min-w-0"
-                            >
-                              <Printer className="mr-1" size={16} />
-                              {printMutation.isPending ? "Printing..." : "Print"}
-                            </Button>
+                      {!hideActions && (
+                        <div className="flex flex-wrap gap-2">
+                          {order.status === 'pending' ? (
+                            <>
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleCreateShipment(order)}
+                                className="flex-1 min-w-0"
+                              >
+                                <Package className="mr-1" size={16} />
+                                Ship
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleViewEditOrder(order)}
+                                className="flex-1 min-w-0"
+                              >
+                                <Edit className="mr-1" size={16} />
+                                Edit
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleDeleteOrder(order)}
+                                disabled={deleteOrderMutation.isPending}
+                                className="flex-1 min-w-0"
+                              >
+                                <Trash2 className="mr-1" size={16} />
+                                Delete
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleEditShipment(order)}
+                                className="flex-1 min-w-0"
+                              >
+                                <Edit className="mr-1" size={16} />
+                                Edit
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handlePrintLabel(order)}
+                                disabled={printMutation.isPending}
+                                className="flex-1 min-w-0"
+                              >
+                                <Printer className="mr-1" size={16} />
+                                {printMutation.isPending ? "Printing..." : "Print"}
+                              </Button>
 
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleDebugOrder(order)}
-                              title="Debug Quikpik Sync"
-                              className="flex-1 min-w-0"
-                            >
-                              <Bug className="mr-1" size={16} />
-                              Debug
-                            </Button>
-                          </>
-                        )}
-                      </div>
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleDebugOrder(order)}
+                                title="Debug Quikpik Sync"
+                                className="flex-1 min-w-0"
+                              >
+                                <Bug className="mr-1" size={16} />
+                                Debug
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      )}
                     </Card>
                   );
                 })}

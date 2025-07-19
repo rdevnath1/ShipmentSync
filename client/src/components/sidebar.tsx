@@ -128,41 +128,8 @@ export default function Sidebar() {
           </ul>
         </div>
         
-        {/* User Profile & Actions */}
+        {/* Theme Toggle */}
         <div className="px-3 lg:px-4 pb-4 border-t border-border">
-          <div className="py-3">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="w-full justify-start px-3 lg:px-4">
-                  <User className="mr-3" size={16} />
-                  <div className="flex flex-col items-start">
-                    <span className="text-sm font-medium">
-                      {user?.firstName} {user?.lastName}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {user?.organization?.name || user?.email}
-                    </span>
-                  </div>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium">{user?.firstName} {user?.lastName}</p>
-                    <p className="text-xs text-muted-foreground">{user?.email}</p>
-                    <p className="text-xs text-muted-foreground capitalize">{user?.role} Account</p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-          
-          {/* Theme Toggle */}
           <div className="flex items-center justify-between px-3 lg:px-4 py-3">
             <span className="text-sm text-muted-foreground">Theme</span>
             <ThemeToggle />

@@ -18,6 +18,8 @@ export default function Tracking() {
 
   const { data: shipments } = useQuery({
     queryKey: ["/api/shipments"],
+    retry: false,
+    enabled: false, // Disable shipments query for public tracking page
   });
 
   const trackingMutation = useMutation({
@@ -121,13 +123,16 @@ export default function Tracking() {
 
   return (
     <>
-      <Header 
-        title="Tracking" 
-        description="Track your shipments in real-time"
-      />
+      <div className="bg-background border-b border-border px-4 lg:px-6 py-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
+          <div>
+            <h2 className="text-xl lg:text-2xl font-semibold text-foreground">Tracking</h2>
+            <p className="text-sm lg:text-base text-muted-foreground">Track your shipments in real-time</p>
+          </div>
+        </div>
+      </div>
       <div className="p-4 lg:p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
-          <div className="lg:col-span-2">
+        <div className="max-w-4xl mx-auto">
             <Card>
               <CardContent>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-3 mb-6">
@@ -294,51 +299,6 @@ export default function Tracking() {
                 )}
               </CardContent>
             </Card>
-          </div>
-
-          <div>
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Recent Shipments</CardTitle>
-                <p className="text-muted-foreground">Quick access to your shipments</p>
-              </CardHeader>
-              <CardContent>
-                {!shipments || shipments.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Truck className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
-                    <p className="text-sm text-muted-foreground">No shipments found</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {shipments.slice(0, 5).map((shipment: any) => (
-                      <div
-                        key={shipment.id}
-                        className="p-3 border border-border rounded-lg hover:bg-muted cursor-pointer transition-colors"
-                        onClick={() => {
-                          setTrackingNumber(shipment.trackingNumber);
-                          trackingMutation.mutate(shipment.trackingNumber);
-                        }}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium text-foreground text-sm">
-                              {shipment.trackingNumber}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              Order #{shipment.orderId}
-                            </p>
-                          </div>
-                          <Badge className={getStatusColor(shipment.status)} variant="secondary">
-                            {shipment.status}
-                          </Badge>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
         </div>
       </div>
     </>

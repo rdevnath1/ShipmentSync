@@ -42,7 +42,7 @@ export default function Dashboard() {
         
 
 
-        <OrderTable orders={orders.slice(0, 5)} />
+        <OrderTable orders={orders.slice(0, 5)} hideActions={true} />
         
         <TrackingSection />
         
