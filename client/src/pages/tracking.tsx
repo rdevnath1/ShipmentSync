@@ -125,7 +125,6 @@ export default function Tracking() {
         title="Tracking" 
         description="Track your shipments in real-time"
       />
-      
       <div className="p-4 lg:p-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
           <div className="lg:col-span-2">
@@ -201,7 +200,7 @@ export default function Tracking() {
                     ) : trackingData.data && trackingData.data[0] && trackingData.data[0].fromDetail ? (
                       <div className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <h4 className="font-medium text-foreground">Timeline History</h4>
+                          <h4 className="font-medium text-foreground">Timeline</h4>
                           <span className="text-xs text-muted-foreground">
                             {trackingData.data[0].fromDetail.length} events
                           </span>
