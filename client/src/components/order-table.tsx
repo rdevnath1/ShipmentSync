@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 
-import { Search, Plus, Eye, Trash2, Package, Printer, Edit, ExternalLink, Bug } from "lucide-react";
+import { Search, Plus, Eye, Trash2, Package, Printer, Edit, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -13,7 +13,7 @@ import CreateShipmentModal from "./create-shipment-modal";
 import BatchPrintModal from "./batch-print-modal";
 import EditShipmentModal from "./edit-shipment-modal";
 import EditOrderModal from "./edit-order-modal";
-import DebugJiayouModal from "./debug-jiayou-modal";
+
 
 interface OrderTableProps {
   orders: any[];
@@ -26,7 +26,7 @@ export default function OrderTable({ orders, showShipmentActions = false, showBa
   const [showBatchPrintModal, setShowBatchPrintModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showEditOrderModal, setShowEditOrderModal] = useState(false);
-  const [showDebugModal, setShowDebugModal] = useState(false);
+
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
@@ -89,10 +89,7 @@ export default function OrderTable({ orders, showShipmentActions = false, showBa
     }
   };
 
-  const handleDebugOrder = (order: any) => {
-    setSelectedOrder(order);
-    setShowDebugModal(true);
-  };
+
 
   const handleDeleteOrder = (order: any) => {
     if (window.confirm(`Are you sure you want to delete order #${order.orderNumber}?`)) {
@@ -319,15 +316,7 @@ export default function OrderTable({ orders, showShipmentActions = false, showBa
                                   {printMutation.isPending ? "Printing..." : "Print"}
                                 </Button>
 
-                                <Button 
-                                  size="sm" 
-                                  variant="outline"
-                                  onClick={() => handleDebugOrder(order)}
-                                  title="Debug Jiayou Sync"
-                                >
-                                  <Bug className="mr-1" size={12} />
-                                  Debug
-                                </Button>
+
 
                               </>
                             )}
@@ -438,16 +427,7 @@ export default function OrderTable({ orders, showShipmentActions = false, showBa
                               {printMutation.isPending ? "Printing..." : "Print"}
                             </Button>
 
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleDebugOrder(order)}
-                              title="Debug Jiayou Sync"
-                              className="flex-1 min-w-0"
-                            >
-                              <Bug className="mr-1" size={16} />
-                              Debug
-                            </Button>
+
                           </>
                         )}
                       </div>
@@ -484,13 +464,7 @@ export default function OrderTable({ orders, showShipmentActions = false, showBa
         order={selectedOrder}
       />
       
-      {showDebugModal && selectedOrder && (
-        <DebugJiayouModal
-          orderId={selectedOrder.id}
-          trackingNumber={selectedOrder.trackingNumber}
-          onClose={() => setShowDebugModal(false)}
-        />
-      )}
+
     </>
   );
 }

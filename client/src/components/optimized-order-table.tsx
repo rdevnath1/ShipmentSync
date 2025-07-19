@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Package, Printer, Edit, ExternalLink, Bug, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -12,7 +11,7 @@ import CreateShipmentModal from "./create-shipment-modal";
 import BatchPrintModal from "./batch-print-modal";
 import EditShipmentModal from "./edit-shipment-modal";
 import EditOrderModal from "./edit-order-modal";
-import DebugJiayouModal from "./debug-jiayou-modal";
+
 
 interface OrderTableProps {
   orders: any[];
@@ -116,7 +115,6 @@ const OrderRow = React.memo(({ order, onAction }: { order: any; onAction: (type:
                 Print
               </Button>
               <Button size="sm" variant="outline" onClick={() => onAction('debug', order)}>
-                <Bug className="mr-1" size={12} />
                 Debug
               </Button>
             </>
@@ -335,7 +333,6 @@ export default function OptimizedOrderTable({ orders, showShipmentActions = fals
       />
       
       {modals.debug && selectedOrder && (
-        <DebugJiayouModal
           orderId={selectedOrder.id}
           trackingNumber={selectedOrder.trackingNumber}
           onClose={() => closeModal('debug')}
