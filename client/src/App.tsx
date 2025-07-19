@@ -30,9 +30,9 @@ function Router() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen flex">
       <Sidebar />
-      <main className="min-h-screen ml-0 lg:ml-64">
+      <main className="flex-1 lg:ml-64">
         <Switch>
           <Route path="/" component={Dashboard} />
           <Route path="/orders" component={Orders} />

@@ -88,10 +88,10 @@ export default function Sidebar() {
 
       {/* Sidebar */}
       <nav className={`
-        bg-background border-r border-border h-screen overflow-y-auto z-50
+        bg-background border-r border-border h-full overflow-y-auto z-50
         fixed top-0 left-0 transition-transform duration-300 ease-in-out
-        w-64 flex flex-col
-        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0
+        w-64 lg:w-64 flex flex-col
+        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         <div className="p-4 lg:p-6">
           <div className="flex items-center space-x-3">
