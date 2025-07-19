@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Bell, User, LogOut, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -28,7 +28,8 @@ export default function Header({ title, description }: HeaderProps) {
     return trackingNumber?.replace(/^GV/g, 'QP') || '';
   };
   
-  const [notifications, setNotifications] = useState([
+  // Default notifications data
+  const defaultNotifications = [
     {
       id: 1,
       title: "Shipment Delivered",
@@ -50,7 +51,29 @@ export default function Header({ title, description }: HeaderProps) {
       time: "3 hours ago",
       unread: false
     }
-  ]);
+  ];
+
+  // Load notifications from localStorage or use defaults
+  const [notifications, setNotifications] = useState(() => {
+    try {
+      const stored = localStorage.getItem('notifications');
+      if (stored) {
+        return JSON.parse(stored);
+      }
+    } catch (error) {
+      console.error('Error loading notifications from localStorage:', error);
+    }
+    return defaultNotifications;
+  });
+
+  // Save notifications to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem('notifications', JSON.stringify(notifications));
+    } catch (error) {
+      console.error('Error saving notifications to localStorage:', error);
+    }
+  }, [notifications]);
 
   const unreadCount = notifications.filter(n => n.unread).length;
 

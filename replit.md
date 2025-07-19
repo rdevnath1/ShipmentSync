@@ -55,6 +55,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Persistent Notifications System (July 19, 2025)
+- **Fixed Notification Persistence**: Notifications now persist across tabs and page refreshes using localStorage
+- **Mark All Read Functionality**: Added "Mark All as Read" button that permanently updates notification status
+- **LocalStorage Integration**: Notification read/unread status is automatically saved and restored
+- **QP Format Consistency**: Updated notification descriptions to show QP tracking format instead of GV
+- **Enhanced UX**: Users can now manage notification states that persist throughout their session
+- **SUCCESSFUL RESULT**: Notifications maintain their read status when navigating between tabs or refreshing pages
+
 ### Public Tracking Page & UI Improvements (July 19, 2025)
 - **Public Tracking Access**: Made tracking page publicly accessible without authentication for customer convenience
 - **Removed Dashboard Actions**: Cleaned up recent orders display on dashboard by removing edit, print, and debug actions  
