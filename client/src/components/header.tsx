@@ -1,4 +1,5 @@
-import { Bell, User, LogOut } from "lucide-react";
+import { useState } from "react";
+import { Bell, User, LogOut, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -22,18 +23,23 @@ export default function Header({ title, description }: HeaderProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   
-  const notifications = [
+  // Utility function to format tracking numbers for display
+  const formatTrackingNumber = (trackingNumber: string) => {
+    return trackingNumber?.replace(/^GV/g, 'QP') || '';
+  };
+  
+  const [notifications, setNotifications] = useState([
     {
       id: 1,
       title: "Shipment Delivered",
-      description: "GV25USA0U020270941 has been delivered",
+      description: "QP25USA0U020270941 has been delivered",
       time: "2 mins ago",
       unread: true
     },
     {
       id: 2,
       title: "Shipment Delivered", 
-      description: "GV25USA0U020270942 has been delivered",
+      description: "QP25USA0U020270942 has been delivered",
       time: "1 hour ago",
       unread: true
     },
@@ -44,9 +50,20 @@ export default function Header({ title, description }: HeaderProps) {
       time: "3 hours ago",
       unread: false
     }
-  ];
+  ]);
 
   const unreadCount = notifications.filter(n => n.unread).length;
+
+  const markAllAsRead = () => {
+    setNotifications(prev => prev.map(notification => ({ 
+      ...notification, 
+      unread: false 
+    })));
+    toast({
+      title: "All notifications marked as read",
+      description: "All notifications have been marked as read",
+    });
+  };
 
   const handleLogout = async () => {
     try {
@@ -94,11 +111,24 @@ export default function Header({ title, description }: HeaderProps) {
               <DropdownMenuLabel>
                 <div className="flex items-center justify-between">
                   <span>Notifications</span>
-                  {unreadCount > 0 && (
-                    <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">
-                      {unreadCount} new
-                    </span>
-                  )}
+                  <div className="flex items-center space-x-2">
+                    {unreadCount > 0 && (
+                      <>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={markAllAsRead}
+                          className="text-xs h-6 px-2 py-1 text-blue-600 hover:text-blue-800"
+                        >
+                          <CheckCheck className="mr-1" size={12} />
+                          Mark all read
+                        </Button>
+                        <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">
+                          {unreadCount} new
+                        </span>
+                      </>
+                    )}
+                  </div>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
