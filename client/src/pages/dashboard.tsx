@@ -52,7 +52,7 @@ export default function Dashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-base lg:text-lg">API Integration Status</CardTitle>
-                  <p className="text-sm lg:text-base text-muted-foreground">ShipStation & Jiayou carrier integration</p>
+                  <p className="text-sm lg:text-base text-muted-foreground">ShipStation & Quikpik carrier integration</p>
                 </div>
                 <div className="flex items-center space-x-2">
                   <div className="w-8 h-8 lg:w-10 lg:h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
@@ -86,7 +86,7 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between py-2 lg:py-3 px-3 lg:px-4 bg-muted rounded-lg">
                     <div className="flex items-center space-x-3">
                       <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                      <span className="text-sm font-medium text-foreground">Jiayou API</span>
+                      <span className="text-sm font-medium text-foreground">Quikpik API</span>
                     </div>
                     <span className="text-xs text-emerald-600 font-medium">Online</span>
                   </div>

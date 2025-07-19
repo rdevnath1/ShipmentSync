@@ -323,7 +323,7 @@ export default function OrderTable({ orders, showShipmentActions = false, showBa
                                   size="sm" 
                                   variant="outline"
                                   onClick={() => handleDebugOrder(order)}
-                                  title="Debug Jiayou Sync"
+                                  title="Debug Quikpik Sync"
                                 >
                                   <Bug className="mr-1" size={12} />
                                   Debug
@@ -442,7 +442,7 @@ export default function OrderTable({ orders, showShipmentActions = false, showBa
                               size="sm" 
                               variant="outline"
                               onClick={() => handleDebugOrder(order)}
-                              title="Debug Jiayou Sync"
+                              title="Debug Quikpik Sync"
                               className="flex-1 min-w-0"
                             >
                               <Bug className="mr-1" size={16} />

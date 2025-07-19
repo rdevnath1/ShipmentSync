@@ -80,7 +80,7 @@ export default function Login() {
               <Truck className="text-emerald-600" size={28} />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Jiayou Shipping</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Quikpik Shipping</h1>
           <p className="text-gray-600 dark:text-gray-300 mt-2">
             E-commerce Shipment Management Platform
           </p>
@@ -155,7 +155,7 @@ export default function Login() {
               <div>
                 <span className="font-medium">Master Account:</span>
                 <div className="text-blue-700 dark:text-blue-300">
-                  admin@jiayou.com / admin123
+                  admin@quikpik.com / admin123
                 </div>
               </div>
               <div>
@@ -170,7 +170,7 @@ export default function Login() {
 
         {/* Footer */}
         <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-          <p>© 2025 Jiayou Shipping Management System</p>
+          <p>© 2025 Quikpik Shipping Management System</p>
         </div>
       </div>
     </div>

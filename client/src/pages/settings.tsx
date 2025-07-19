@@ -19,8 +19,8 @@ import { Settings, Key, Bell, Globe, Shield, Copy, Trash2, Edit, Plus, Eye, EyeO
 const apiSettingsSchema = z.object({
   shipstationApiKey: z.string().min(1, "ShipStation API key is required"),
   shipstationApiSecret: z.string().min(1, "ShipStation API secret is required"),
-  jiayouApiKey: z.string().min(1, "Jiayou API key is required"),
-  jiayouClientId: z.string().min(1, "Jiayou Client ID is required"),
+  jiayouApiKey: z.string().min(1, "Quikpik API key is required"),
+  jiayouClientId: z.string().min(1, "Quikpik Client ID is required"),
 });
 
 const notificationSettingsSchema = z.object({
@@ -216,7 +216,7 @@ export default function SettingsPage() {
                   <Key size={20} />
                   <span>API Configuration</span>
                 </CardTitle>
-                <p className="text-slate-600">Configure your ShipStation and Jiayou API credentials</p>
+                <p className="text-slate-600">Configure your ShipStation and Quikpik API credentials</p>
               </CardHeader>
               <CardContent>
                 <form onSubmit={apiForm.handleSubmit(handleApiSettingsSave)} className="space-y-6">
@@ -262,7 +262,7 @@ export default function SettingsPage() {
                   <Separator />
 
                   <div className="space-y-4">
-                    <h4 className="font-medium text-slate-900">Jiayou API</h4>
+                    <h4 className="font-medium text-slate-900">Quikpik API</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="jiayouApiKey">API Key</Label>
@@ -293,9 +293,9 @@ export default function SettingsPage() {
                     <Button 
                       type="button" 
                       variant="outline" 
-                      onClick={() => handleTestConnection("Jiayou")}
+                      onClick={() => handleTestConnection("Quikpik")}
                     >
-                      Test Jiayou Connection
+                      Test Quikpik Connection
                     </Button>
                   </div>
 

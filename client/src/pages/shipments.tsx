@@ -115,7 +115,7 @@ export default function Shipments() {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-lg">All Shipments</CardTitle>
-                <p className="text-slate-600">Shipments created with Jiayou</p>
+                <p className="text-slate-600">Shipments created with Quikpik</p>
               </div>
               <div className="flex items-center space-x-3">
                 <div className="relative">

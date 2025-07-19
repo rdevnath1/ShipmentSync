@@ -45,7 +45,7 @@ export default function DebugJiayouModal({ orderId, trackingNumber, onClose }: D
       <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
-            <span>Debug Jiayou Order #{orderId}</span>
+            <span>Debug Quikpik Order #{orderId}</span>
             <Button variant="ghost" size="sm" onClick={onClose}>
               ×
             </Button>
@@ -120,7 +120,7 @@ export default function DebugJiayouModal({ orderId, trackingNumber, onClose }: D
                         </Badge>
                       </div>
                       <div>
-                        <span className="font-medium">Jiayou Order ID:</span>
+                        <span className="font-medium">Quikpik Order ID:</span>
                         <br />
                         {debugResult.orderData.jiayouOrderId || 'Not set'}
                       </div>
@@ -154,7 +154,7 @@ export default function DebugJiayouModal({ orderId, trackingNumber, onClose }: D
               {debugResult.trackingData && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-sm">Jiayou Tracking Response</CardTitle>
+                    <CardTitle className="text-sm">Quikpik Tracking Response</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <pre className="text-xs bg-gray-100 p-2 rounded overflow-x-auto">
