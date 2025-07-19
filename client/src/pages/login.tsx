@@ -155,7 +155,7 @@ export default function Login() {
               <div>
                 <span className="font-medium">Master Account:</span>
                 <div className="text-blue-700 dark:text-blue-300">
-                  admin@quikpik.com / admin123
+                  rajan@quikpik.io / admin123
                 </div>
               </div>
               <div>

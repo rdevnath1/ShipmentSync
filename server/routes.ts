@@ -36,11 +36,11 @@ async function initializeDemoData() {
     }
 
     // Create master user
-    const masterExists = await storage.getUserByEmail('admin@quikpik.com');
+    const masterExists = await storage.getUserByEmail('rajan@quikpik.io');
     if (!masterExists) {
       const hashedPassword = await bcrypt.hash('admin123', 10);
       await storage.createUser({
-        email: 'admin@quikpik.com',
+        email: 'rajan@quikpik.io',
         password: hashedPassword,
         firstName: 'Master',
         lastName: 'Admin',
