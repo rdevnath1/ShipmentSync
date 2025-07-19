@@ -22,12 +22,31 @@ export default function Header({ title, description }: HeaderProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   
-  const handleNotifications = () => {
-    toast({
-      title: "Notifications",
-      description: "You have 3 new notifications: 2 shipments delivered, 1 order imported",
-    });
-  };
+  const notifications = [
+    {
+      id: 1,
+      title: "Shipment Delivered",
+      description: "GV25USA0U020270941 has been delivered",
+      time: "2 mins ago",
+      unread: true
+    },
+    {
+      id: 2,
+      title: "Shipment Delivered", 
+      description: "GV25USA0U020270942 has been delivered",
+      time: "1 hour ago",
+      unread: true
+    },
+    {
+      id: 3,
+      title: "Order Imported",
+      description: "New order #100006 imported from ShipStation",
+      time: "3 hours ago",
+      unread: false
+    }
+  ];
+
+  const unreadCount = notifications.filter(n => n.unread).length;
 
   const handleLogout = async () => {
     try {
@@ -60,10 +79,52 @@ export default function Header({ title, description }: HeaderProps) {
           <p className="text-sm lg:text-base text-muted-foreground">{description}</p>
         </div>
         <div className="flex items-center space-x-2 lg:space-x-4">
-          <Button variant="ghost" size="sm" className="relative" onClick={handleNotifications}>
-            <Bell className="text-muted-foreground" size={20} />
-            <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="relative">
+                <Bell className="text-muted-foreground" size={20} />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs text-white font-medium">
+                    {unreadCount}
+                  </span>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-80">
+              <DropdownMenuLabel>
+                <div className="flex items-center justify-between">
+                  <span>Notifications</span>
+                  {unreadCount > 0 && (
+                    <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">
+                      {unreadCount} new
+                    </span>
+                  )}
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {notifications.map((notification) => (
+                <DropdownMenuItem key={notification.id} className="flex flex-col items-start space-y-1 p-3">
+                  <div className="flex items-start justify-between w-full">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2">
+                        <p className="text-sm font-medium">{notification.title}</p>
+                        {notification.unread && (
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">{notification.description}</p>
+                    </div>
+                    <span className="text-xs text-muted-foreground">{notification.time}</span>
+                  </div>
+                </DropdownMenuItem>
+              ))}
+              {notifications.length === 0 && (
+                <div className="p-3 text-center text-sm text-muted-foreground">
+                  No notifications
+                </div>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
           
           {user && (
             <DropdownMenu>
