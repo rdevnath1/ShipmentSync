@@ -43,19 +43,26 @@ export default function Tracking() {
 
   // Check for tracking parameter in URL and trigger tracking immediately
   useEffect(() => {
-    const searchParams = location.split('?')[1];
-    if (searchParams) {
-      const urlParams = new URLSearchParams(searchParams);
-      const trackParam = urlParams.get('track');
-      if (trackParam && trackParam !== trackingNumber) {
-        console.log('URL tracking param detected:', trackParam);
-        setTrackingNumber(trackParam);
-        // Small delay to ensure state is updated
-        setTimeout(() => {
-          console.log('Triggering tracking lookup for:', trackParam);
-          trackingMutation.mutate(trackParam);
-        }, 100);
-      }
+    console.log('Location changed:', location);
+    
+    // Extract query parameters manually
+    const fullUrl = window.location.href;
+    console.log('Full URL:', fullUrl);
+    
+    const url = new URL(fullUrl);
+    const trackParam = url.searchParams.get('track');
+    
+    console.log('Track param from URL:', trackParam);
+    console.log('Current tracking number state:', trackingNumber);
+    
+    if (trackParam && trackParam.trim() && trackParam !== trackingNumber) {
+      console.log('Setting tracking number to:', trackParam);
+      setTrackingNumber(trackParam.trim());
+      // Clear any existing tracking data
+      setTrackingData(null);
+      // Trigger tracking lookup immediately
+      console.log('Triggering tracking lookup for:', trackParam);
+      trackingMutation.mutate(trackParam.trim());
     }
   }, [location]); // Only depend on location to prevent loops
 

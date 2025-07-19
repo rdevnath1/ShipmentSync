@@ -79,6 +79,9 @@ export default function OrderTable({ orders, showShipmentActions = false, showBa
 
   const handleTrackingClick = (order: any) => {
     if (order.trackingNumber) {
+      console.log('Tracking click - Order:', order);
+      console.log('Tracking number:', order.trackingNumber);
+      console.log('Navigating to:', `/tracking?track=${order.trackingNumber}`);
       setLocation(`/tracking?track=${order.trackingNumber}`);
     } else {
       toast({
