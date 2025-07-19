@@ -76,9 +76,6 @@ export default function Header({ title, description }: HeaderProps) {
                     <p className="font-medium text-foreground">
                       {user.firstName} {user.lastName}
                     </p>
-                    <p className="text-muted-foreground text-left">
-                      {user.organization?.name || user.email}
-                    </p>
                   </div>
                 </Button>
               </DropdownMenuTrigger>
