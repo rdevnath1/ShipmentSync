@@ -23,6 +23,11 @@ interface OrderTableProps {
 }
 
 export default function OrderTable({ orders, showShipmentActions = false, showBatchActions = false, hideActions = false }: OrderTableProps) {
+  // Utility function to format tracking numbers
+  const formatTrackingNumber = (trackingNumber: string) => {
+    return trackingNumber?.replace(/^GV/g, 'QP') || '';
+  };
+
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showBatchPrintModal, setShowBatchPrintModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -121,7 +126,7 @@ export default function OrderTable({ orders, showShipmentActions = false, showBa
         window.open(data.labelPath, '_blank');
         toast({
           title: "Label Opened",
-          description: `Label for tracking #${data.trackingNumber} opened in new tab`,
+          description: `Label for tracking #${formatTrackingNumber(data.trackingNumber)} opened in new tab`,
         });
       }
     },
@@ -265,7 +270,7 @@ export default function OrderTable({ orders, showShipmentActions = false, showBa
                                 className="text-blue-600 hover:text-blue-800 p-0 h-auto font-normal"
                               >
                                 <ExternalLink className="mr-1" size={12} />
-                                {order.trackingNumber}
+                                {formatTrackingNumber(order.trackingNumber)}
                               </Button>
                             ) : (
                               <span className="text-sm text-muted-foreground">No tracking</span>
@@ -386,7 +391,7 @@ export default function OrderTable({ orders, showShipmentActions = false, showBa
                               className="text-blue-600 hover:text-blue-800 p-0 h-auto font-normal text-xs"
                             >
                               <ExternalLink className="mr-1" size={12} />
-                              Track: {order.trackingNumber}
+                              Track: {formatTrackingNumber(order.trackingNumber)}
                             </Button>
                           </div>
                         )}

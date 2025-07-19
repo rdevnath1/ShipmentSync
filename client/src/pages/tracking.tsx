@@ -121,6 +121,11 @@ export default function Tracking() {
     return text?.replace(/UNI\b/gi, 'Quikpik') || '';
   };
 
+  const formatTrackingNumber = (trackingNumber: string) => {
+    // Replace GV with QP in tracking numbers
+    return trackingNumber?.replace(/^GV/g, 'QP') || '';
+  };
+
   return (
     <>
       <div className="bg-background border-b border-border px-4 lg:px-6 py-4">
@@ -147,8 +152,12 @@ export default function Tracking() {
                     <Input 
                       placeholder="Enter tracking number..." 
                       className="pl-10 pr-4 py-2 mt-[16px] mb-[16px]"
-                      value={trackingNumber}
-                      onChange={(e) => setTrackingNumber(e.target.value)}
+                      value={formatTrackingNumber(trackingNumber)}
+                      onChange={(e) => {
+                        // Store the original value but allow user to enter GV or QP
+                        const value = e.target.value.replace(/^QP/g, 'GV');
+                        setTrackingNumber(value);
+                      }}
                       onKeyPress={(e) => e.key === 'Enter' && handleTrackPackage()}
                       disabled={trackingMutation.isPending}
                     />
@@ -282,7 +291,7 @@ export default function Tracking() {
                               Tracking number is valid but detailed tracking events are not yet available.
                             </p>
                             <p className="text-xs text-green-600 mt-1">
-                              Tracking Number: {trackingData.data[0]?.trackingNo || trackingNumber}
+                              Tracking Number: {formatTrackingNumber(trackingData.data[0]?.trackingNo || trackingNumber)}
                             </p>
                           </div>
                         </div>
