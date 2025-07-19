@@ -108,14 +108,14 @@ interface JiayouCreateOrderResponse {
   };
 }
 
-export class JiayouService {
+export class QuikpikService {
   private apiKey: string;
   private clientId: string;
   private baseUrl = 'https://api.jygjexp.com/v1';
 
   constructor() {
-    this.apiKey = process.env.JIAYOU_API_KEY || 'd370d0ee7e704117bfca9184bc03f590';
-    this.clientId = process.env.JIAYOU_CLIENT_ID || '769908';
+    this.apiKey = process.env.QUIKPIK_API_KEY || 'd370d0ee7e704117bfca9184bc03f590';
+    this.clientId = process.env.QUIKPIK_CLIENT_ID || '769908';
   }
 
   private generateSignature(code: string, apiKey: string): string {
@@ -149,10 +149,10 @@ export class JiayouService {
     };
   }
 
-  async createOrder(orderData: JiayouCreateOrderRequest): Promise<JiayouCreateOrderResponse> {
+  async createOrder(orderData: QuikpikCreateOrderRequest): Promise<QuikpikCreateOrderResponse> {
     try {
       // Log the order creation attempt (ChatGPT suggestion #1)
-      console.log("→ Jiayou createOrder", orderData.referenceNo, orderData.channelCode);
+      console.log("→ Quikpik createOrder", orderData.referenceNo, orderData.channelCode);
       
       const response = await axios.post(
         `${this.baseUrl}/api/orderNew/createOrder`,  // Use the working endpoint from our tests
