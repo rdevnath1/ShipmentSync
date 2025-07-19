@@ -259,22 +259,7 @@ export default function Tracking() {
                           </div>
                         </div>
                         
-                        {/* Summary Footer */}
-                        <div className="mt-6 p-4 bg-muted/50 rounded-lg border border-dashed border-muted-foreground/20">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h5 className="font-medium text-foreground text-sm">Current Status</h5>
-                              <p className="text-xs text-muted-foreground mt-1">
-                                {trackingData.data[0].fromDetail
-                                  .sort((a: any, b: any) => new Date(b.pathTime).getTime() - new Date(a.pathTime).getTime())[0]?.pathInfo || 'No recent updates'}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <div className="text-xs text-muted-foreground">Tracking by</div>
-                              <div className="font-medium text-sm">Quikpik</div>
-                            </div>
-                          </div>
-                        </div>
+                        
                       </div>
                     ) : trackingData.code === 1 && trackingData.data ? (
                       <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
