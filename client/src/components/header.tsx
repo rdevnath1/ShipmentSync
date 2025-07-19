@@ -124,7 +124,7 @@ export default function Header({ title, description }: HeaderProps) {
               <Button variant="ghost" size="sm" className="relative">
                 <Bell className="text-muted-foreground" size={20} />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs text-primary-foreground font-medium">
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs text-white font-medium">
                     {unreadCount}
                   </span>
                 )}
@@ -183,8 +183,8 @@ export default function Header({ title, description }: HeaderProps) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center space-x-2 lg:space-x-3">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center bg-primary">
-                    <User className="text-primary-foreground" size={16} />
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center bg-[#64748b]">
+                    <User className="text-white" size={16} />
                   </div>
 
                 </Button>
