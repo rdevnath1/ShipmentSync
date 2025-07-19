@@ -48,9 +48,13 @@ export default function Tracking() {
       const urlParams = new URLSearchParams(searchParams);
       const trackParam = urlParams.get('track');
       if (trackParam && trackParam !== trackingNumber) {
+        console.log('URL tracking param detected:', trackParam);
         setTrackingNumber(trackParam);
-        // Trigger tracking lookup immediately
-        trackingMutation.mutate(trackParam);
+        // Small delay to ensure state is updated
+        setTimeout(() => {
+          console.log('Triggering tracking lookup for:', trackParam);
+          trackingMutation.mutate(trackParam);
+        }, 100);
       }
     }
   }, [location]); // Only depend on location to prevent loops
@@ -133,6 +137,7 @@ export default function Tracking() {
                       value={trackingNumber}
                       onChange={(e) => setTrackingNumber(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && handleTrackPackage()}
+                      disabled={trackingMutation.isPending}
                     />
                   </div>
                   <Button
@@ -140,9 +145,28 @@ export default function Tracking() {
                     disabled={trackingMutation.isPending}
                     className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
                   >
-                    {trackingMutation.isPending ? "Tracking..." : "Track"}
+                    {trackingMutation.isPending ? (
+                      <>
+                        <Clock className="mr-2 animate-spin" size={16} />
+                        Tracking...
+                      </>
+                    ) : (
+                      "Track Package"
+                    )}
                   </Button>
                 </div>
+
+                {trackingMutation.isPending && !trackingData && (
+                  <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-center">
+                      <Clock className="text-blue-600 mr-2 animate-spin" size={16} />
+                      <div>
+                        <h4 className="font-medium text-blue-800">Fetching Tracking Information</h4>
+                        <p className="text-sm text-blue-700">Please wait while we retrieve the latest tracking data...</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {trackingData && (
                   <div className="space-y-4">
