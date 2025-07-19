@@ -81,7 +81,7 @@ export default function Sidebar() {
       {/* Mobile overlay */}
       {isMobileMenuOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/50 z-40"
+          className="lg:hidden fixed inset-0 bg-primary/50 z-40"
           onClick={toggleMobileMenu}
         />
       )}
