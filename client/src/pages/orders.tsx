@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/header";
 import OrderTable from "@/components/order-table";
 import { Button } from "@/components/ui/button";
@@ -7,44 +6,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CalendarIcon } from "lucide-react";
+import { useOrders, useFilteredOrders } from "@/hooks/use-orders";
 
 export default function Orders() {
   const [filter, setFilter] = useState<"all" | "pending" | "shipped">("all");
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   
-  const { data: orders } = useQuery({
-    queryKey: ["/api/orders"],
-  });
-
-  const filteredOrders = orders?.filter(order => {
-    // Status filter
-    let matchesStatus = true;
-    if (filter === "pending") matchesStatus = order.status === "pending";
-    if (filter === "shipped") matchesStatus = order.status === "shipped";
-    
-    // Date range filter
-    let matchesDateRange = true;
-    if (startDate || endDate) {
-      const orderDate = new Date(order.createdAt);
-      if (startDate) {
-        const start = new Date(startDate);
-        start.setHours(0, 0, 0, 0);
-        matchesDateRange = matchesDateRange && orderDate >= start;
-      }
-      if (endDate) {
-        const end = new Date(endDate);
-        end.setHours(23, 59, 59, 999);
-        matchesDateRange = matchesDateRange && orderDate <= end;
-      }
-    }
-    
-    return matchesStatus && matchesDateRange;
-  }) || [];
-
-  const pendingCount = orders?.filter(order => order.status === "pending").length || 0;
-  const shippedCount = orders?.filter(order => order.status === "shipped").length || 0;
+  const { data, isLoading } = useOrders();
+  const filteredOrders = useFilteredOrders(data?.orders, filter, startDate, endDate);
+  
+  const pendingCount = data?.pendingCount || 0;
+  const shippedCount = data?.shippedCount || 0;
+  const totalCount = data?.orders?.length || 0;
   
 
 
@@ -77,7 +51,7 @@ export default function Orders() {
                 >
                   All Orders
                   <Badge variant="secondary" className="ml-2">
-                    {orders?.length || 0}
+                    {totalCount}
                   </Badge>
                 </Button>
                 <Button
@@ -139,10 +113,10 @@ export default function Orders() {
             </div>
 
             {/* Results Summary */}
-            {filteredOrders.length !== orders?.length && (
+            {filteredOrders.length !== totalCount && (
               <div className="pt-2 border-t">
                 <div className="flex flex-col sm:flex-row gap-4 text-sm text-muted-foreground">
-                  <span>Showing {filteredOrders.length} of {orders?.length || 0} orders</span>
+                  <span>Showing {filteredOrders.length} of {totalCount} orders</span>
                 </div>
               </div>
             )}

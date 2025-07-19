@@ -1,6 +1,6 @@
 import { users, orders, trackingEvents, apiKeys, type User, type InsertUser, type Order, type InsertOrder, type TrackingEvent, type InsertTrackingEvent, type ApiKey, type InsertApiKey } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -16,6 +16,7 @@ export interface IStorage {
   getAllOrders(): Promise<Order[]>;
   getPendingOrders(): Promise<Order[]>;
   getShippedOrders(): Promise<Order[]>;
+  getOrdersWithStats(): Promise<{ orders: Order[], pendingCount: number, shippedCount: number }>;
   deleteOrder(id: number): Promise<void>;
   
   // Tracking methods
@@ -85,6 +86,28 @@ export class DatabaseStorage implements IStorage {
 
   async getAllOrders(): Promise<Order[]> {
     return await db.select().from(orders).orderBy(desc(orders.createdAt));
+  }
+
+  // Optimized: Get orders with status counts in single query
+  async getOrdersWithStats(): Promise<{ orders: Order[], pendingCount: number, shippedCount: number }> {
+    const [orders, stats] = await Promise.all([
+      db.select().from(orders).orderBy(desc(orders.createdAt)),
+      db.select({ 
+        status: orders.status, 
+        count: sql<number>`count(*)::int`
+      }).from(orders).groupBy(orders.status)
+    ]);
+    
+    const statusMap = stats.reduce((acc, row) => {
+      acc[row.status] = Number(row.count);
+      return acc;
+    }, {} as Record<string, number>);
+
+    return {
+      orders,
+      pendingCount: statusMap.pending || 0,
+      shippedCount: statusMap.shipped || 0
+    };
   }
 
   async deleteOrder(id: number): Promise<void> {

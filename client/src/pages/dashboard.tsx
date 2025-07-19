@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/header";
 import StatsCards from "@/components/stats-cards";
 import OrderTable from "@/components/order-table";
+import { useOrders } from "@/hooks/use-orders";
+import { usePullOrdersMutation } from "@/hooks/use-optimized-mutations";
 import TrackingSection from "@/components/tracking-section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,39 +16,20 @@ export default function Dashboard() {
   const { toast } = useToast();
   const [location, setLocation] = useLocation();
 
-  const { data: orders, refetch: refetchOrders } = useQuery({
-    queryKey: ["/api/orders"],
-  });
-
-  const { data: stats } = useQuery({
-    queryKey: ["/api/dashboard/stats"],
-  });
-
-  const handlePullOrders = async () => {
-    try {
-      const response = await apiRequest("POST", "/api/orders/pull-shipstation");
-      const data = await response.json();
-      
-      // Show detailed feedback about what was synced
-      let description = data.message;
-      if (data.created > 0 || data.updated > 0) {
-        description += ` (${data.created} new, ${data.updated} updated)`;
-      }
-      
-      toast({
-        title: "Sync Complete",
-        description: description,
-      });
-      
-      refetchOrders();
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to sync orders from ShipStation",
-        variant: "destructive",
-      });
-    }
+  // Use optimized hook that fetches orders with stats in one call
+  const { data, refetch: refetchOrders } = useOrders();
+  
+  // Extract orders and compute stats from the optimized response
+  const orders = data?.orders || [];
+  const stats = {
+    totalOrders: orders.length,
+    activeShipments: data?.shippedCount || 0,
+    pendingOrders: data?.pendingCount || 0,
+    deliveredOrders: orders.filter(o => o.status === 'delivered').length
   };
+
+  // Use optimized mutation hook
+  const pullOrdersMutation = usePullOrdersMutation();
 
   return (
     <>
@@ -59,7 +42,7 @@ export default function Dashboard() {
         
 
 
-        <OrderTable orders={orders || []} />
+        <OrderTable orders={orders.slice(0, 5)} />
         
         <TrackingSection />
         
@@ -113,14 +96,15 @@ export default function Dashboard() {
                       <span className="text-sm font-medium text-foreground">Pending Labels</span>
                     </div>
                     <span className="text-xs text-muted-foreground">
-                      {orders?.filter((o: any) => o.status === "pending").length || 0} orders
+                      {stats.pendingOrders} orders
                     </span>
                   </div>
                 </div>
               </div>
 
               <Button 
-                onClick={handlePullOrders}
+                onClick={() => pullOrdersMutation.mutate()}
+                disabled={pullOrdersMutation.isPending}
                 className="w-full"
               >
                 <FolderSync className="mr-2" size={16} />

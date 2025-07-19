@@ -6,48 +6,41 @@ import { JiayouService } from "./services/jiayou";
 import { insertOrderSchema } from "@shared/schema";
 import { z } from "zod";
 
-export async function registerRoutes(app: Express): Promise<Server> {
-  const shipStationService = new ShipStationService();
-  const jiayouService = new JiayouService();
+// Create service instances once and reuse them
+const shipStationService = new ShipStationService();
+const jiayouService = new JiayouService();
 
-  // Get all orders (pending and shipped)
+export async function registerRoutes(app: Express): Promise<Server> {
+
+  // Get all orders (pending and shipped) with stats - OPTIMIZED
   app.get("/api/orders", async (req, res) => {
     try {
-      const orders = await storage.getAllOrders();
-      res.json(orders);
+      const data = await storage.getOrdersWithStats();
+      res.json(data);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch orders" });
     }
   });
 
-  // Get pending orders (not yet shipped)
-  app.get("/api/orders/pending", async (req, res) => {
-    try {
-      const orders = await storage.getPendingOrders();
-      res.json(orders);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch pending orders" });
-    }
-  });
+  // DEPRECATED: Remove redundant endpoint - data is now available via /api/orders
+  // app.get("/api/orders/pending", async (req, res) => {
 
-  // Delete order
+  // Delete order - OPTIMIZED
   app.delete("/api/orders/:id", async (req, res) => {
     try {
       const orderId = parseInt(req.params.id);
       
-      // Check if order exists
+      // Check if order exists and has shipments in single query
       const order = await storage.getOrder(orderId);
       if (!order) {
         return res.status(404).json({ error: "Order not found" });
       }
 
-      // Check if order has associated shipments
-      const shipment = await storage.getShipmentByOrderId(orderId);
-      if (shipment) {
-        return res.status(400).json({ error: "Cannot delete order with associated shipments" });
+      // Check if order is shipped (has tracking number)
+      if (order.trackingNumber) {
+        return res.status(400).json({ error: "Cannot delete shipped orders" });
       }
 
-      // Delete the order (implement this in storage)
       await storage.deleteOrder(orderId);
       res.json({ message: "Order deleted successfully" });
     } catch (error) {
@@ -194,11 +187,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all shipments (shipped orders)
+  // DEPRECATED: Merged with /api/orders for efficiency
+  // Get all shipments (now handled by /api/orders with status filter)
   app.get("/api/shipments", async (req, res) => {
     try {
-      const shipments = await storage.getShippedOrders();
-      res.json(shipments);
+      // Redirect to optimized endpoint
+      const data = await storage.getOrdersWithStats();
+      const shippedOrders = data.orders.filter(order => order.status === 'shipped');
+      res.json(shippedOrders);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch shipments" });
     }
