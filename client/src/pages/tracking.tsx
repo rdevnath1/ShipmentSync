@@ -168,49 +168,96 @@ export default function Tracking() {
                         </div>
                       </div>
                     ) : trackingData.data && trackingData.data[0] && trackingData.data[0].fromDetail ? (
-                      <div className="space-y-3">
-                        <h4 className="font-medium text-foreground">Tracking History</h4>
-                        <div className="space-y-3">
-                          {trackingData.data[0].fromDetail.map((event: any, index: number) => (
-                            <div key={index} className="flex items-start space-x-3 p-3 border border-border rounded-lg">
-                              <div className="mt-1">
-                                {getStatusIcon(event.pathCode)}
-                              </div>
-                              <div className="flex-1">
-                                <div className="flex items-center justify-between">
-                                  <h5 className="font-medium text-foreground">{event.pathInfo}</h5>
-                                  <span className="text-sm text-muted-foreground">
-                                    {new Date(event.pathTime).toLocaleString()}
-                                  </span>
-                                </div>
-                                {event.pathLocation && (
-                                  <p className="text-sm text-muted-foreground mt-1 flex items-center">
-                                    <MapPin size={12} className="mr-1" />
-                                    {cleanLocationText(event.pathLocation)}
-                                  </p>
-                                )}
-                                {event.timezone && (
-                                  <p className="text-xs text-muted-foreground mt-1">
-                                    Timezone: {event.timezone}
-                                  </p>
-                                )}
-                                {event.flightNo && (
-                                  <p className="text-xs text-muted-foreground">
-                                    Flight: {event.flightNo}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                          ))}
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-medium text-foreground">Timeline History</h4>
+                          <span className="text-xs text-muted-foreground">
+                            {trackingData.data[0].fromDetail.length} events
+                          </span>
                         </div>
-                        <div className="mt-4 p-3 bg-muted rounded-lg">
-                          <h5 className="font-medium text-foreground mb-2">Package Status</h5>
-                          <p className="text-sm text-muted-foreground">
-                            Latest Update: {trackingData.data[0].fromDetail[0]?.pathInfo || 'No updates available'}
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Tracking provided by Quikpik • Total events: {trackingData.data[0].fromDetail.length}
-                          </p>
+                        
+                        {/* Timeline Container */}
+                        <div className="relative">
+                          {/* Timeline Line */}
+                          <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-border"></div>
+                          
+                          <div className="space-y-6">
+                            {/* Sort events by pathTime (most recent first) */}
+                            {trackingData.data[0].fromDetail
+                              .sort((a: any, b: any) => new Date(b.pathTime).getTime() - new Date(a.pathTime).getTime())
+                              .map((event: any, index: number) => (
+                              <div key={index} className="relative flex items-start space-x-4">
+                                {/* Timeline Dot */}
+                                <div className="relative z-10 flex items-center justify-center w-12 h-12 bg-background border-2 border-primary rounded-full shadow-sm">
+                                  {getStatusIcon(event.pathCode)}
+                                </div>
+                                
+                                {/* Event Content */}
+                                <div className="flex-1 min-w-0 pb-6">
+                                  <div className="bg-card border border-border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                                    {/* Event Header */}
+                                    <div className="flex items-start justify-between mb-2">
+                                      <h5 className="font-semibold text-foreground text-sm">
+                                        {event.pathInfo}
+                                      </h5>
+                                      <div className="text-right">
+                                        <div className="text-sm font-medium text-foreground">
+                                          {new Date(event.pathTime).toLocaleDateString()}
+                                        </div>
+                                        <div className="text-xs text-muted-foreground">
+                                          {new Date(event.pathTime).toLocaleTimeString()}
+                                        </div>
+                                      </div>
+                                    </div>
+                                    
+                                    {/* Event Details */}
+                                    <div className="space-y-1">
+                                      {event.pathLocation && (
+                                        <div className="flex items-center text-xs text-muted-foreground">
+                                          <MapPin size={12} className="mr-1.5 text-blue-500" />
+                                          <span>{cleanLocationText(event.pathLocation)}</span>
+                                        </div>
+                                      )}
+                                      <div className="flex items-center justify-between text-xs">
+                                        <div className="flex items-center text-muted-foreground">
+                                          <Clock size={12} className="mr-1.5 text-amber-500" />
+                                          <span>{event.timezone || 'UTC'}</span>
+                                        </div>
+                                        {event.pathCode && (
+                                          <div className="text-xs text-muted-foreground">
+                                            Code: {event.pathCode}
+                                          </div>
+                                        )}
+                                      </div>
+                                      {event.flightNo && (
+                                        <div className="flex items-center text-xs text-muted-foreground">
+                                          <Truck size={12} className="mr-1.5 text-green-500" />
+                                          <span>Flight: {event.flightNo}</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        {/* Summary Footer */}
+                        <div className="mt-6 p-4 bg-muted/50 rounded-lg border border-dashed border-muted-foreground/20">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h5 className="font-medium text-foreground text-sm">Current Status</h5>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {trackingData.data[0].fromDetail
+                                  .sort((a: any, b: any) => new Date(b.pathTime).getTime() - new Date(a.pathTime).getTime())[0]?.pathInfo || 'No recent updates'}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-xs text-muted-foreground">Tracking by</div>
+                              <div className="font-medium text-sm">Quikpik</div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     ) : trackingData.code === 1 && trackingData.data ? (
