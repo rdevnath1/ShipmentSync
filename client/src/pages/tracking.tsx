@@ -84,16 +84,20 @@ export default function Tracking() {
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "delivered":
-        return <Package className="text-emerald-600" size={16} />;
-      case "in_transit":
-      case "in transit":
+  const getStatusIcon = (pathCode: string) => {
+    // Map Quikpik path codes to appropriate icons
+    switch (pathCode) {
+      case "120": // Parcel data received
+        return <Package className="text-blue-600" size={16} />;
+      case "315": // Order received  
+        return <Clock className="text-amber-600" size={16} />;
+      case "310": // Picked up
+      case "320": // In transit
         return <Truck className="text-blue-600" size={16} />;
-      case "created":
-      case "picked_up":
-        return <MapPin className="text-amber-600" size={16} />;
+      case "410": // Delivered
+        return <Package className="text-emerald-600" size={16} />;
+      case "510": // Exception
+        return <MapPin className="text-red-600" size={16} />;
       default:
         return <Clock className="text-slate-600" size={16} />;
     }
@@ -147,7 +151,7 @@ export default function Tracking() {
                       </Badge>
                     </div>
 
-                    {/* Show tracking response based on API structure */}
+                    {/* Show tracking response based on Quikpik API structure */}
                     {trackingData.code === 0 && trackingData.message ? (
                       <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
                         <div className="flex items-center">
@@ -158,62 +162,77 @@ export default function Tracking() {
                           </div>
                         </div>
                       </div>
-                    ) : trackingData.data && trackingData.data.trackingEvents ? (
+                    ) : trackingData.data && trackingData.data[0] && trackingData.data[0].fromDetail ? (
                       <div className="space-y-3">
-                        <h4 className="font-medium text-foreground">Tracking Events</h4>
+                        <h4 className="font-medium text-foreground">Tracking History</h4>
                         <div className="space-y-3">
-                          {trackingData.data.trackingEvents.map((event: any, index: number) => (
+                          {trackingData.data[0].fromDetail.map((event: any, index: number) => (
                             <div key={index} className="flex items-start space-x-3 p-3 border border-border rounded-lg">
                               <div className="mt-1">
-                                {getStatusIcon(event.status || 'unknown')}
+                                {getStatusIcon(event.pathCode)}
                               </div>
                               <div className="flex-1">
                                 <div className="flex items-center justify-between">
-                                  <h5 className="font-medium text-foreground">{event.description || event.eventDescription}</h5>
+                                  <h5 className="font-medium text-foreground">{event.pathInfo}</h5>
                                   <span className="text-sm text-muted-foreground">
-                                    {event.timestamp ? new Date(event.timestamp).toLocaleString() : event.eventTime}
+                                    {new Date(event.pathTime).toLocaleString()}
                                   </span>
                                 </div>
-                                {event.location && (
-                                  <p className="text-sm text-muted-foreground mt-1">{event.location}</p>
+                                {event.pathLocation && (
+                                  <p className="text-sm text-muted-foreground mt-1 flex items-center">
+                                    <MapPin size={12} className="mr-1" />
+                                    {event.pathLocation}
+                                  </p>
+                                )}
+                                {event.timezone && (
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    Timezone: {event.timezone}
+                                  </p>
+                                )}
+                                {event.flightNo && (
+                                  <p className="text-xs text-muted-foreground">
+                                    Flight: {event.flightNo}
+                                  </p>
                                 )}
                               </div>
                             </div>
                           ))}
                         </div>
+                        <div className="mt-4 p-3 bg-muted rounded-lg">
+                          <h5 className="font-medium text-foreground mb-2">Package Status</h5>
+                          <p className="text-sm text-muted-foreground">
+                            Latest Update: {trackingData.data[0].fromDetail[0]?.pathInfo || 'No updates available'}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Tracking provided by Quikpik • Total events: {trackingData.data[0].fromDetail.length}
+                          </p>
+                        </div>
                       </div>
-                    ) : trackingData.events && trackingData.events.length > 0 ? (
-                      <div className="space-y-3">
-                        <h4 className="font-medium text-foreground">Tracking Events</h4>
-                        <div className="space-y-3">
-                          {trackingData.events.map((event: any, index: number) => (
-                            <div key={index} className="flex items-start space-x-3 p-3 border border-border rounded-lg">
-                              <div className="mt-1">
-                                {getStatusIcon(event.status)}
-                              </div>
-                              <div className="flex-1">
-                                <div className="flex items-center justify-between">
-                                  <h5 className="font-medium text-foreground">{event.description}</h5>
-                                  <span className="text-sm text-muted-foreground">
-                                    {new Date(event.timestamp).toLocaleString()}
-                                  </span>
-                                </div>
-                                {event.location && (
-                                  <p className="text-sm text-muted-foreground mt-1">{event.location}</p>
-                                )}
-                              </div>
-                            </div>
-                          ))}
+                    ) : trackingData.code === 1 && trackingData.data ? (
+                      <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-center">
+                          <Package className="text-green-600 mr-2" size={16} />
+                          <div>
+                            <h4 className="font-medium text-green-800">Package Found</h4>
+                            <p className="text-sm text-green-700">
+                              Tracking number is valid but detailed tracking events are not yet available.
+                            </p>
+                            <p className="text-xs text-green-600 mt-1">
+                              Tracking Number: {trackingData.data[0]?.trackingNo || trackingNumber}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     ) : (
-                      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
                         <div className="flex items-center">
-                          <Package className="text-blue-600 mr-2" size={16} />
+                          <Package className="text-red-600 mr-2" size={16} />
                           <div>
-                            <h4 className="font-medium text-blue-800">Tracking Found</h4>
-                            <p className="text-sm text-blue-700">Tracking information retrieved successfully.</p>
-                            <pre className="text-xs text-blue-600 mt-2 bg-blue-100 p-2 rounded">{JSON.stringify(trackingData, null, 2)}</pre>
+                            <h4 className="font-medium text-red-800">Tracking Error</h4>
+                            <p className="text-sm text-red-700">Unable to retrieve tracking information for this number.</p>
+                            <p className="text-xs text-red-600 mt-1">
+                              Please verify the tracking number and try again.
+                            </p>
                           </div>
                         </div>
                       </div>

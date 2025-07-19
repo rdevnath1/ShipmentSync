@@ -217,7 +217,7 @@ export class JiayouService {
         }
       );
 
-      console.log('Official tracking response:', response.data);
+      console.log('Official tracking response:', JSON.stringify(response.data, null, 2));
       
       if (response.data.code === 1) {
         return response.data;
