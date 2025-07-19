@@ -4,16 +4,33 @@ import {
   LayoutDashboard, 
   Package, 
   Route, 
+  BarChart3,
   Settings,
   Menu,
-  X
+  X,
+  LogOut,
+  User
 } from "lucide-react";
 import logoPath from "@assets/logo_1752442395960.png";
 import { ThemeToggle } from "./theme-toggle";
+import { useAuth } from "@/hooks/useAuth";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { queryClient } from "@/lib/queryClient";
+import { Button } from "@/components/ui/button";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuLabel, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
 
 const navItems = [
   { path: "/", icon: LayoutDashboard, label: "Dashboard" },
   { path: "/orders", icon: Package, label: "Orders" },
+  { path: "/analytics", icon: BarChart3, label: "Analytics" },
   { path: "/tracking", icon: Route, label: "Tracking" },
   { path: "/settings", icon: Settings, label: "Settings" },
 ];
@@ -21,9 +38,34 @@ const navItems = [
 export default function Sidebar() {
   const [location] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user } = useAuth();
+  const { toast } = useToast();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await apiRequest("POST", "/api/auth/logout", {});
+      
+      // Clear all cached data
+      queryClient.clear();
+      
+      toast({
+        title: "Logged out successfully",
+        description: "You have been logged out of your account.",
+      });
+      
+      // Force page reload to reset authentication state
+      window.location.reload();
+    } catch (error) {
+      toast({
+        title: "Logout Failed",
+        description: "Failed to logout properly",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -86,8 +128,41 @@ export default function Sidebar() {
           </ul>
         </div>
         
-        {/* Theme Toggle */}
+        {/* User Profile & Actions */}
         <div className="px-3 lg:px-4 pb-4 border-t border-border">
+          <div className="py-3">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="w-full justify-start px-3 lg:px-4">
+                  <User className="mr-3" size={16} />
+                  <div className="flex flex-col items-start">
+                    <span className="text-sm font-medium">
+                      {user?.firstName} {user?.lastName}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {user?.organization?.name || user?.email}
+                    </span>
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium">{user?.firstName} {user?.lastName}</p>
+                    <p className="text-xs text-muted-foreground">{user?.email}</p>
+                    <p className="text-xs text-muted-foreground capitalize">{user?.role} Account</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          
+          {/* Theme Toggle */}
           <div className="flex items-center justify-between px-3 lg:px-4 py-3">
             <span className="text-sm text-muted-foreground">Theme</span>
             <ThemeToggle />

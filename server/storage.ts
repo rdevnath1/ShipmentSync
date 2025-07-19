@@ -1,23 +1,41 @@
-import { users, orders, trackingEvents, apiKeys, type User, type InsertUser, type Order, type InsertOrder, type TrackingEvent, type InsertTrackingEvent, type ApiKey, type InsertApiKey } from "@shared/schema";
+import { 
+  organizations, users, orders, trackingEvents, analytics, apiKeys, 
+  type Organization, type InsertOrganization, type User, type InsertUser, 
+  type Order, type InsertOrder, type TrackingEvent, type InsertTrackingEvent, 
+  type Analytics, type InsertAnalytics, type ApiKey, type InsertApiKey 
+} from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, and, gte, lte, count } from "drizzle-orm";
 
 export interface IStorage {
+  // Organization methods
+  getOrganization(id: number): Promise<Organization | undefined>;
+  getOrganizationBySlug(slug: string): Promise<Organization | undefined>;
+  createOrganization(org: InsertOrganization): Promise<Organization>;
+  getAllOrganizations(): Promise<Organization[]>;
+  
   // User methods
   getUser(id: number): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByEmailWithOrg(email: string): Promise<(User & { organization?: Organization }) | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUserLastLogin(id: number): Promise<void>;
   
   // Order methods (now includes shipment functionality)
   getOrder(id: number): Promise<Order | undefined>;
+  getOrdersByOrganization(orgId: number): Promise<Order[]>;
   getOrderByShipstationId(shipstationOrderId: string): Promise<Order | undefined>;
   createOrder(order: InsertOrder): Promise<Order>;
   updateOrder(id: number, order: Partial<InsertOrder>): Promise<Order>;
   getAllOrders(): Promise<Order[]>;
   getPendingOrders(): Promise<Order[]>;
   getShippedOrders(): Promise<Order[]>;
-  getOrdersWithStats(): Promise<{ orders: Order[], pendingCount: number, shippedCount: number }>;
+  getOrdersWithStats(orgId?: number): Promise<{ orders: Order[], pendingCount: number, shippedCount: number }>;
   deleteOrder(id: number): Promise<void>;
+  
+  // Analytics methods
+  getAnalytics(orgId: number, startDate?: Date, endDate?: Date): Promise<Analytics[]>;
+  createAnalyticsRecord(analytics: InsertAnalytics): Promise<Analytics>;
   
   // Tracking methods
   createTrackingEvent(event: InsertTrackingEvent): Promise<TrackingEvent>;
@@ -33,14 +51,56 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  // Organization methods
+  async getOrganization(id: number): Promise<Organization | undefined> {
+    const [org] = await db.select().from(organizations).where(eq(organizations.id, id));
+    return org || undefined;
+  }
+
+  async getOrganizationBySlug(slug: string): Promise<Organization | undefined> {
+    const [org] = await db.select().from(organizations).where(eq(organizations.slug, slug));
+    return org || undefined;
+  }
+
+  async createOrganization(insertOrg: InsertOrganization): Promise<Organization> {
+    const [org] = await db.insert(organizations).values(insertOrg).returning();
+    return org;
+  }
+
+  async getAllOrganizations(): Promise<Organization[]> {
+    return await db.select().from(organizations).orderBy(desc(organizations.createdAt));
+  }
+
+  // User methods
   async getUser(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user || undefined;
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
     return user || undefined;
+  }
+
+  async getUserByEmailWithOrg(email: string): Promise<(User & { organization?: Organization }) | undefined> {
+    const result = await db.select()
+      .from(users)
+      .leftJoin(organizations, eq(users.organizationId, organizations.id))
+      .where(eq(users.email, email));
+    
+    if (!result.length) return undefined;
+    
+    const row = result[0];
+    return {
+      ...row.users,
+      organization: row.organizations || undefined
+    };
+  }
+
+  async updateUserLastLogin(id: number): Promise<void> {
+    await db.update(users)
+      .set({ lastLogin: new Date() })
+      .where(eq(users.id, id));
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
@@ -54,6 +114,12 @@ export class DatabaseStorage implements IStorage {
   async getOrder(id: number): Promise<Order | undefined> {
     const [order] = await db.select().from(orders).where(eq(orders.id, id));
     return order || undefined;
+  }
+
+  async getOrdersByOrganization(orgId: number): Promise<Order[]> {
+    return await db.select().from(orders)
+      .where(eq(orders.organizationId, orgId))
+      .orderBy(desc(orders.createdAt));
   }
 
   async getOrderByShipstationId(shipstationOrderId: string): Promise<Order | undefined> {
@@ -88,14 +154,25 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(orders).orderBy(desc(orders.createdAt));
   }
 
-  // Optimized: Get orders with status counts in single query
-  async getOrdersWithStats(): Promise<{ orders: Order[], pendingCount: number, shippedCount: number }> {
-    const [orders, stats] = await Promise.all([
-      db.select().from(orders).orderBy(desc(orders.createdAt)),
+  // Optimized: Get orders with status counts in single query (with org filtering)
+  async getOrdersWithStats(orgId?: number): Promise<{ orders: Order[], pendingCount: number, shippedCount: number }> {
+    const baseQuery = orgId ? 
+      db.select().from(orders).where(eq(orders.organizationId, orgId)) :
+      db.select().from(orders);
+    
+    const statsQuery = orgId ?
       db.select({ 
         status: orders.status, 
         count: sql<number>`count(*)::int`
-      }).from(orders).groupBy(orders.status)
+      }).from(orders).where(eq(orders.organizationId, orgId)).groupBy(orders.status) :
+      db.select({ 
+        status: orders.status, 
+        count: sql<number>`count(*)::int`
+      }).from(orders).groupBy(orders.status);
+
+    const [ordersResult, stats] = await Promise.all([
+      baseQuery.orderBy(desc(orders.createdAt)),
+      statsQuery
     ]);
     
     const statusMap = stats.reduce((acc, row) => {
@@ -104,10 +181,31 @@ export class DatabaseStorage implements IStorage {
     }, {} as Record<string, number>);
 
     return {
-      orders,
+      orders: ordersResult,
       pendingCount: statusMap.pending || 0,
       shippedCount: statusMap.shipped || 0
     };
+  }
+
+  // Analytics methods
+  async getAnalytics(orgId: number, startDate?: Date, endDate?: Date): Promise<Analytics[]> {
+    const conditions = [eq(analytics.organizationId, orgId)];
+    
+    if (startDate) {
+      conditions.push(gte(analytics.date, startDate));
+    }
+    if (endDate) {
+      conditions.push(lte(analytics.date, endDate));
+    }
+    
+    return await db.select().from(analytics)
+      .where(and(...conditions))
+      .orderBy(desc(analytics.date));
+  }
+
+  async createAnalyticsRecord(insertAnalytics: InsertAnalytics): Promise<Analytics> {
+    const [record] = await db.insert(analytics).values(insertAnalytics).returning();
+    return record;
   }
 
   async deleteOrder(id: number): Promise<void> {

@@ -1,0 +1,173 @@
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { useLocation } from "wouter";
+import { Package, Truck } from "lucide-react";
+
+const loginSchema = z.object({
+  email: z.string().email("Please enter a valid email"),
+  password: z.string().min(1, "Password is required"),
+});
+
+type LoginFormData = z.infer<typeof loginSchema>;
+
+export default function Login() {
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+  const [, setLocation] = useLocation();
+
+  const form = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const onSubmit = async (data: LoginFormData) => {
+    setIsLoading(true);
+    try {
+      const response = await apiRequest("POST", "/api/auth/login", data);
+      const result = await response.json();
+
+      if (result.success) {
+        toast({
+          title: "Login Successful",
+          description: `Welcome back, ${result.user.firstName || result.user.email}!`,
+        });
+        
+        // Redirect to dashboard
+        setLocation("/");
+      } else {
+        toast({
+          title: "Login Failed",
+          description: result.error || "Invalid credentials",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Login Error",
+        description: error.message || "Something went wrong",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
+      <div className="w-full max-w-md space-y-8">
+        {/* Logo and Branding */}
+        <div className="text-center">
+          <div className="flex justify-center items-center space-x-2 mb-4">
+            <div className="flex items-center space-x-1">
+              <Package className="text-blue-600" size={28} />
+              <Truck className="text-emerald-600" size={28} />
+            </div>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Jiayou Shipping</h1>
+          <p className="text-gray-600 dark:text-gray-300 mt-2">
+            E-commerce Shipment Management Platform
+          </p>
+        </div>
+
+        {/* Login Form */}
+        <Card className="shadow-lg">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl text-center">Sign In</CardTitle>
+            <p className="text-sm text-muted-foreground text-center">
+              Enter your credentials to access your dashboard
+            </p>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email Address</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="email"
+                          placeholder="Enter your email"
+                          disabled={isLoading}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="password"
+                          placeholder="Enter your password"
+                          disabled={isLoading}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Signing in..." : "Sign In"}
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+
+        {/* Demo Credentials */}
+        <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+          <CardContent className="pt-4">
+            <h3 className="font-semibold text-sm text-blue-900 dark:text-blue-100 mb-2">Demo Access</h3>
+            <div className="space-y-2 text-sm">
+              <div>
+                <span className="font-medium">Master Account:</span>
+                <div className="text-blue-700 dark:text-blue-300">
+                  admin@jiayou.com / admin123
+                </div>
+              </div>
+              <div>
+                <span className="font-medium">Client Account:</span>
+                <div className="text-blue-700 dark:text-blue-300">
+                  demo@client.com / demo123
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Footer */}
+        <div className="text-center text-sm text-gray-500 dark:text-gray-400">
+          <p>© 2025 Jiayou Shipping Management System</p>
+        </div>
+      </div>
+    </div>
+  );
+}

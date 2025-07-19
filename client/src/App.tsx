@@ -6,12 +6,29 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
 import Dashboard from "@/pages/dashboard";
 import Orders from "@/pages/orders";
+import Analytics from "@/pages/analytics";
 import Tracking from "@/pages/tracking";
 import Settings from "@/pages/settings";
+import Login from "@/pages/login";
 import NotFound from "@/pages/not-found";
 import Sidebar from "@/components/sidebar";
+import { useAuth } from "@/hooks/useAuth";
 
 function Router() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Login />;
+  }
+
   return (
     <div className="min-h-screen flex">
       <Sidebar />
@@ -19,6 +36,7 @@ function Router() {
         <Switch>
           <Route path="/" component={Dashboard} />
           <Route path="/orders" component={Orders} />
+          <Route path="/analytics" component={Analytics} />
           <Route path="/tracking" component={Tracking} />
           <Route path="/settings" component={Settings} />
           <Route component={NotFound} />

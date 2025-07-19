@@ -5,17 +5,82 @@ import { ShipStationService } from "./services/shipstation";
 import { JiayouService } from "./services/jiayou";
 import { insertOrderSchema } from "@shared/schema";
 import { z } from "zod";
+import { setupAuth, requireAuth, requireOrgAccess, requireRole } from "./auth";
+import bcrypt from 'bcrypt';
 
 // Create service instances once and reuse them
 const shipStationService = new ShipStationService();
 const jiayouService = new JiayouService();
 
-export async function registerRoutes(app: Express): Promise<Server> {
+// Demo data initialization
+async function initializeDemoData() {
+  try {
+    // Check if master organization exists
+    let masterOrg = await storage.getOrganizationBySlug('master');
+    if (!masterOrg) {
+      masterOrg = await storage.createOrganization({
+        name: 'Jiayou Master Admin',
+        slug: 'master',
+        settings: {}
+      });
+    }
 
-  // Get all orders (pending and shipped) with stats - OPTIMIZED
-  app.get("/api/orders", async (req, res) => {
+    // Check if demo organization exists
+    let demoOrg = await storage.getOrganizationBySlug('demo-client');
+    if (!demoOrg) {
+      demoOrg = await storage.createOrganization({
+        name: 'Demo E-commerce Store',
+        slug: 'demo-client',
+        settings: {}
+      });
+    }
+
+    // Create master user
+    const masterExists = await storage.getUserByEmail('admin@jiayou.com');
+    if (!masterExists) {
+      const hashedPassword = await bcrypt.hash('admin123', 10);
+      await storage.createUser({
+        email: 'admin@jiayou.com',
+        password: hashedPassword,
+        firstName: 'Master',
+        lastName: 'Admin',
+        role: 'master',
+        organizationId: masterOrg.id
+      });
+    }
+
+    // Create demo client user
+    const demoExists = await storage.getUserByEmail('demo@client.com');
+    if (!demoExists) {
+      const hashedPassword = await bcrypt.hash('demo123', 10);
+      await storage.createUser({
+        email: 'demo@client.com',
+        password: hashedPassword,
+        firstName: 'Demo',
+        lastName: 'User',
+        role: 'client',
+        organizationId: demoOrg.id
+      });
+    }
+
+    console.log('Demo data initialized successfully');
+  } catch (error) {
+    console.error('Error initializing demo data:', error);
+  }
+}
+
+export async function registerRoutes(app: Express): Promise<Server> {
+  // Setup authentication system
+  await setupAuth(app);
+
+  // Initialize master admin user and demo data
+  await initializeDemoData();
+
+  // Get all orders (pending and shipped) with stats - OPTIMIZED with org filtering
+  app.get("/api/orders", requireAuth, requireOrgAccess, async (req: any, res) => {
     try {
-      const data = await storage.getOrdersWithStats();
+      const orgId = req.user.role === 'master' ? undefined : req.organizationId;
+      const data = await storage.getOrdersWithStats(orgId);
       res.json(data);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch orders" });
@@ -25,8 +90,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // DEPRECATED: Remove redundant endpoint - data is now available via /api/orders
   // app.get("/api/orders/pending", async (req, res) => {
 
-  // Delete order - OPTIMIZED
-  app.delete("/api/orders/:id", async (req, res) => {
+  // Analytics endpoint
+  app.get("/api/analytics", requireAuth, requireOrgAccess, async (req: any, res) => {
+    try {
+      const orgId = req.user.role === 'master' ? 
+        (req.query.organizationId ? parseInt(req.query.organizationId) : 1) : 
+        req.organizationId;
+      
+      const startDate = req.query.startDate ? new Date(req.query.startDate) : undefined;
+      const endDate = req.query.endDate ? new Date(req.query.endDate) : undefined;
+      
+      const analytics = await storage.getAnalytics(orgId, startDate, endDate);
+      res.json(analytics);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch analytics" });
+    }
+  });
+
+  // Organization management (master only)
+  app.get("/api/organizations", requireAuth, requireRole(['master']), async (req, res) => {
+    try {
+      const organizations = await storage.getAllOrganizations();
+      res.json(organizations);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch organizations" });
+    }
+  });
+
+  // Delete order - OPTIMIZED with org access control
+  app.delete("/api/orders/:id", requireAuth, requireOrgAccess, async (req: any, res) => {
     try {
       const orderId = parseInt(req.params.id);
       
@@ -34,6 +126,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const order = await storage.getOrder(orderId);
       if (!order) {
         return res.status(404).json({ error: "Order not found" });
+      }
+
+      // Check organization access for non-master users
+      if (req.user.role !== 'master' && order.organizationId !== req.organizationId) {
+        return res.status(403).json({ error: "Access denied" });
       }
 
       // Check if order is shipped (has tracking number)
