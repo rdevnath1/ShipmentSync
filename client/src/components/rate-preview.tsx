@@ -241,19 +241,7 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
               </div>
             </div>
 
-            {/* Coverage Info */}
-            <div className="flex items-center gap-3 p-4 border rounded-lg">
-              <MapPin className="h-5 w-5 text-green-600" />
-              <div>
-                <div className="font-medium">Service Coverage</div>
-                <div className="text-sm text-muted-foreground">
-                  {rateData.preview.coverage.serviceArea}
-                </div>
-                <Badge variant="outline" className="text-green-600 border-green-600 mt-1">
-                  Available
-                </Badge>
-              </div>
-            </div>
+            
 
             
 
