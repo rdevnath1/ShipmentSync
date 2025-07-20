@@ -235,9 +235,7 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
                 <div className="text-sm text-muted-foreground">
                   {rateData.preview.estimatedDelivery.description}
                 </div>
-                <div className="text-sm text-blue-600">
-                  Est. {rateData.preview.estimatedDelivery.estimatedDate}
-                </div>
+                
               </div>
             </div>
 
