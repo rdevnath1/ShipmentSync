@@ -117,7 +117,7 @@ export default function Dashboard() {
                 className="w-full"
               >
                 <FolderSync className="mr-2" size={16} />
-                Sync Orders from ShipStation
+                Sync Orders
               </Button>
             </CardContent>
           </Card>
