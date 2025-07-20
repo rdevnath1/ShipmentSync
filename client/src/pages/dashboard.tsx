@@ -42,7 +42,7 @@ export default function Dashboard() {
         
 
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div className="mb-6">
           {/* Recent Orders */}
           <Card>
             <CardHeader>
@@ -50,29 +50,6 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <OrderTable orders={orders.slice(0, 5)} hideActions={true} />
-            </CardContent>
-          </Card>
-
-          {/* API Integration Status */}
-          <Card>
-            <CardHeader>
-              <CardTitle>API Integration Status</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">ShipStation</span>
-                  <div className="h-2 w-2 bg-green-500 rounded-full"></div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Jiayou</span>
-                  <div className="h-2 w-2 bg-green-500 rounded-full"></div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Rate Calculator API</span>
-                  <div className="h-2 w-2 bg-green-500 rounded-full"></div>
-                </div>
-              </div>
             </CardContent>
           </Card>
         </div>
