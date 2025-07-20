@@ -1,8 +1,9 @@
 import { 
-  organizations, users, orders, trackingEvents, analytics, apiKeys, 
+  organizations, users, orders, trackingEvents, analytics, apiKeys, auditLogs, retryQueue,
   type Organization, type InsertOrganization, type User, type InsertUser, 
   type Order, type InsertOrder, type TrackingEvent, type InsertTrackingEvent, 
-  type Analytics, type InsertAnalytics, type ApiKey, type InsertApiKey 
+  type Analytics, type InsertAnalytics, type ApiKey, type InsertApiKey,
+  type AuditLog, type InsertAuditLog, type RetryQueueItem, type InsertRetryQueueItem
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, gte, lte, count } from "drizzle-orm";
@@ -48,6 +49,16 @@ export interface IStorage {
   updateApiKey(id: number, apiKey: Partial<InsertApiKey>): Promise<ApiKey>;
   deleteApiKey(id: number): Promise<void>;
   updateApiKeyLastUsed(keyId: string): Promise<void>;
+  
+  // Audit Log methods
+  createAuditLog(log: InsertAuditLog): Promise<AuditLog>;
+  getAuditLogs(orgId?: number, limit?: number): Promise<AuditLog[]>;
+  
+  // Retry Queue methods
+  createRetryQueueItem(item: InsertRetryQueueItem): Promise<RetryQueueItem>;
+  getRetryQueueItem(id: number): Promise<RetryQueueItem | undefined>;
+  updateRetryQueueItem(id: number, item: Partial<InsertRetryQueueItem>): Promise<RetryQueueItem>;
+  getPendingRetryJobs(limit?: number): Promise<RetryQueueItem[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -286,6 +297,65 @@ export class DatabaseStorage implements IStorage {
       .update(apiKeys)
       .set({ lastUsed: new Date() })
       .where(eq(apiKeys.keyId, keyId));
+  }
+
+  // Audit Log methods
+  async createAuditLog(insertLog: InsertAuditLog): Promise<AuditLog> {
+    const [log] = await db
+      .insert(auditLogs)
+      .values(insertLog)
+      .returning();
+    return log;
+  }
+
+  async getAuditLogs(orgId?: number, limit: number = 100): Promise<AuditLog[]> {
+    const query = db.select().from(auditLogs);
+    
+    if (orgId) {
+      return await query
+        .where(eq(auditLogs.organizationId, orgId))
+        .orderBy(desc(auditLogs.createdAt))
+        .limit(limit);
+    }
+    
+    return await query
+      .orderBy(desc(auditLogs.createdAt))
+      .limit(limit);
+  }
+
+  // Retry Queue methods
+  async createRetryQueueItem(insertItem: InsertRetryQueueItem): Promise<RetryQueueItem> {
+    const [item] = await db
+      .insert(retryQueue)
+      .values(insertItem)
+      .returning();
+    return item;
+  }
+
+  async getRetryQueueItem(id: number): Promise<RetryQueueItem | undefined> {
+    const [item] = await db
+      .select()
+      .from(retryQueue)
+      .where(eq(retryQueue.id, id));
+    return item || undefined;
+  }
+
+  async updateRetryQueueItem(id: number, itemUpdate: Partial<InsertRetryQueueItem>): Promise<RetryQueueItem> {
+    const [item] = await db
+      .update(retryQueue)
+      .set({ ...itemUpdate, updatedAt: new Date() })
+      .where(eq(retryQueue.id, id))
+      .returning();
+    return item;
+  }
+
+  async getPendingRetryJobs(limit: number = 50): Promise<RetryQueueItem[]> {
+    return await db
+      .select()
+      .from(retryQueue)
+      .where(eq(retryQueue.status, 'pending'))
+      .orderBy(retryQueue.nextAttempt)
+      .limit(limit);
   }
 }
 

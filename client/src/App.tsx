@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import Dashboard from "@/pages/dashboard";
 import Orders from "@/pages/orders";
 import Analytics from "@/pages/analytics";
+import AuditLogs from "@/pages/audit-logs";
 import Tracking from "@/pages/tracking";
 import Settings from "@/pages/settings";
 import Login from "@/pages/login";
@@ -38,6 +39,7 @@ function Router() {
                 <Route path="/" component={Dashboard} />
                 <Route path="/orders" component={Orders} />
                 <Route path="/analytics" component={Analytics} />
+                <Route path="/audit-logs" component={AuditLogs} />
                 <Route path="/settings" component={Settings} />
                 <Route component={NotFound} />
               </Switch>

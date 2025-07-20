@@ -6,6 +6,7 @@ import {
   Route, 
   BarChart3,
   Settings,
+  Shield,
   Menu,
   X,
   LogOut,
@@ -27,19 +28,25 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 
-const navItems = [
-  { path: "/", icon: LayoutDashboard, label: "Dashboard" },
-  { path: "/orders", icon: Package, label: "Orders" },
-  { path: "/analytics", icon: BarChart3, label: "Analytics" },
-  { path: "/tracking", icon: Route, label: "Tracking" },
-  { path: "/settings", icon: Settings, label: "Settings" },
-];
-
 export default function Sidebar() {
   const [location] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+
+  // Base navigation items for all users
+  const baseNavItems = [
+    { path: "/", icon: LayoutDashboard, label: "Dashboard" },
+    { path: "/orders", icon: Package, label: "Orders" },
+    { path: "/analytics", icon: BarChart3, label: "Analytics" },
+    { path: "/tracking", icon: Route, label: "Tracking" },
+    { path: "/settings", icon: Settings, label: "Settings" },
+  ];
+
+  // Add admin-only items for master users
+  const navItems = user?.role === 'master' 
+    ? [...baseNavItems.slice(0, -1), { path: "/audit-logs", icon: Shield, label: "Audit Logs" }, baseNavItems[baseNavItems.length - 1]]
+    : baseNavItems;
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);

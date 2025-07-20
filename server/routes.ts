@@ -6,6 +6,8 @@ import { JiayouService } from "./services/jiayou";
 import { insertOrderSchema } from "@shared/schema";
 import { z } from "zod";
 import { setupAuth, requireAuth, requireOrgAccess, requireRole } from "./auth";
+import { createAuditMiddleware, errorHandlerMiddleware, rateLimitMiddleware } from "./middleware/audit-middleware";
+import { retryQueue } from "./utils/retry-queue";
 import bcrypt from 'bcrypt';
 
 // Create service instances once and reuse them
@@ -76,8 +78,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize master admin user and demo data
   await initializeDemoData();
 
+  // Add global rate limiting
+  app.use('/api', rateLimitMiddleware());
+
   // Get all orders (pending and shipped) with stats - OPTIMIZED with org filtering
-  app.get("/api/orders", requireAuth, requireOrgAccess, async (req: any, res) => {
+  app.get("/api/orders", requireAuth, requireOrgAccess, createAuditMiddleware('list_orders', 'internal'), async (req: any, res) => {
     try {
       const orgId = req.user.role === 'master' ? undefined : req.organizationId;
       const data = await storage.getOrdersWithStats(orgId);
@@ -194,7 +199,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Pull and sync orders from ShipStation
-  app.post("/api/orders/pull-shipstation", async (req, res) => {
+  app.post("/api/orders/pull-shipstation", requireAuth, requireOrgAccess, createAuditMiddleware('sync_shipstation_orders', 'shipstation'), async (req, res) => {
     try {
       const shipStationOrders = await shipStationService.getOrders();
       const createdOrders = [];
@@ -1084,6 +1089,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to fetch dashboard stats" });
     }
   });
+
+  // Audit logs endpoint (master admin only)
+  app.get("/api/audit-logs", requireAuth, requireRole(['master']), createAuditMiddleware('view_audit_logs', 'internal'), async (req: any, res) => {
+    try {
+      const orgId = req.query.organizationId ? parseInt(req.query.organizationId) : undefined;
+      const limit = req.query.limit ? parseInt(req.query.limit) : 100;
+      
+      const logs = await storage.getAuditLogs(orgId, limit);
+      res.json(logs);
+    } catch (error) {
+      console.error("Error fetching audit logs:", error);
+      res.status(500).json({ error: "Failed to fetch audit logs" });
+    }
+  });
+
+  // Add error handler middleware at the end
+  app.use(errorHandlerMiddleware());
 
   const httpServer = createServer(app);
   return httpServer;

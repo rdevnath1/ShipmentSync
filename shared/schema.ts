@@ -109,6 +109,50 @@ export const apiKeys = pgTable("api_keys", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Audit log for API requests and system events
+export const auditLogs = pgTable("audit_logs", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").references(() => organizations.id),
+  userId: integer("user_id").references(() => users.id),
+  action: text("action").notNull(), // create_shipment, track_package, batch_print, etc.
+  resource: text("resource"), // shipstation, jiayou, internal
+  resourceId: text("resource_id"), // tracking number, order ID, etc.
+  method: text("method"), // GET, POST, PUT, DELETE
+  endpoint: text("endpoint"), // API endpoint called
+  requestData: jsonb("request_data"), // Request payload (sanitized)
+  responseData: jsonb("response_data"), // Response data (sanitized)
+  statusCode: integer("status_code"), // HTTP status code
+  success: boolean("success").notNull(),
+  error: text("error"), // Error message if failed
+  duration: integer("duration"), // Request duration in ms
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_audit_logs_org").on(table.organizationId),
+  index("idx_audit_logs_user").on(table.userId),
+  index("idx_audit_logs_action").on(table.action),
+  index("idx_audit_logs_created").on(table.createdAt),
+]);
+
+// Retry queue for failed operations
+export const retryQueue = pgTable("retry_queue", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").references(() => organizations.id),
+  jobType: text("job_type").notNull(), // create_shipment, track_update, etc.
+  payload: jsonb("payload").notNull(), // Job data
+  attempts: integer("attempts").default(0),
+  maxAttempts: integer("max_attempts").default(3),
+  nextAttempt: timestamp("next_attempt").notNull(),
+  lastError: text("last_error"),
+  status: text("status").default("pending"), // pending, processing, completed, failed
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_retry_queue_next").on(table.nextAttempt),
+  index("idx_retry_queue_status").on(table.status),
+]);
+
 // Define all relations
 export const organizationsRelations = relations(organizations, ({ many }) => ({
   users: many(users),
@@ -149,6 +193,24 @@ export const apiKeysRelations = relations(apiKeys, ({ many }) => ({
   // Add relations if needed
 }));
 
+export const auditLogsRelations = relations(auditLogs, ({ one }) => ({
+  organization: one(organizations, {
+    fields: [auditLogs.organizationId],
+    references: [organizations.id],
+  }),
+  user: one(users, {
+    fields: [auditLogs.userId],
+    references: [users.id],
+  }),
+}));
+
+export const retryQueueRelations = relations(retryQueue, ({ one }) => ({
+  organization: one(organizations, {
+    fields: [retryQueue.organizationId],
+    references: [organizations.id],
+  }),
+}));
+
 // Export types for TypeScript
 export type Organization = typeof organizations.$inferSelect;
 export type InsertOrganization = typeof organizations.$inferInsert;
@@ -162,6 +224,10 @@ export type Analytics = typeof analytics.$inferSelect;
 export type InsertAnalytics = typeof analytics.$inferInsert;
 export type ApiKey = typeof apiKeys.$inferSelect;
 export type InsertApiKey = typeof apiKeys.$inferInsert;
+export type AuditLog = typeof auditLogs.$inferSelect;
+export type InsertAuditLog = typeof auditLogs.$inferInsert;
+export type RetryQueueItem = typeof retryQueue.$inferSelect;
+export type InsertRetryQueueItem = typeof retryQueue.$inferInsert;
 
 // Zod schemas for validation
 export const insertOrganizationSchema = createInsertSchema(organizations);
@@ -170,3 +236,5 @@ export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, cre
 export const insertTrackingEventSchema = createInsertSchema(trackingEvents);
 export const insertAnalyticsSchema = createInsertSchema(analytics);
 export const insertApiKeySchema = createInsertSchema(apiKeys);
+export const insertAuditLogSchema = createInsertSchema(auditLogs);
+export const insertRetryQueueItemSchema = createInsertSchema(retryQueue);
