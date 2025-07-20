@@ -108,7 +108,6 @@ export default function Sidebar() {
             </div>
             <div>
               <h1 className="text-lg lg:text-xl font-semibold text-foreground">Quikpik</h1>
-              <p className="text-xs lg:text-sm text-muted-foreground">Shipment Management</p>
             </div>
           </div>
         </div>
