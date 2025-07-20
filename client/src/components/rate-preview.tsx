@@ -255,25 +255,7 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
               </div>
             </div>
 
-            {/* Service Options */}
-            {rateData.preview.serviceOptions && rateData.preview.serviceOptions.length > 0 && (
-              <div>
-                <Label className="text-base font-medium mb-3 block">Available Services</Label>
-                <div className="space-y-2">
-                  {rateData.preview.serviceOptions.map((service: any, index: number) => (
-                    <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
-                        <div className="font-medium">{service.name}</div>
-                        <div className="text-sm text-muted-foreground">{service.description}</div>
-                      </div>
-                      <Badge variant={service.available ? "default" : "secondary"}>
-                        {service.available ? "Available" : "Not Available"}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            
 
             {/* Warnings */}
             {rateData.warnings && rateData.warnings.length > 0 && (
@@ -322,9 +304,7 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
               </Button>
             )}
 
-            <div className="text-xs text-muted-foreground text-center">
-              Rate valid until: {new Date(rateData.validUntil).toLocaleString()}
-            </div>
+            
           </CardContent>
         </Card>
       )}
