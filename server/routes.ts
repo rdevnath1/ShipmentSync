@@ -92,6 +92,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const data = await storage.getOrdersWithStats(orgId);
       res.json(data);
     } catch (error) {
+      console.error("Error fetching orders:", error);
       res.status(500).json({ error: "Failed to fetch orders" });
     }
   });
@@ -227,6 +228,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           totalAmount: ssOrder.orderTotal.toString(),
           currency: "USD",
           status: existingOrder?.status || "pending", // Preserve existing shipment status
+          organizationId: req.organizationId, // Assign to user's organization
         };
 
         if (existingOrder) {

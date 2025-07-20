@@ -152,6 +152,7 @@ export class DatabaseStorage implements IStorage {
       .insert(orders)
       .values({
         ...insertOrder,
+        organizationId: insertOrder.organizationId || 1, // Default to organization 1 if not specified
         updatedAt: new Date(),
       })
       .returning();
