@@ -37,11 +37,14 @@ router.post("/preview", requireAuth, requireOrgAccess, createAuditMiddleware('ra
       });
     }
 
-    // Calculate estimated cost based on weight and dimensions
-    const estimatedCost = calculateShippingCost(weight, dimensions, 'US');
+    // Calculate estimated cost based on weight, dimensions, and ZIP codes
+    const estimatedCost = calculateShippingCost(weight, dimensions, 'US', pickupZipCode, deliveryZipCode);
     
-    // Calculate estimated delivery time
-    const estimatedDelivery = calculateDeliveryTime('US', serviceType);
+    // Get shipping zone based on ZIP codes
+    const shippingZone = getShippingZone('US', pickupZipCode, deliveryZipCode);
+    
+    // Calculate estimated delivery time based on zone
+    const estimatedDelivery = calculateDeliveryTime(shippingZone, serviceType);
 
     // Get service options
     const serviceOptions = getAvailableServices('US');
@@ -68,11 +71,11 @@ router.post("/preview", requireAuth, requireOrgAccess, createAuditMiddleware('ra
         rateCalculation: {
           baseWeight: weight,
           dimensions: dimensions,
-          zone: getShippingZone('US', deliveryZipCode),
+          zone: shippingZone,
           factors: {
             weightFactor: Math.ceil(weight / 0.45), // Per pound
             dimensionalWeight: calculateDimensionalWeight(dimensions),
-            zoneFactor: getZoneMultiplier('US')
+            zoneFactor: getZoneMultiplier(shippingZone)
           }
         }
       },
@@ -211,11 +214,12 @@ router.post("/bulk-preview", requireAuth, requireOrgAccess, createAuditMiddlewar
 });
 
 // Helper functions for rate calculations
-function calculateShippingCost(weight: number, dimensions: any, country: string): number {
+function calculateShippingCost(weight: number, dimensions: any, country: string, originZip?: string, destZip?: string): number {
   const baseRate = 3.89; // Base Jiayou rate
   const weightFactor = Math.max(weight, 0.05) * 2.5; // Per kg
   const dimensionalWeight = calculateDimensionalWeight(dimensions);
-  const zoneMultiplier = getZoneMultiplier(country);
+  const zone = getShippingZone(country, originZip, destZip);
+  const zoneMultiplier = getZoneMultiplier(zone);
   
   const billableWeight = Math.max(weight, dimensionalWeight);
   const cost = (baseRate + (billableWeight * weightFactor)) * zoneMultiplier;
@@ -229,34 +233,105 @@ function calculateDimensionalWeight(dimensions: any): number {
   return (length * width * height) / 5000;
 }
 
-function getShippingZone(country: string, postalCode?: string): string {
-  // Simplified zone mapping
-  if (country === 'US') return 'Zone 1';
-  if (country === 'CA') return 'Zone 2';
-  if (['MX', 'PR', 'VI', 'GU'].includes(country)) return 'Zone 3';
-  return 'Zone 4'; // International
+function getShippingZone(country: string, originZip?: string, destZip?: string): string {
+  if (country !== 'US') {
+    if (country === 'CA') return 'Zone 2';
+    if (['MX', 'PR', 'VI', 'GU'].includes(country)) return 'Zone 3';
+    return 'Zone 4'; // International
+  }
+
+  // For US domestic shipping, calculate zone based on ZIP code distance
+  if (!originZip || !destZip) return 'Zone 1';
+
+  const originDigits = parseInt(originZip.substring(0, 3));
+  const destDigits = parseInt(destZip.substring(0, 3));
+  
+  // Calculate approximate distance using ZIP code ranges
+  const distance = calculateZipDistance(originDigits, destDigits);
+  
+  // Map distance to shipping zones (similar to USPS zones)
+  if (distance <= 150) return 'Zone 1'; // Local
+  if (distance <= 300) return 'Zone 2'; // Regional
+  if (distance <= 600) return 'Zone 3'; // 
+  if (distance <= 1000) return 'Zone 4';
+  if (distance <= 1400) return 'Zone 5';
+  if (distance <= 1800) return 'Zone 6';
+  if (distance <= 2200) return 'Zone 7';
+  return 'Zone 8'; // Cross-country
 }
 
-function getZoneMultiplier(country: string): number {
-  const zone = getShippingZone(country);
+function calculateZipDistance(origin3Digit: number, dest3Digit: number): number {
+  // Simplified distance calculation based on first 3 digits of ZIP codes
+  // This maps ZIP prefixes to approximate geographic locations
+  
+  const zipRegions = {
+    // Northeast
+    010: { lat: 42.36, lon: -71.06 }, // Boston area
+    121: { lat: 42.75, lon: -73.80 }, // Albany, NY (12134 is in this region)
+    100: { lat: 40.71, lon: -74.01 }, // NYC area
+    
+    // Southeast  
+    300: { lat: 33.75, lon: -84.39 }, // Atlanta
+    321: { lat: 28.54, lon: -81.38 }, // Orlando
+    
+    // Midwest
+    600: { lat: 41.88, lon: -87.63 }, // Chicago
+    550: { lat: 44.98, lon: -93.27 }, // Minneapolis
+    
+    // Southwest
+    750: { lat: 32.78, lon: -96.80 }, // Dallas
+    853: { lat: 33.45, lon: -112.07 }, // Phoenix
+    
+    // West Coast
+    900: { lat: 34.05, lon: -118.24 }, // Los Angeles
+    941: { lat: 37.77, lon: -122.42 }, // San Francisco
+    981: { lat: 47.61, lon: -122.33 }, // Seattle (98174 is in this region)
+  };
+
+  // Get coordinates for origin and destination regions
+  const originCoords = zipRegions[origin3Digit] || zipRegions[Math.floor(origin3Digit / 10) * 10] || zipRegions[100];
+  const destCoords = zipRegions[dest3Digit] || zipRegions[Math.floor(dest3Digit / 10) * 10] || zipRegions[900];
+
+  // Calculate approximate distance using Haversine formula
+  const R = 3959; // Earth's radius in miles
+  const dLat = (destCoords.lat - originCoords.lat) * Math.PI / 180;
+  const dLon = (destCoords.lon - originCoords.lon) * Math.PI / 180;
+  
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(originCoords.lat * Math.PI / 180) * Math.cos(destCoords.lat * Math.PI / 180) *
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c; // Distance in miles
+}
+
+function getZoneMultiplier(zone: string): number {
   switch (zone) {
     case 'Zone 1': return 1.0;
-    case 'Zone 2': return 1.2;
-    case 'Zone 3': return 1.5;
+    case 'Zone 2': return 1.3;
+    case 'Zone 3': return 1.6;
     case 'Zone 4': return 2.0;
+    case 'Zone 5': return 2.4;
+    case 'Zone 6': return 2.8;
+    case 'Zone 7': return 3.2;
+    case 'Zone 8': return 3.8;
     default: return 1.0;
   }
 }
 
-function calculateDeliveryTime(country: string, serviceType: string): any {
-  const zone = getShippingZone(country);
+function calculateDeliveryTime(zone: string, serviceType: string): any {
   let baseDays = 3;
   
   switch (zone) {
     case 'Zone 1': baseDays = 3; break;
-    case 'Zone 2': baseDays = 5; break;
-    case 'Zone 3': baseDays = 7; break;
-    case 'Zone 4': baseDays = 10; break;
+    case 'Zone 2': baseDays = 4; break;
+    case 'Zone 3': baseDays = 5; break;
+    case 'Zone 4': baseDays = 6; break;
+    case 'Zone 5': baseDays = 7; break;
+    case 'Zone 6': baseDays = 8; break;
+    case 'Zone 7': baseDays = 9; break;
+    case 'Zone 8': baseDays = 10; break;
+    default: baseDays = 3; break;
   }
 
   if (serviceType === 'express') {

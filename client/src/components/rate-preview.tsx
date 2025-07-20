@@ -209,7 +209,7 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
         <Card>
           <CardHeader className="flex flex-col space-y-1.5 p-6 pl-[8px] pr-[8px] pt-[1px] pb-[1px]">
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="p-6 space-y-4 ml-[0px] mr-[0px] mt-[0px] mb-[0px] pl-[24px] pr-[24px] pt-[15px] pb-[15px]">
             {/* Three-column layout for rate information */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               {/* Estimated Cost */}
