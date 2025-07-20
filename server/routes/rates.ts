@@ -215,14 +215,39 @@ router.post("/bulk-preview", requireAuth, requireOrgAccess, createAuditMiddlewar
 
 // Helper functions for rate calculations
 function calculateShippingCost(weight: number, dimensions: any, country: string, originZip?: string, destZip?: string): number {
-  const baseRate = 3.89; // Base Jiayou rate
-  const weightFactor = Math.max(weight, 0.05) * 2.5; // Per kg
-  const dimensionalWeight = calculateDimensionalWeight(dimensions);
   const zone = getShippingZone(country, originZip, destZip);
-  const zoneMultiplier = getZoneMultiplier(zone);
+  const dimensionalWeight = calculateDimensionalWeight(dimensions);
   
-  const billableWeight = Math.max(weight, dimensionalWeight);
-  const cost = (baseRate + (billableWeight * weightFactor)) * zoneMultiplier;
+  // Only use dimensional weight if it's significantly larger than actual weight AND the package is very light
+  // This prevents small packages from being overcharged due to packaging dimensions
+  let billableWeight = weight;
+  if (weight < 1.0 && dimensionalWeight > weight * 3) {
+    billableWeight = Math.min(dimensionalWeight, weight * 2); // Cap dimensional weight impact for small packages
+  } else {
+    billableWeight = Math.max(weight, dimensionalWeight);
+  }
+  
+  // Get base rate from weight tiers (based on your rate chart)
+  let baseRate = 0;
+  if (billableWeight <= 0.5) {
+    baseRate = 3.89;
+  } else if (billableWeight <= 1.0) {
+    baseRate = 4.20;
+  } else if (billableWeight <= 1.5) {
+    baseRate = 4.68;
+  } else if (billableWeight <= 2.0) {
+    baseRate = 5.04; // This should be the rate for 1.5-2kg range
+  } else if (billableWeight <= 3.0) {
+    baseRate = 5.85;
+  } else if (billableWeight <= 5.0) {
+    baseRate = 7.56;
+  } else {
+    // For weights over 5kg, calculate progressively
+    baseRate = 7.56 + ((billableWeight - 5) * 1.5);
+  }
+  
+  const zoneMultiplier = getZoneMultiplier(zone);
+  const cost = baseRate * zoneMultiplier;
   
   return Math.round(cost * 100) / 100; // Round to 2 decimal places
 }
@@ -230,7 +255,9 @@ function calculateShippingCost(weight: number, dimensions: any, country: string,
 function calculateDimensionalWeight(dimensions: any): number {
   const { length, width, height } = dimensions;
   // Standard dimensional weight formula: L × W × H / 5000 (for cm to kg)
-  return (length * width * height) / 5000;
+  // Only apply dimensional weight if package is large and light
+  const dimWeight = (length * width * height) / 5000;
+  return dimWeight;
 }
 
 function getShippingZone(country: string, originZip?: string, destZip?: string): string {
