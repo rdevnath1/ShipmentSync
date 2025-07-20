@@ -86,15 +86,10 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
     <div className={`space-y-6 ${className}`}>
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Truck className="h-5 w-5" />
-            Rate Calculator
-          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* ZIP Code Details */}
           <div className="space-y-3">
-            <Label className="text-base font-medium">Shipping Details</Label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="pickupZipCode">Pickup ZIP Code</Label>

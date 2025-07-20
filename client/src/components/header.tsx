@@ -116,7 +116,6 @@ export default function Header({ title, description }: HeaderProps) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
         <div>
           <h2 className="text-xl lg:text-2xl font-semibold text-foreground">{title}</h2>
-          <p className="text-sm lg:text-base text-muted-foreground">{description}</p>
         </div>
         <div className="flex items-center space-x-2 lg:space-x-4">
           <DropdownMenu>
