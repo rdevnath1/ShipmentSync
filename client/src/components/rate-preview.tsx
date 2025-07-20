@@ -258,7 +258,28 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
               </Alert>
             )}
 
-            
+            {/* Rate Breakdown */}
+            <details className="border rounded-lg p-4">
+              <summary className="font-medium cursor-pointer">Rate Calculation Details</summary>
+              <div className="mt-3 space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span>Base Weight:</span>
+                  <span>{(rateData.preview.rateCalculation.baseWeight * 35.274).toFixed(1)} oz</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Dimensional Weight:</span>
+                  <span>{(rateData.preview.rateCalculation.factors.dimensionalWeight * 35.274).toFixed(1)} oz</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Shipping Zone:</span>
+                  <span>{rateData.preview.rateCalculation.zone}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Zone Multiplier:</span>
+                  <span>{rateData.preview.rateCalculation.factors.zoneFactor}x</span>
+                </div>
+              </div>
+            </details>
 
             {onRateSelected && (
               <Button 
