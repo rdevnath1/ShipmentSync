@@ -43,7 +43,9 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
 
   const ratePreviewMutation = useMutation({
     mutationFn: async (data: any) => {
-      return apiRequest("POST", "/api/rates/preview", data);
+      const result = await apiRequest("POST", "/api/rates/preview", data);
+      console.log("Rate preview response:", result);
+      return result;
     },
   });
 
@@ -81,6 +83,11 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
   };
 
   const { data: rateData, error, isLoading } = ratePreviewMutation;
+
+  // Debug logging
+  console.log("Rate data:", rateData);
+  console.log("Error:", error);
+  console.log("Loading:", isLoading);
 
   return (
     <div className={`space-y-6 ${className}`}>
