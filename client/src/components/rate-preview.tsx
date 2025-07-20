@@ -43,7 +43,8 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
 
   const ratePreviewMutation = useMutation({
     mutationFn: async (data: any) => {
-      const result = await apiRequest("POST", "/api/rates/preview", data);
+      const response = await apiRequest("POST", "/api/rates/preview", data);
+      const result = await response.json();
       console.log("Rate preview response:", result);
       return result;
     },
