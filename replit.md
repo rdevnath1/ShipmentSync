@@ -60,7 +60,11 @@ Preferred communication style: Simple, everyday language.
 - **Dashboard Simplification**: Removed webhook activity and rate preview sections from dashboard for cleaner interface
 - **Navigation Update**: Updated sidebar and routing to use /rate-calculator path
 - **Focused Dashboard**: Dashboard now shows Recent Orders and API Integration Status only
-- **SUCCESSFUL RESULT**: Clean, focused dashboard with proper Rate Calculator branding
+- **Weight Unit Selection**: Added Oz/Lb weight unit selection with Oz as default and automatic metric conversion for APIs
+- **Imperial Units**: Changed dimensions from cm to inches for US-friendly input with automatic API conversion
+- **Sidebar Cleanup**: Removed "Shipment Management" subtitle from sidebar for cleaner branding
+- **Business Insights**: Added intelligent analytics insights including profit margin analysis, shipping efficiency, order trends, and cost optimization recommendations
+- **SUCCESSFUL RESULT**: Clean, focused dashboard with proper Rate Calculator branding and enhanced analytics
 
 ### ChatGPT Production Optimizations Implementation (July 20, 2025)
 - **Pre-Validation System**: Enhanced address validation with country-specific schemas, PO Box detection, and business rule validation

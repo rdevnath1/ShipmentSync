@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
-import { TrendingUp, Package, DollarSign, Users, Calendar, Download } from "lucide-react";
+import { TrendingUp, Package, DollarSign, Users, Calendar, Download, Lightbulb, AlertTriangle, CheckCircle, Target } from "lucide-react";
 
 export default function Analytics() {
   const [dateRange, setDateRange] = useState<"7d" | "30d" | "90d" | "custom">("30d");
@@ -72,6 +72,113 @@ export default function Analytics() {
       default: return '#6b7280';
     }
   }
+
+  // Generate unique business insights
+  function generateInsights() {
+    const insights = [];
+    
+    // Profit margin analysis
+    const profitMargin = totalRevenue > 0 ? (profit / totalRevenue) * 100 : 0;
+    if (profitMargin > 50) {
+      insights.push({
+        type: 'success',
+        icon: CheckCircle,
+        title: 'Excellent Profit Margins',
+        description: `Your profit margin of ${profitMargin.toFixed(1)}% is exceptional. Consider scaling operations to maximize this advantage.`
+      });
+    } else if (profitMargin < 20 && profitMargin > 0) {
+      insights.push({
+        type: 'warning',
+        icon: AlertTriangle,
+        title: 'Low Profit Margins',
+        description: `Your profit margin of ${profitMargin.toFixed(1)}% suggests high shipping costs. Consider negotiating better rates or optimizing package sizing.`
+      });
+    }
+    
+    // Order status analysis
+    const shippedRate = orders.length > 0 ? (statusDistribution.shipped || 0) / orders.length * 100 : 0;
+    if (shippedRate > 90) {
+      insights.push({
+        type: 'success',
+        icon: CheckCircle,
+        title: 'High Shipping Efficiency',
+        description: `${shippedRate.toFixed(1)}% of your orders are shipped successfully. Your fulfillment process is performing excellently.`
+      });
+    } else if (shippedRate < 70) {
+      insights.push({
+        type: 'warning',
+        icon: AlertTriangle,
+        title: 'Shipping Bottleneck',
+        description: `Only ${shippedRate.toFixed(1)}% of orders are shipped. Focus on streamlining your fulfillment process.`
+      });
+    }
+    
+    // Average order value
+    const avgOrderValue = orders.length > 0 ? totalRevenue / orders.length : 0;
+    if (avgOrderValue > 50) {
+      insights.push({
+        type: 'insight',
+        icon: Target,
+        title: 'High-Value Customers',
+        description: `Your average order value of $${avgOrderValue.toFixed(2)} indicates premium customer base. Consider upselling strategies.`
+      });
+    } else if (avgOrderValue < 20 && avgOrderValue > 0) {
+      insights.push({
+        type: 'insight',
+        icon: TrendingUp,
+        title: 'Low Order Values',
+        description: `Average order value is $${avgOrderValue.toFixed(2)}. Bundle products or offer free shipping thresholds to increase basket size.`
+      });
+    }
+    
+    // Volume trends
+    const recentOrders = orders.filter(order => {
+      const orderDate = new Date(order.createdAt);
+      const lastWeek = new Date();
+      lastWeek.setDate(lastWeek.getDate() - 7);
+      return orderDate > lastWeek;
+    }).length;
+    
+    const previousWeekOrders = orders.filter(order => {
+      const orderDate = new Date(order.createdAt);
+      const twoWeeksAgo = new Date();
+      twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      return orderDate > twoWeeksAgo && orderDate <= oneWeekAgo;
+    }).length;
+    
+    if (recentOrders > previousWeekOrders * 1.2) {
+      insights.push({
+        type: 'success',
+        icon: TrendingUp,
+        title: 'Growing Order Volume',
+        description: `Order volume increased by ${(((recentOrders - previousWeekOrders) / (previousWeekOrders || 1)) * 100).toFixed(1)}% this week. Your business is trending upward!`
+      });
+    } else if (recentOrders < previousWeekOrders * 0.8 && previousWeekOrders > 0) {
+      insights.push({
+        type: 'warning',
+        icon: AlertTriangle,
+        title: 'Declining Order Volume',
+        description: `Order volume decreased by ${(((previousWeekOrders - recentOrders) / previousWeekOrders) * 100).toFixed(1)}% this week. Monitor customer acquisition channels.`
+      });
+    }
+    
+    // Cost efficiency insight
+    const avgShippingCost = orders.length > 0 ? totalShippingCost / orders.length : 0;
+    if (avgShippingCost < 5) {
+      insights.push({
+        type: 'success',
+        icon: Package,
+        title: 'Cost-Effective Shipping',
+        description: `Average shipping cost of $${avgShippingCost.toFixed(2)} per order shows excellent carrier rate negotiation.`
+      });
+    }
+    
+    return insights.slice(0, 4); // Limit to 4 most relevant insights
+  }
+
+  const businessInsights = generateInsights();
 
   if (isLoading) {
     return (
@@ -253,6 +360,58 @@ export default function Analytics() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Business Insights */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Lightbulb className="mr-2" size={20} />
+              Business Insights
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {businessInsights.map((insight, index) => {
+                const Icon = insight.icon;
+                return (
+                  <div
+                    key={index}
+                    className={`p-4 rounded-lg border-l-4 ${
+                      insight.type === 'success' 
+                        ? 'border-green-500 bg-green-50 dark:bg-green-950/20' 
+                        : insight.type === 'warning' 
+                        ? 'border-orange-500 bg-orange-50 dark:bg-orange-950/20'
+                        : 'border-blue-500 bg-blue-50 dark:bg-blue-950/20'
+                    }`}
+                  >
+                    <div className="flex items-start space-x-3">
+                      <Icon 
+                        size={20} 
+                        className={`mt-1 ${
+                          insight.type === 'success' 
+                            ? 'text-green-600' 
+                            : insight.type === 'warning' 
+                            ? 'text-orange-600'
+                            : 'text-blue-600'
+                        }`} 
+                      />
+                      <div className="flex-1">
+                        <h4 className="font-medium text-sm mb-1">{insight.title}</h4>
+                        <p className="text-sm text-muted-foreground">{insight.description}</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {businessInsights.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                <Lightbulb size={32} className="mx-auto mb-2 opacity-50" />
+                <p>More insights will appear as you process more orders.</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Daily Orders Chart */}
         <Card>
