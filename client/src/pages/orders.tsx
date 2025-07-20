@@ -1,4 +1,5 @@
 import { useState } from "react";
+import RatePreview from "@/components/rate-preview";
 import Header from "@/components/header";
 import OrderTable from "@/components/order-table";
 import { Button } from "@/components/ui/button";

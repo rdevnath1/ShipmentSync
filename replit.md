@@ -1,8 +1,8 @@
-# Jiayou Shipment Management System
+# Quikpik Shipment Management System
 
 ## Overview
 
-This is a full-stack web application built with React and Express that manages shipments between ShipStation and Jiayou. The system allows users to import orders from ShipStation, create shipments with Jiayou, and track the shipping process. It features a modern UI built with shadcn/ui components and uses PostgreSQL for data persistence.
+This is a full-stack web application built with React and Express that manages shipments between ShipStation and Jiayou. The system allows users to import orders from ShipStation, create shipments with Jiayou, and track the shipping process. Enhanced with production-ready features including rate preview API, webhook support, and comprehensive error handling. It features a modern UI built with shadcn/ui components and uses PostgreSQL for data persistence.
 
 ## User Preferences
 

@@ -54,6 +54,7 @@ export const orders = pgTable("orders", {
   weight: decimal("weight", { precision: 8, scale: 3 }),
   dimensions: jsonb("dimensions"),
   shippingCost: decimal("shipping_cost", { precision: 10, scale: 2 }),
+  deliveredAt: timestamp("delivered_at"), // Track actual delivery timestamp
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [

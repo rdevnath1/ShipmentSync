@@ -38,6 +38,7 @@ export default function Sidebar() {
   const baseNavItems = [
     { path: "/", icon: LayoutDashboard, label: "Dashboard" },
     { path: "/orders", icon: Package, label: "Orders" },
+    { path: "/rate-preview", icon: BarChart3, label: "Rate Preview" },
     { path: "/analytics", icon: BarChart3, label: "Analytics" },
     { path: "/tracking", icon: Route, label: "Tracking" },
     { path: "/settings", icon: Settings, label: "Settings" },
