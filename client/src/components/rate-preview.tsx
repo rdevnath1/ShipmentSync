@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertCircle, Clock, DollarSign, Truck, MapPin } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { apiRequest } from "@/lib/queryClient";
@@ -40,7 +41,8 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
     country: "US"
   });
   
-  const [weight, setWeight] = useState<number>(0.5);
+  const [weight, setWeight] = useState<number>(8); // Default 8 oz
+  const [weightUnit, setWeightUnit] = useState<string>("oz"); // Default to ounces
   const [dimensions, setDimensions] = useState<Dimensions>({
     length: 10,
     width: 10,
@@ -58,10 +60,20 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
       return;
     }
 
+    // Convert weight to kg for API (Jiayou expects kg)
+    const weightInKg = weightUnit === "lb" ? weight * 0.453592 : weight * 0.0283495;
+    
+    // Convert dimensions from inches to cm for API (Jiayou expects cm)
+    const dimensionsInCm = {
+      length: Math.round(dimensions.length * 2.54),
+      width: Math.round(dimensions.width * 2.54),
+      height: Math.round(dimensions.height * 2.54)
+    };
+    
     ratePreviewMutation.mutate({
       shippingAddress: address,
-      weight,
-      dimensions,
+      weight: weightInKg,
+      dimensions: dimensionsInCm,
       serviceType: 'standard',
       channelCode: 'US001'
     });
@@ -155,46 +167,61 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
           {/* Package Details */}
           <div className="space-y-3">
             <Label className="text-base font-medium">Package Details</Label>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-              <div>
-                <Label htmlFor="weight">Weight (kg)</Label>
-                <Input
-                  id="weight"
-                  type="number"
-                  step="0.1"
-                  min="0.05"
-                  value={weight}
-                  onChange={(e) => setWeight(parseFloat(e.target.value) || 0.05)}
-                />
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+              <div className="md:col-span-2">
+                <Label htmlFor="weight">Weight</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="weight"
+                    type="number"
+                    step="0.1"
+                    min="0.1"
+                    value={weight}
+                    onChange={(e) => setWeight(parseFloat(e.target.value) || 0.1)}
+                    className="flex-1"
+                  />
+                  <Select value={weightUnit} onValueChange={setWeightUnit}>
+                    <SelectTrigger className="w-20">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="oz">Oz</SelectItem>
+                      <SelectItem value="lb">Lb</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               <div>
-                <Label htmlFor="length">Length (cm)</Label>
+                <Label htmlFor="length">Length (in)</Label>
                 <Input
                   id="length"
                   type="number"
+                  step="0.1"
                   min="1"
                   value={dimensions.length}
-                  onChange={(e) => handleDimensionChange('length', parseInt(e.target.value) || 1)}
+                  onChange={(e) => handleDimensionChange('length', parseFloat(e.target.value) || 1)}
                 />
               </div>
               <div>
-                <Label htmlFor="width">Width (cm)</Label>
+                <Label htmlFor="width">Width (in)</Label>
                 <Input
                   id="width"
                   type="number"
+                  step="0.1"
                   min="1"
                   value={dimensions.width}
-                  onChange={(e) => handleDimensionChange('width', parseInt(e.target.value) || 1)}
+                  onChange={(e) => handleDimensionChange('width', parseFloat(e.target.value) || 1)}
                 />
               </div>
               <div>
-                <Label htmlFor="height">Height (cm)</Label>
+                <Label htmlFor="height">Height (in)</Label>
                 <Input
                   id="height"
                   type="number"
+                  step="0.1"
                   min="1"
                   value={dimensions.height}
-                  onChange={(e) => handleDimensionChange('height', parseInt(e.target.value) || 1)}
+                  onChange={(e) => handleDimensionChange('height', parseFloat(e.target.value) || 1)}
                 />
               </div>
             </div>

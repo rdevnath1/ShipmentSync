@@ -204,15 +204,23 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
 
           <div className="border-t border-slate-200 pt-6">
             <h4 className="text-md font-medium text-foreground mb-4">Package Details</h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="weight">Weight (kg)</Label>
-                <Input
-                  id="weight"
-                  type="number"
-                  step="0.1"
-                  {...form.register("weight", { valueAsNumber: true })}
-                />
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="md:col-span-2">
+                <Label htmlFor="weight">Weight</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="weight"
+                    type="number"
+                    step="0.1"
+                    min="0.1"
+                    className="flex-1"
+                    {...form.register("weight", { valueAsNumber: true })}
+                  />
+                  <select className="w-16 px-2 py-1 border border-input bg-background text-sm rounded-md" defaultValue="oz">
+                    <option value="oz">Oz</option>
+                    <option value="lb">Lb</option>
+                  </select>
+                </div>
                 {form.formState.errors.weight && (
                   <p className="text-red-500 text-sm mt-1">
                     {form.formState.errors.weight.message}
@@ -220,10 +228,11 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
                 )}
               </div>
               <div>
-                <Label htmlFor="length">Length (cm)</Label>
+                <Label htmlFor="length">Length (in)</Label>
                 <Input
                   id="length"
                   type="number"
+                  step="0.1"
                   {...form.register("dimensions.length", { valueAsNumber: true })}
                 />
                 {form.formState.errors.dimensions?.length && (
@@ -233,10 +242,11 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
                 )}
               </div>
               <div>
-                <Label htmlFor="width">Width (cm)</Label>
+                <Label htmlFor="width">Width (in)</Label>
                 <Input
                   id="width"
                   type="number"
+                  step="0.1"
                   {...form.register("dimensions.width", { valueAsNumber: true })}
                 />
                 {form.formState.errors.dimensions?.width && (
@@ -246,10 +256,11 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
                 )}
               </div>
               <div>
-                <Label htmlFor="height">Height (cm)</Label>
+                <Label htmlFor="height">Height (in)</Label>
                 <Input
                   id="height"
                   type="number"
+                  step="0.1"
                   {...form.register("dimensions.height", { valueAsNumber: true })}
                 />
                 {form.formState.errors.dimensions?.height && (
