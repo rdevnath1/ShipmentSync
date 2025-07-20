@@ -186,7 +186,12 @@ export default function Header({ title, description }: HeaderProps) {
                   <div className="w-8 h-8 rounded-full flex items-center justify-center bg-[#1f2933]">
                     <User className="text-white" size={16} />
                   </div>
-
+                  <div className="hidden lg:flex lg:flex-col lg:text-left">
+                    <span className="text-sm font-medium text-foreground">
+                      {user.role === 'master' ? 'Master Admin' : user.firstName + ' ' + user.lastName}
+                    </span>
+                    <span className="text-xs text-muted-foreground">{user.email}</span>
+                  </div>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
