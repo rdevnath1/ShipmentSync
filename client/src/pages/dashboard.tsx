@@ -62,7 +62,6 @@ export default function Dashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-base lg:text-lg">API Integration Status</CardTitle>
-                  <p className="text-sm lg:text-base text-muted-foreground">ShipStation & Quikpik carrier integration</p>
                 </div>
                 <div className="flex items-center space-x-2">
                   <div className="w-8 h-8 lg:w-10 lg:h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
