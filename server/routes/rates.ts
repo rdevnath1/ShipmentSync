@@ -218,36 +218,98 @@ function calculateShippingCost(weight: number, dimensions: any, country: string,
   const zone = getShippingZone(country, originZip, destZip);
   const dimensionalWeight = calculateDimensionalWeight(dimensions);
   
-  // Only use dimensional weight if it's significantly larger than actual weight AND the package is very light
-  // This prevents small packages from being overcharged due to packaging dimensions
-  let billableWeight = weight;
-  if (weight < 1.0 && dimensionalWeight > weight * 3) {
-    billableWeight = Math.min(dimensionalWeight, weight * 2); // Cap dimensional weight impact for small packages
-  } else {
-    billableWeight = Math.max(weight, dimensionalWeight);
+  // Use the greater of actual weight or dimensional weight
+  const billableWeight = Math.max(weight, dimensionalWeight);
+  
+  // Rate table based on the actual Jiayou rate card
+  const rateTable = {
+    'Zone 1': {
+      0.5: 3.30, 1.0: 3.30, 1.5: 3.30, 2.0: 3.30, 2.5: 3.30, 3.0: 3.30,
+      3.5: 4.49, 4.0: 4.49, 4.5: 4.49, 5.0: 4.49, 5.5: 5.29, 6.0: 5.29,
+      6.5: 5.29, 7.0: 5.29, 7.5: 5.29, 8.0: 5.29, 8.5: 5.29, 9.0: 5.29,
+      9.5: 5.29, 10.0: 5.29
+    },
+    'Zone 2': {
+      0.5: 3.30, 1.0: 3.30, 1.5: 3.30, 2.0: 3.30, 2.5: 3.79, 3.0: 3.79,
+      3.5: 5.29, 4.0: 5.29, 4.5: 5.29, 5.0: 5.29, 5.5: 6.13, 6.0: 6.13,
+      6.5: 6.13, 7.0: 6.13, 7.5: 6.13, 8.0: 6.13, 8.5: 6.13, 9.0: 6.13,
+      9.5: 6.13, 10.0: 6.13
+    },
+    'Zone 3': {
+      0.5: 3.50, 1.0: 3.50, 1.5: 3.50, 2.0: 3.50, 2.5: 4.39, 3.0: 4.39,
+      3.5: 6.13, 4.0: 6.13, 4.5: 6.13, 5.0: 6.13, 5.5: 6.13, 6.0: 6.13,
+      6.5: 6.13, 7.0: 6.13, 7.5: 6.13, 8.0: 6.13, 8.5: 6.13, 9.0: 6.13,
+      9.5: 6.13, 10.0: 6.13
+    },
+    'Zone 4': {
+      0.5: 4.69, 1.0: 4.69, 1.5: 4.69, 2.0: 4.69, 2.5: 6.49, 3.0: 6.49,
+      3.5: 6.49, 4.0: 6.49, 4.5: 6.49, 5.0: 6.49, 5.5: 6.49, 6.0: 6.49,
+      6.5: 6.49, 7.0: 6.49, 7.5: 6.49, 8.0: 6.49, 8.5: 6.49, 9.0: 6.49,
+      9.5: 6.49, 10.0: 11.70
+    },
+    'Zone 5': {
+      0.5: 5.29, 1.0: 5.29, 1.5: 5.29, 2.0: 5.29, 2.5: 6.58, 3.0: 6.58,
+      3.5: 6.58, 4.0: 6.58, 4.5: 6.58, 5.0: 6.58, 5.5: 6.66, 6.0: 6.66,
+      6.5: 6.92, 7.0: 7.30, 7.5: 7.52, 8.0: 7.91, 8.5: 8.99, 9.0: 9.99,
+      9.5: 11.60, 10.0: 11.60
+    },
+    'Zone 6': {
+      0.5: 5.49, 1.0: 5.49, 1.5: 5.49, 2.0: 5.49, 2.5: 6.68, 3.0: 6.68,
+      3.5: 6.68, 4.0: 6.68, 4.5: 6.68, 5.0: 6.68, 5.5: 7.00, 6.0: 7.00,
+      6.5: 7.30, 7.0: 7.30, 7.5: 7.94, 8.0: 8.34, 8.5: 10.10, 9.0: 10.10,
+      9.5: 13.45, 10.0: 13.45
+    },
+    'Zone 7': {
+      0.5: 5.69, 1.0: 5.69, 1.5: 5.69, 2.0: 5.69, 2.5: 6.68, 3.0: 6.68,
+      3.5: 6.68, 4.0: 6.68, 4.5: 6.68, 5.0: 6.68, 5.5: 7.00, 6.0: 7.00,
+      6.5: 7.30, 7.0: 7.30, 7.5: 7.94, 8.0: 8.34, 8.5: 10.10, 9.0: 10.10,
+      9.5: 13.45, 10.0: 13.45
+    },
+    'Zone 8': {
+      0.5: 5.79, 1.0: 5.79, 1.5: 5.79, 2.0: 5.79, 2.5: 6.78, 3.0: 9.86,
+      3.5: 10.05, 4.0: 10.05, 4.5: 10.05, 5.0: 10.05, 5.5: 10.54, 6.0: 10.54,
+      6.5: 10.70, 7.0: 10.70, 7.5: 11.17, 8.0: 12.40, 8.5: 12.40, 9.0: 12.40,
+      9.5: 15.75, 10.0: 15.75
+    }
+  };
+  
+  // Find the appropriate weight tier
+  let weightTier = 0.5;
+  if (billableWeight <= 0.5) weightTier = 0.5;
+  else if (billableWeight <= 1.0) weightTier = 1.0;
+  else if (billableWeight <= 1.5) weightTier = 1.5;
+  else if (billableWeight <= 2.0) weightTier = 2.0;
+  else if (billableWeight <= 2.5) weightTier = 2.5;
+  else if (billableWeight <= 3.0) weightTier = 3.0;
+  else if (billableWeight <= 3.5) weightTier = 3.5;
+  else if (billableWeight <= 4.0) weightTier = 4.0;
+  else if (billableWeight <= 4.5) weightTier = 4.5;
+  else if (billableWeight <= 5.0) weightTier = 5.0;
+  else if (billableWeight <= 5.5) weightTier = 5.5;
+  else if (billableWeight <= 6.0) weightTier = 6.0;
+  else if (billableWeight <= 6.5) weightTier = 6.5;
+  else if (billableWeight <= 7.0) weightTier = 7.0;
+  else if (billableWeight <= 7.5) weightTier = 7.5;
+  else if (billableWeight <= 8.0) weightTier = 8.0;
+  else if (billableWeight <= 8.5) weightTier = 8.5;
+  else if (billableWeight <= 9.0) weightTier = 9.0;
+  else if (billableWeight <= 9.5) weightTier = 9.5;
+  else if (billableWeight <= 10.0) weightTier = 10.0;
+  else {
+    // For weights over 10kg, use the 10kg rate plus additional per kg
+    weightTier = 10.0;
   }
   
-  // Get base rate from weight tiers (based on your rate chart)
-  let baseRate = 0;
-  if (billableWeight <= 0.5) {
-    baseRate = 3.89;
-  } else if (billableWeight <= 1.0) {
-    baseRate = 4.20;
-  } else if (billableWeight <= 1.5) {
-    baseRate = 4.68;
-  } else if (billableWeight <= 2.0) {
-    baseRate = 5.04; // This should be the rate for 1.5-2kg range
-  } else if (billableWeight <= 3.0) {
-    baseRate = 5.85;
-  } else if (billableWeight <= 5.0) {
-    baseRate = 7.56;
-  } else {
-    // For weights over 5kg, calculate progressively
-    baseRate = 7.56 + ((billableWeight - 5) * 1.5);
-  }
+  // Get rate from table
+  const zoneRates = rateTable[zone] || rateTable['Zone 1'];
+  let cost = zoneRates[weightTier] || zoneRates[10.0];
   
-  const zoneMultiplier = getZoneMultiplier(zone);
-  const cost = baseRate * zoneMultiplier;
+  // For weights over 10kg, add additional cost
+  if (billableWeight > 10.0) {
+    const extraWeight = billableWeight - 10.0;
+    const perKgRate = 1.50; // Estimated additional rate per kg
+    cost += extraWeight * perKgRate;
+  }
   
   return Math.round(cost * 100) / 100; // Round to 2 decimal places
 }
