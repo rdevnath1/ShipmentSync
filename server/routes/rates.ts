@@ -9,7 +9,8 @@ const router = express.Router();
 router.post("/preview", requireAuth, requireOrgAccess, createAuditMiddleware('rate_preview', 'rates'), async (req, res) => {
   try {
     const { 
-      shippingAddress, 
+      pickupZipCode,
+      deliveryZipCode,
       weight, 
       dimensions, 
       serviceType = 'standard',
@@ -17,35 +18,33 @@ router.post("/preview", requireAuth, requireOrgAccess, createAuditMiddleware('ra
     } = req.body;
 
     // Validate required fields
-    if (!shippingAddress || !weight || !dimensions) {
+    if (!pickupZipCode || !deliveryZipCode || !weight || !dimensions) {
       return res.status(400).json({
-        error: "Missing required fields: shippingAddress, weight, dimensions"
+        error: "Missing required fields: pickupZipCode, deliveryZipCode, weight, dimensions"
       });
     }
 
-    // Basic address validation
-    if (!shippingAddress.postalCode || !shippingAddress.country) {
+    // Validate ZIP code formats
+    if (!/^\d{5}$/.test(pickupZipCode)) {
       return res.status(400).json({
-        error: "Address validation failed",
-        details: ["Postal code and country are required"]
+        error: "Invalid pickup ZIP code format - must be 5 digits"
       });
     }
 
-    // Simple coverage check for US addresses
-    if (shippingAddress.country === 'US' && !/^\d{5}(-\d{4})?$/.test(shippingAddress.postalCode)) {
+    if (!/^\d{5}$/.test(deliveryZipCode)) {
       return res.status(400).json({
-        error: "Invalid US postal code format"
+        error: "Invalid delivery ZIP code format - must be 5 digits"
       });
     }
 
     // Calculate estimated cost based on weight and dimensions
-    const estimatedCost = calculateShippingCost(weight, dimensions, shippingAddress.country);
+    const estimatedCost = calculateShippingCost(weight, dimensions, 'US');
     
     // Calculate estimated delivery time
-    const estimatedDelivery = calculateDeliveryTime(shippingAddress.country, serviceType);
+    const estimatedDelivery = calculateDeliveryTime('US', serviceType);
 
     // Get service options
-    const serviceOptions = getAvailableServices(shippingAddress.country);
+    const serviceOptions = getAvailableServices('US');
 
     res.json({
       success: true,
@@ -63,22 +62,28 @@ router.post("/preview", requireAuth, requireOrgAccess, createAuditMiddleware('ra
         serviceOptions,
         coverage: {
           available: true,
-          serviceArea: shippingAddress.country === 'US' ? 'Domestic US' : 'International',
+          serviceArea: 'Domestic US',
           restrictions: []
         },
         rateCalculation: {
           baseWeight: weight,
           dimensions: dimensions,
-          zone: getShippingZone(shippingAddress.country, shippingAddress.postalCode),
+          zone: getShippingZone('US', deliveryZipCode),
           factors: {
             weightFactor: Math.ceil(weight / 0.45), // Per pound
             dimensionalWeight: calculateDimensionalWeight(dimensions),
-            zoneFactor: getZoneMultiplier(shippingAddress.country)
+            zoneFactor: getZoneMultiplier('US')
           }
         }
       },
       warnings: [],
-      validUntil: new Date(Date.now() + 30 * 60 * 1000).toISOString() // 30 minutes
+      validUntil: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 minutes
+      request: {
+        pickupZipCode,
+        deliveryZipCode,
+        weight,
+        dimensions
+      }
     });
 
   } catch (error) {
