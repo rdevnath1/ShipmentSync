@@ -37,59 +37,134 @@ router.post("/preview", requireAuth, requireOrgAccess, createAuditMiddleware('ra
       });
     }
 
-    // Calculate estimated cost based on weight, dimensions, and ZIP codes
-    const estimatedCost = calculateShippingCost(weight, dimensions, 'US', pickupZipCode, deliveryZipCode);
+    // Get actual rate from Jiayou API
+    const jiayouService = new JiayouService();
     
-    // Get shipping zone based on ZIP codes
-    const shippingZone = getShippingZone('US', pickupZipCode, deliveryZipCode);
-    
-    // Calculate estimated delivery time based on zone
-    const estimatedDelivery = calculateDeliveryTime(shippingZone, serviceType);
-
-    // Get service options
-    const serviceOptions = getAvailableServices('US');
-
-    const responseData = {
-      success: true,
-      preview: {
-        estimatedCost: {
-          amount: estimatedCost,
-          currency: 'USD',
-          formatted: `$${estimatedCost.toFixed(2)}`
-        },
-        estimatedDelivery: {
-          businessDays: estimatedDelivery.days,
-          description: estimatedDelivery.description,
-          estimatedDate: estimatedDelivery.date
-        },
-        serviceOptions,
-        coverage: {
-          available: true,
-          serviceArea: 'Domestic US',
-          restrictions: []
-        },
-        rateCalculation: {
-          baseWeight: weight,
-          dimensions: dimensions,
-          zone: shippingZone,
-          factors: {
-            weightFactor: Math.ceil(weight / 0.45), // Per pound
-            dimensionalWeight: calculateDimensionalWeight(dimensions),
-            zoneFactor: getZoneMultiplier(shippingZone)
-          }
-        }
-      },
-      warnings: [],
-      validUntil: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 minutes
-      request: {
-        pickupZipCode,
+    try {
+      // Call Jiayou's costCal API to get actual shipping cost
+      const jiayouResponse = await jiayouService.checkPostalCodeCoverage(
+        channelCode,
         deliveryZipCode,
-        weight,
-        dimensions
+        dimensions,
+        weight
+      );
+      
+      console.log('Jiayou API Response:', JSON.stringify(jiayouResponse, null, 2));
+      
+      // Check if API returned success
+      if (jiayouResponse.status !== 1) {
+        return res.status(400).json({
+          error: jiayouResponse.msg || 'Failed to get rate from carrier',
+          jiayouResponse // Include full response for debugging
+        });
       }
-    };
-    
-    res.json(responseData);
+      
+      // Extract actual cost from Jiayou response
+      // The response typically includes cost in the data field
+      const actualCost = jiayouResponse.data?.cost || jiayouResponse.data?.price || 0;
+      
+      // Get shipping zone for delivery time estimation
+      const shippingZone = getShippingZone('US', pickupZipCode, deliveryZipCode);
+      
+      // Calculate estimated delivery time based on zone
+      const estimatedDelivery = calculateDeliveryTime(shippingZone, serviceType);
+
+      // Get service options
+      const serviceOptions = getAvailableServices('US');
+
+      const responseData = {
+        success: true,
+        preview: {
+          estimatedCost: {
+            amount: actualCost,
+            currency: 'USD',
+            formatted: `$${actualCost.toFixed(2)}`
+          },
+          estimatedDelivery: {
+            businessDays: estimatedDelivery.days,
+            description: estimatedDelivery.description,
+            estimatedDate: estimatedDelivery.date
+          },
+          serviceOptions,
+          coverage: {
+            available: true,
+            serviceArea: 'Domestic US',
+            restrictions: []
+          },
+          rateCalculation: {
+            baseWeight: weight,
+            dimensions: dimensions,
+            zone: shippingZone,
+            factors: {
+              weightFactor: Math.ceil(weight / 0.45), // Per pound
+              dimensionalWeight: calculateDimensionalWeight(dimensions),
+              zoneFactor: getZoneMultiplier(shippingZone),
+              jiayouData: jiayouResponse.data // Include full Jiayou data for transparency
+            }
+          }
+        },
+        warnings: [],
+        validUntil: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 minutes
+        request: {
+          pickupZipCode,
+          deliveryZipCode,
+          weight,
+          dimensions
+        }
+      };
+      
+      res.json(responseData);
+      
+    } catch (jiayouError) {
+      console.error("Jiayou API error:", jiayouError);
+      
+      // If Jiayou API fails, fallback to calculated estimate
+      const estimatedCost = calculateShippingCost(weight, dimensions, 'US', pickupZipCode, deliveryZipCode);
+      const shippingZone = getShippingZone('US', pickupZipCode, deliveryZipCode);
+      const estimatedDelivery = calculateDeliveryTime(shippingZone, serviceType);
+      const serviceOptions = getAvailableServices('US');
+      
+      res.json({
+        success: true,
+        preview: {
+          estimatedCost: {
+            amount: estimatedCost,
+            currency: 'USD',
+            formatted: `$${estimatedCost.toFixed(2)}`
+          },
+          estimatedDelivery: {
+            businessDays: estimatedDelivery.days,
+            description: estimatedDelivery.description,
+            estimatedDate: estimatedDelivery.date
+          },
+          serviceOptions,
+          coverage: {
+            available: true,
+            serviceArea: 'Domestic US',
+            restrictions: []
+          },
+          rateCalculation: {
+            baseWeight: weight,
+            dimensions: dimensions,
+            zone: shippingZone,
+            factors: {
+              weightFactor: Math.ceil(weight / 0.45),
+              dimensionalWeight: calculateDimensionalWeight(dimensions),
+              zoneFactor: getZoneMultiplier(shippingZone)
+            },
+            note: "Using calculated estimate due to carrier API unavailability"
+          }
+        },
+        warnings: ["Using estimated rates. Actual carrier rates may vary."],
+        validUntil: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+        request: {
+          pickupZipCode,
+          deliveryZipCode,
+          weight,
+          dimensions
+        }
+      });
+    }
 
   } catch (error) {
     console.error("Rate preview error:", error);
@@ -222,7 +297,7 @@ function calculateShippingCost(weight: number, dimensions: any, country: string,
   const billableWeight = Math.max(weight, dimensionalWeight);
   
   // Rate table based on the actual Jiayou rate card
-  const rateTable = {
+  const rateTable: Record<string, Record<number, number>> = {
     'Zone 1': {
       0.5: 3.30, 1.0: 3.30, 1.5: 3.30, 2.0: 3.30, 2.5: 3.30, 3.0: 3.30,
       3.5: 4.49, 4.0: 4.49, 4.5: 4.49, 5.0: 4.49, 5.5: 5.29, 6.0: 5.29,
@@ -353,9 +428,9 @@ function calculateZipDistance(origin3Digit: number, dest3Digit: number): number 
   // Simplified distance calculation based on first 3 digits of ZIP codes
   // This maps ZIP prefixes to approximate geographic locations
   
-  const zipRegions = {
+  const zipRegions: Record<number, { lat: number; lon: number }> = {
     // Northeast
-    010: { lat: 42.36, lon: -71.06 }, // Boston area
+    10: { lat: 42.36, lon: -71.06 }, // Boston area (010 prefix)
     121: { lat: 42.75, lon: -73.80 }, // Albany, NY (12134 is in this region)
     100: { lat: 40.71, lon: -74.01 }, // NYC area
     
