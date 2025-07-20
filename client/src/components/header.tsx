@@ -194,10 +194,7 @@ export default function Header({ title, description }: HeaderProps) {
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium">{user.firstName} {user.lastName}</p>
                     <p className="text-xs text-muted-foreground">{user.email}</p>
-                    <p className="text-xs text-muted-foreground capitalize">{user.role} Account</p>
-                    {user.organization && (
-                      <p className="text-xs text-muted-foreground">{user.organization.name}</p>
-                    )}
+                    
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
