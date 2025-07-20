@@ -40,7 +40,10 @@ class AuditLogger {
         userAgent: options.userAgent || null,
       };
 
-      await storage.createAuditLog(auditData);
+      const result = await storage.createAuditLog(auditData);
+      if (result.id === 0) {
+        console.warn('Audit log creation fallback used - audit_logs table may not exist yet');
+      }
     } catch (error) {
       console.error("Failed to create audit log:", error);
       // Don't throw - audit logging should never break the main operation

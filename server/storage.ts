@@ -310,11 +310,35 @@ export class DatabaseStorage implements IStorage {
 
   // Audit Log methods
   async createAuditLog(insertLog: InsertAuditLog): Promise<AuditLog> {
-    const [log] = await db
-      .insert(auditLogs)
-      .values(insertLog)
-      .returning();
-    return log;
+    try {
+      const [log] = await db
+        .insert(auditLogs)
+        .values(insertLog)
+        .returning();
+      return log;
+    } catch (error) {
+      // Gracefully handle audit log creation failures - return minimal log object
+      console.warn("Failed to create audit log:", error);
+      return {
+        id: 0,
+        organizationId: insertLog.organizationId || null,
+        userId: insertLog.userId || null,
+        action: insertLog.action,
+        resource: insertLog.resource || null,
+        resourceId: insertLog.resourceId || null,
+        method: insertLog.method || null,
+        endpoint: insertLog.endpoint || null,
+        requestData: insertLog.requestData || null,
+        responseData: insertLog.responseData || null,
+        ipAddress: insertLog.ipAddress || null,
+        userAgent: insertLog.userAgent || null,
+        statusCode: insertLog.statusCode || null,
+        success: insertLog.success,
+        error: insertLog.error || null,
+        duration: insertLog.duration || null,
+        createdAt: new Date()
+      };
+    }
   }
 
   async getAuditLogs(orgId?: number, limit: number = 100): Promise<AuditLog[]> {
