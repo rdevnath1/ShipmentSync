@@ -208,10 +208,6 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
       {rateData?.success && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5" />
-              Rate Calculator Results
-            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Estimated Cost */}
