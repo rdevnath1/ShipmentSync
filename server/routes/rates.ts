@@ -7,6 +7,8 @@ const router = express.Router();
 
 // Rate preview endpoint - returns cost and ETA before creating shipment
 router.post("/preview", requireAuth, requireOrgAccess, createAuditMiddleware('rate_preview', 'rates'), async (req, res) => {
+  console.log("Rate preview request:", req.body);
+  
   try {
     const { 
       pickupZipCode,
@@ -17,8 +19,11 @@ router.post("/preview", requireAuth, requireOrgAccess, createAuditMiddleware('ra
       channelCode = 'US001' 
     } = req.body;
 
+    console.log("Extracted values:", { pickupZipCode, deliveryZipCode, weight, dimensions, serviceType, channelCode });
+
     // Validate required fields
     if (!pickupZipCode || !deliveryZipCode || !weight || !dimensions) {
+      console.log("Validation failed - missing fields");
       return res.status(400).json({
         error: "Missing required fields: pickupZipCode, deliveryZipCode, weight, dimensions"
       });
@@ -38,15 +43,19 @@ router.post("/preview", requireAuth, requireOrgAccess, createAuditMiddleware('ra
     }
 
     // Calculate estimated cost based on weight and dimensions
+    console.log("Calculating shipping cost...");
     const estimatedCost = calculateShippingCost(weight, dimensions, 'US');
+    console.log("Estimated cost:", estimatedCost);
     
     // Calculate estimated delivery time
     const estimatedDelivery = calculateDeliveryTime('US', serviceType);
+    console.log("Estimated delivery:", estimatedDelivery);
 
     // Get service options
     const serviceOptions = getAvailableServices('US');
+    console.log("Service options:", serviceOptions);
 
-    res.json({
+    const responseData = {
       success: true,
       preview: {
         estimatedCost: {
@@ -84,7 +93,10 @@ router.post("/preview", requireAuth, requireOrgAccess, createAuditMiddleware('ra
         weight,
         dimensions
       }
-    });
+    };
+    
+    console.log("Sending response:", JSON.stringify(responseData, null, 2));
+    res.json(responseData);
 
   } catch (error) {
     console.error("Rate preview error:", error);
