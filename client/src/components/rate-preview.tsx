@@ -85,8 +85,6 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
   return (
     <div className={`space-y-6 ${className}`}>
       <Card>
-        <CardHeader>
-        </CardHeader>
         <CardContent className="space-y-4">
           {/* ZIP Code Details */}
           <div className="space-y-3">
