@@ -259,9 +259,8 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
             )}
 
             {/* Rate Breakdown */}
-            <details className="border rounded-lg p-4">
-              <summary className="font-medium cursor-pointer">Rate Calculation Details</summary>
-              <div className="mt-3 space-y-2 text-sm">
+            <div className="border rounded-lg p-4 bg-muted/30">
+              <div className="space-y-2 text-sm text-muted-foreground">
                 <div className="flex justify-between">
                   <span>Base Weight:</span>
                   <span>{(rateData.preview.rateCalculation.baseWeight * 35.274).toFixed(1)} oz</span>
@@ -279,7 +278,7 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
                   <span>{rateData.preview.rateCalculation.factors.zoneFactor}x</span>
                 </div>
               </div>
-            </details>
+            </div>
 
             {onRateSelected && (
               <Button 
