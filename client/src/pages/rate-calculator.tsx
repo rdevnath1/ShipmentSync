@@ -1,12 +1,12 @@
 import Header from "@/components/header";
 import RatePreview from "@/components/rate-preview";
 
-export default function RatePreviewPage() {
+export default function RateCalculatorPage() {
   return (
     <>
       <Header 
-        title="Rate Preview" 
-        description="Get shipping cost estimates before creating orders"
+        title="Rate Calculator" 
+        description="Calculate shipping costs before creating orders"
       />
       <div className="p-4 lg:p-6">
         <RatePreview className="max-w-4xl mx-auto" />

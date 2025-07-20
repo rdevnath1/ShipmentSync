@@ -1,7 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/header";
-import WebhookActivity from "@/components/webhook-activity";
-import RatePreview from "@/components/rate-preview";
 import StatsCards from "@/components/stats-cards";
 import OrderTable from "@/components/order-table";
 import { useOrders } from "@/hooks/use-orders";
@@ -55,30 +53,6 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          {/* Webhook Activity - Master Admin Only */}
-          <WebhookActivity />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Rate Preview Tool */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Rate Preview</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                Get cost estimates before creating shipments
-              </p>
-              <Button 
-                onClick={() => setLocation('/rate-preview')}
-                variant="outline" 
-                className="w-full"
-              >
-                Open Rate Preview Tool
-              </Button>
-            </CardContent>
-          </Card>
-
           {/* API Integration Status */}
           <Card>
             <CardHeader>
@@ -95,11 +69,7 @@ export default function Dashboard() {
                   <div className="h-2 w-2 bg-green-500 rounded-full"></div>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">Rate Preview API</span>
-                  <div className="h-2 w-2 bg-green-500 rounded-full"></div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Webhook Handler</span>
+                  <span className="text-sm">Rate Calculator API</span>
                   <div className="h-2 w-2 bg-green-500 rounded-full"></div>
                 </div>
               </div>

@@ -12,7 +12,7 @@ import Tracking from "@/pages/tracking";
 import Settings from "@/pages/settings";
 import Login from "@/pages/login";
 import NotFound from "@/pages/not-found";
-import RatePreviewPage from "@/pages/rate-preview";
+import RateCalculatorPage from "@/pages/rate-calculator";
 import Sidebar from "@/components/sidebar";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -41,7 +41,7 @@ function Router() {
                 <Route path="/orders" component={Orders} />
                 <Route path="/analytics" component={Analytics} />
                 <Route path="/audit-logs" component={AuditLogs} />
-                <Route path="/rate-preview" component={RatePreviewPage} />
+                <Route path="/rate-calculator" component={RateCalculatorPage} />
                 <Route path="/settings" component={Settings} />
                 <Route component={NotFound} />
               </Switch>

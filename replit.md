@@ -55,6 +55,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Rate Calculator & Dashboard Cleanup (July 20, 2025)
+- **Rate Calculator Rename**: Renamed "Rate Preview" to "Rate Calculator" throughout the system
+- **Dashboard Simplification**: Removed webhook activity and rate preview sections from dashboard for cleaner interface
+- **Navigation Update**: Updated sidebar and routing to use /rate-calculator path
+- **Focused Dashboard**: Dashboard now shows Recent Orders and API Integration Status only
+- **SUCCESSFUL RESULT**: Clean, focused dashboard with proper Rate Calculator branding
+
 ### ChatGPT Production Optimizations Implementation (July 20, 2025)
 - **Pre-Validation System**: Enhanced address validation with country-specific schemas, PO Box detection, and business rule validation
 - **Carrier Wrapper Interface**: Multi-carrier abstraction layer with standardized error handling and response logging
