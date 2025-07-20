@@ -16,13 +16,9 @@ interface RatePreviewProps {
   className?: string;
 }
 
-interface Address {
-  name: string;
-  street1: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  country: string;
+interface RateRequest {
+  pickupZipCode: string;
+  deliveryZipCode: string;
 }
 
 interface Dimensions {
@@ -32,13 +28,9 @@ interface Dimensions {
 }
 
 export default function RatePreview({ onRateSelected, className }: RatePreviewProps) {
-  const [address, setAddress] = useState<Address>({
-    name: "",
-    street1: "",
-    city: "",
-    state: "",
-    postalCode: "",
-    country: "US"
+  const [rateRequest, setRateRequest] = useState<RateRequest>({
+    pickupZipCode: "",
+    deliveryZipCode: ""
   });
   
   const [weight, setWeight] = useState<number>(8); // Default 8 oz
@@ -56,7 +48,7 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
   });
 
   const handleGetRates = () => {
-    if (!address.name || !address.street1 || !address.city || !address.postalCode) {
+    if (!rateRequest.pickupZipCode || !rateRequest.deliveryZipCode) {
       return;
     }
 
@@ -71,7 +63,8 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
     };
     
     ratePreviewMutation.mutate({
-      shippingAddress: address,
+      pickupZipCode: rateRequest.pickupZipCode,
+      deliveryZipCode: rateRequest.deliveryZipCode,
       weight: weightInKg,
       dimensions: dimensionsInCm,
       serviceType: 'standard',
@@ -79,8 +72,8 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
     });
   };
 
-  const handleAddressChange = (field: keyof Address, value: string) => {
-    setAddress(prev => ({ ...prev, [field]: value }));
+  const handleRateRequestChange = (field: keyof RateRequest, value: string) => {
+    setRateRequest(prev => ({ ...prev, [field]: value }));
   };
 
   const handleDimensionChange = (field: keyof Dimensions, value: number) => {
@@ -95,68 +88,32 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Truck className="h-5 w-5" />
-            Rate Preview
+            Rate Calculator
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Address Input */}
+          {/* ZIP Code Details */}
           <div className="space-y-3">
-            <Label className="text-base font-medium">Shipping Address</Label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <Label className="text-base font-medium">Shipping Details</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="name">Recipient Name</Label>
+                <Label htmlFor="pickupZipCode">Pickup ZIP Code</Label>
                 <Input
-                  id="name"
-                  value={address.name}
-                  onChange={(e) => handleAddressChange('name', e.target.value)}
-                  placeholder="John Doe"
-                />
-              </div>
-              <div>
-                <Label htmlFor="street1">Street Address</Label>
-                <Input
-                  id="street1"
-                  value={address.street1}
-                  onChange={(e) => handleAddressChange('street1', e.target.value)}
-                  placeholder="123 Main St"
-                />
-              </div>
-              <div>
-                <Label htmlFor="city">City</Label>
-                <Input
-                  id="city"
-                  value={address.city}
-                  onChange={(e) => handleAddressChange('city', e.target.value)}
-                  placeholder="New York"
-                />
-              </div>
-              <div>
-                <Label htmlFor="state">State</Label>
-                <Input
-                  id="state"
-                  value={address.state}
-                  onChange={(e) => handleAddressChange('state', e.target.value)}
-                  placeholder="NY"
-                  maxLength={2}
-                />
-              </div>
-              <div>
-                <Label htmlFor="postalCode">ZIP Code</Label>
-                <Input
-                  id="postalCode"
-                  value={address.postalCode}
-                  onChange={(e) => handleAddressChange('postalCode', e.target.value)}
+                  id="pickupZipCode"
+                  value={rateRequest.pickupZipCode}
+                  onChange={(e) => handleRateRequestChange('pickupZipCode', e.target.value)}
                   placeholder="10001"
+                  maxLength={5}
                 />
               </div>
               <div>
-                <Label htmlFor="country">Country</Label>
+                <Label htmlFor="deliveryZipCode">Delivery ZIP Code</Label>
                 <Input
-                  id="country"
-                  value={address.country}
-                  onChange={(e) => handleAddressChange('country', e.target.value)}
-                  placeholder="US"
-                  maxLength={2}
+                  id="deliveryZipCode"
+                  value={rateRequest.deliveryZipCode}
+                  onChange={(e) => handleRateRequestChange('deliveryZipCode', e.target.value)}
+                  placeholder="90210"
+                  maxLength={5}
                 />
               </div>
             </div>
@@ -229,10 +186,10 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
 
           <Button 
             onClick={handleGetRates} 
-            disabled={isLoading || !address.name || !address.street1}
+            disabled={isLoading || !rateRequest.pickupZipCode || !rateRequest.deliveryZipCode}
             className="w-full"
           >
-            {isLoading ? "Getting Rates..." : "Get Rate Preview"}
+            {isLoading ? "Calculating Rates..." : "Calculate Rates"}
           </Button>
         </CardContent>
       </Card>
@@ -252,7 +209,7 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <DollarSign className="h-5 w-5" />
-              Rate Preview Results
+              Rate Calculator Results
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
