@@ -59,8 +59,8 @@ export default function StatsCards({ stats }: StatsCardsProps) {
               <p className="text-sm font-medium text-muted-foreground">Active Shipments</p>
               <p className="text-3xl font-bold text-foreground">{stats.activeShipments}</p>
             </div>
-            <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center">
-              <Truck className="text-amber-600 dark:text-amber-400" size={20} />
+            <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center">
+              <Truck className="text-emerald-600 dark:text-emerald-400" size={20} />
             </div>
           </div>
           <div className="mt-4 flex items-center text-sm">
