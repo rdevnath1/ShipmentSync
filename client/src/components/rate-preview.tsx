@@ -207,7 +207,7 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
 
       {rateData?.success && (
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-col space-y-1.5 p-6 pl-[8px] pr-[8px] pt-[1px] pb-[1px]">
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Estimated Cost */}
