@@ -12,12 +12,17 @@ export default function TrackingSection() {
     queryKey: ["/api/shipments"],
   });
 
+  // Utility function to format tracking numbers for display
+  const formatTrackingNumber = (trackingNumber: string) => {
+    return trackingNumber?.replace(/^GV/g, 'QP') || '';
+  };
+
   const handleViewTracking = (trackingNumber: string) => {
-    setLocation('/tracking');
+    setLocation(`/tracking?track=${trackingNumber}`);
   };
 
   const activeShipments = shipments?.filter((s: any) => 
-    s.status === "created" || s.status === "in_transit"
+    s.status === "created" || s.status === "in_transit" || s.status === "shipped"
   ).slice(0, 3) || [];
 
   const getStatusColor = (status: string) => {
@@ -26,6 +31,8 @@ export default function TrackingSection() {
         return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
       case "created":
         return "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400";
+      case "shipped":
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
       case "delivered":
         return "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400";
       default:
@@ -53,7 +60,7 @@ export default function TrackingSection() {
               <div key={shipment.id} className="border border-border rounded-lg p-4 hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between mb-3">
                   <div className="text-sm font-medium text-foreground">
-                    {shipment.trackingNumber}
+                    {formatTrackingNumber(shipment.trackingNumber)}
                   </div>
                   <Badge className={getStatusColor(shipment.status)}>
                     {shipment.status}
@@ -73,10 +80,10 @@ export default function TrackingSection() {
                   </div>
                   <div className="flex items-center space-x-3">
                     <div className={`w-2 h-2 rounded-full ${
-                      shipment.status === "in_transit" ? "bg-green-500" : "bg-muted"
+                      shipment.status === "in_transit" || shipment.status === "shipped" ? "bg-green-500" : "bg-muted"
                     }`}></div>
                     <div className={`text-xs ${
-                      shipment.status === "in_transit" ? "text-muted-foreground" : "text-muted-foreground/50"
+                      shipment.status === "in_transit" || shipment.status === "shipped" ? "text-muted-foreground" : "text-muted-foreground/50"
                     }`}>In transit</div>
                   </div>
                   <div className="flex items-center space-x-3">
