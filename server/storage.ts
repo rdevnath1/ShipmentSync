@@ -1,9 +1,10 @@
 import { 
-  organizations, users, orders, trackingEvents, analytics, apiKeys, auditLogs, retryQueue,
+  organizations, users, orders, trackingEvents, analytics, apiKeys, auditLogs, retryQueue, carrierLogs, enhancedTrackingEvents,
   type Organization, type InsertOrganization, type User, type InsertUser, 
   type Order, type InsertOrder, type TrackingEvent, type InsertTrackingEvent, 
   type Analytics, type InsertAnalytics, type ApiKey, type InsertApiKey,
-  type AuditLog, type InsertAuditLog, type RetryQueueItem, type InsertRetryQueueItem
+  type AuditLog, type InsertAuditLog, type RetryQueueItem, type InsertRetryQueueItem,
+  type CarrierLog, type InsertCarrierLog, type EnhancedTrackingEvent, type InsertEnhancedTrackingEvent
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, gte, lte, count } from "drizzle-orm";
@@ -59,6 +60,14 @@ export interface IStorage {
   getRetryQueueItem(id: number): Promise<RetryQueueItem | undefined>;
   updateRetryQueueItem(id: number, item: Partial<InsertRetryQueueItem>): Promise<RetryQueueItem>;
   getPendingRetryJobs(limit?: number): Promise<RetryQueueItem[]>;
+  
+  // Carrier Log methods
+  createCarrierLog(log: InsertCarrierLog): Promise<CarrierLog>;
+  getCarrierLogs(carrierName?: string, limit?: number): Promise<CarrierLog[]>;
+  
+  // Enhanced Tracking methods
+  createEnhancedTrackingEvent(event: InsertEnhancedTrackingEvent): Promise<EnhancedTrackingEvent>;
+  getEnhancedTrackingEvents(trackingNumber: string): Promise<EnhancedTrackingEvent[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -356,6 +365,47 @@ export class DatabaseStorage implements IStorage {
       .where(eq(retryQueue.status, 'pending'))
       .orderBy(retryQueue.nextAttempt)
       .limit(limit);
+  }
+
+  // Carrier Log methods
+  async createCarrierLog(insertLog: InsertCarrierLog): Promise<CarrierLog> {
+    const [log] = await db
+      .insert(carrierLogs)
+      .values(insertLog)
+      .returning();
+    return log;
+  }
+
+  async getCarrierLogs(carrierName?: string, limit: number = 100): Promise<CarrierLog[]> {
+    const query = db.select().from(carrierLogs);
+    
+    if (carrierName) {
+      return await query
+        .where(eq(carrierLogs.carrierName, carrierName))
+        .orderBy(desc(carrierLogs.createdAt))
+        .limit(limit);
+    }
+    
+    return await query
+      .orderBy(desc(carrierLogs.createdAt))
+      .limit(limit);
+  }
+
+  // Enhanced Tracking methods
+  async createEnhancedTrackingEvent(insertEvent: InsertEnhancedTrackingEvent): Promise<EnhancedTrackingEvent> {
+    const [event] = await db
+      .insert(enhancedTrackingEvents)
+      .values(insertEvent)
+      .returning();
+    return event;
+  }
+
+  async getEnhancedTrackingEvents(trackingNumber: string): Promise<EnhancedTrackingEvent[]> {
+    return await db
+      .select()
+      .from(enhancedTrackingEvents)
+      .where(eq(enhancedTrackingEvents.trackingNumber, trackingNumber))
+      .orderBy(desc(enhancedTrackingEvents.timestamp));
   }
 }
 

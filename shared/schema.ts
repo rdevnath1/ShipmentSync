@@ -153,6 +153,49 @@ export const retryQueue = pgTable("retry_queue", {
   index("idx_retry_queue_status").on(table.status),
 ]);
 
+// Raw API response logging for debugging
+export const carrierLogs = pgTable("carrier_logs", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").references(() => organizations.id),
+  carrierName: text("carrier_name").notNull(), // jiayou, shipstation, etc.
+  operation: text("operation").notNull(), // create_shipment, track_package, etc.
+  requestPayload: jsonb("request_payload"),
+  responsePayload: jsonb("response_payload"),
+  statusCode: integer("status_code"),
+  success: boolean("success").notNull(),
+  error: text("error"),
+  duration: integer("duration"), // ms
+  resourceId: text("resource_id"), // tracking number, order ID, etc.
+  endpoint: text("endpoint"), // API endpoint called
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_carrier_logs_org").on(table.organizationId),
+  index("idx_carrier_logs_carrier").on(table.carrierName),
+  index("idx_carrier_logs_operation").on(table.operation),
+  index("idx_carrier_logs_created").on(table.createdAt),
+  index("idx_carrier_logs_success").on(table.success),
+]);
+
+// Enhanced tracking events with standardized statuses
+export const enhancedTrackingEvents = pgTable("enhanced_tracking_events", {
+  id: serial("id").primaryKey(),
+  orderId: integer("order_id").references(() => orders.id),
+  trackingNumber: text("tracking_number").notNull(),
+  standardStatus: text("standard_status").notNull(), // StandardTrackingStatus enum
+  rawStatus: text("raw_status"), // Original carrier status code
+  description: text("description").notNull(),
+  location: text("location"),
+  carrierName: text("carrier_name").notNull(),
+  timestamp: timestamp("timestamp").notNull(),
+  carrierSpecific: jsonb("carrier_specific"), // Carrier-specific data
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_enhanced_tracking_order").on(table.orderId),
+  index("idx_enhanced_tracking_number").on(table.trackingNumber),
+  index("idx_enhanced_tracking_status").on(table.standardStatus),
+  index("idx_enhanced_tracking_timestamp").on(table.timestamp),
+]);
+
 // Define all relations
 export const organizationsRelations = relations(organizations, ({ many }) => ({
   users: many(users),
@@ -211,6 +254,20 @@ export const retryQueueRelations = relations(retryQueue, ({ one }) => ({
   }),
 }));
 
+export const carrierLogsRelations = relations(carrierLogs, ({ one }) => ({
+  organization: one(organizations, {
+    fields: [carrierLogs.organizationId],
+    references: [organizations.id],
+  }),
+}));
+
+export const enhancedTrackingEventsRelations = relations(enhancedTrackingEvents, ({ one }) => ({
+  order: one(orders, {
+    fields: [enhancedTrackingEvents.orderId],
+    references: [orders.id],
+  }),
+}));
+
 // Export types for TypeScript
 export type Organization = typeof organizations.$inferSelect;
 export type InsertOrganization = typeof organizations.$inferInsert;
@@ -228,6 +285,10 @@ export type AuditLog = typeof auditLogs.$inferSelect;
 export type InsertAuditLog = typeof auditLogs.$inferInsert;
 export type RetryQueueItem = typeof retryQueue.$inferSelect;
 export type InsertRetryQueueItem = typeof retryQueue.$inferInsert;
+export type CarrierLog = typeof carrierLogs.$inferSelect;
+export type InsertCarrierLog = typeof carrierLogs.$inferInsert;
+export type EnhancedTrackingEvent = typeof enhancedTrackingEvents.$inferSelect;
+export type InsertEnhancedTrackingEvent = typeof enhancedTrackingEvents.$inferInsert;
 
 // Zod schemas for validation
 export const insertOrganizationSchema = createInsertSchema(organizations);
@@ -238,3 +299,5 @@ export const insertAnalyticsSchema = createInsertSchema(analytics);
 export const insertApiKeySchema = createInsertSchema(apiKeys);
 export const insertAuditLogSchema = createInsertSchema(auditLogs);
 export const insertRetryQueueItemSchema = createInsertSchema(retryQueue);
+export const insertCarrierLogSchema = createInsertSchema(carrierLogs);
+export const insertEnhancedTrackingEventSchema = createInsertSchema(enhancedTrackingEvents);

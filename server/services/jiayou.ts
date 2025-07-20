@@ -1,5 +1,10 @@
 import axios from 'axios';
 import crypto from 'crypto';
+import { storage } from '../storage';
+import { CarrierWrapper, type CarrierService, type CarrierResponse } from '../utils/carrier-wrapper';
+import { AddressValidator } from '../utils/address-validator';
+import { StatusMapper, StandardTrackingStatus } from '../utils/status-mapper';
+import { auditLogger } from '../utils/audit-logger';
 
 interface JiayouOrderItem {
   ename: string;
