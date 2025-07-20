@@ -219,7 +219,7 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
               <div>
                 <div className="font-medium">Estimated Shipping Cost</div>
                 <div className="text-sm text-muted-foreground">
-                  Zone {rateData.preview.rateCalculation.zone} • Weight: {weight}kg
+                  {rateData.preview.rateCalculation.zone}
                 </div>
               </div>
               <div className="text-2xl font-bold text-green-600">
