@@ -137,8 +137,8 @@ export class ShipStationService {
           height: 4
         },
         ...(trackingUrl && { 
-          internalNotes: `Track shipment: ${trackingUrl}`,
-          customerNotes: `Track your shipment at: ${trackingUrl}`
+          internalNotes: `🚚 Quikpik Tracking: ${trackingUrl}`,
+          customerNotes: `📦 Track your package: ${trackingUrl}`
         }),
         ...(labelUrl && {
           labelData: await this.getLabelDataFromUrl(labelUrl)
@@ -173,8 +173,8 @@ export class ShipStationService {
           notifyCustomer: true,
           notifySalesChannel: true,
           ...(trackingUrl && { 
-            internalNotes: `Track shipment: ${trackingUrl}`,
-            customerNotes: `Track your shipment at: ${trackingUrl}`
+            internalNotes: `🚚 Quikpik Tracking: ${trackingUrl}`,
+            customerNotes: `📦 Track your package: ${trackingUrl}`
           }),
         };
 
