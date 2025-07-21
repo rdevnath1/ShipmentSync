@@ -77,7 +77,7 @@ router.post("/preview", requireAuth, requireOrgAccess, createAuditMiddleware('ra
       }
       
       // Extract actual cost from Jiayou response
-      const actualCost = rateData.totalFee;
+      const actualCost = parseFloat(rateData.totalFee);
       
       // Get shipping zone for delivery time estimation
       const shippingZone = getShippingZone('US', pickupZipCode, deliveryZipCode);
@@ -110,16 +110,17 @@ router.post("/preview", requireAuth, requireOrgAccess, createAuditMiddleware('ra
           rateCalculation: {
             baseWeight: weight,
             dimensions: dimensions,
-            zone: shippingZone,
+            zone: `Zone ${rateData.areaCode}`, // Use actual zone from Jiayou
             factors: {
-              weightFactor: Math.ceil(weight / 0.45), // Per pound
-              dimensionalWeight: calculateDimensionalWeight(dimensions),
-              zoneFactor: getZoneMultiplier(shippingZone),
-              jiayouData: jiayouResponse.data // Include full Jiayou data for transparency
-            }
+              actualRate: actualCost,
+              currency: rateData.currencyCode,
+              channelCode: rateData.channelCode,
+              jiayouFees: rateData.feeList // Detailed fee breakdown
+            },
+            note: "Actual rate from Jiayou API"
           }
         },
-        warnings: [],
+        warnings: [`Actual rate: $${actualCost.toFixed(2)} from Jiayou for Zone ${rateData.areaCode}`],
         validUntil: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 minutes
         request: {
           pickupZipCode,
