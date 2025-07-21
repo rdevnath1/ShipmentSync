@@ -85,10 +85,13 @@ export default function OrderTable({ orders, showShipmentActions = false, showBa
 
   const handleTrackingClick = (order: any) => {
     if (order.trackingNumber) {
+      // Use the formatted QP tracking number for the URL to ensure proper tracking
+      const formattedTracking = formatTrackingNumber(order.trackingNumber);
       console.log('Tracking click - Order:', order);
-      console.log('Tracking number:', order.trackingNumber);
-      console.log('Navigating to:', `/tracking?track=${order.trackingNumber}`);
-      setLocation(`/tracking?track=${order.trackingNumber}`);
+      console.log('Original tracking number:', order.trackingNumber);
+      console.log('Formatted tracking number:', formattedTracking);
+      console.log('Navigating to:', `/tracking?track=${formattedTracking}`);
+      setLocation(`/tracking?track=${formattedTracking}`);
     } else {
       toast({
         title: "No Tracking Available",

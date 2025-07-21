@@ -55,6 +55,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Tracking Number Format & Navigation Fix (July 20, 2025)
+- **Fixed QP Tracking Format**: ShipStation now receives QP format tracking numbers instead of GV format
+- **Fixed Tracking Navigation**: Clicking tracking numbers now properly navigates to tracking page with QP format
+- **Enhanced API Compatibility**: Tracking API automatically converts QP back to GV for Jiayou API compatibility
+- **Improved Logging**: Added detailed tracking format conversion logs for debugging
+- **Rate Calculator API Integration**: Started implementing actual Jiayou API rates instead of hardcoded zone multipliers
+- **SUCCESSFUL RESULT**: Tracking numbers now display consistently as QP format across ShipStation and Quikpik platform
+
 ### Rate Calculator & Dashboard Cleanup (July 20, 2025)
 - **Rate Calculator Rename**: Renamed "Rate Preview" to "Rate Calculator" throughout the system
 - **Dashboard Simplification**: Removed webhook activity and rate preview sections from dashboard for cleaner interface

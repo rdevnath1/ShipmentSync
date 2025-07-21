@@ -784,15 +784,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Update ShipStation with tracking info and label data
       if (order.shipstationOrderId) {
+        // Format tracking number for ShipStation (GV -> QP)
+        const formattedTrackingNo = jiayouResponse.data.trackingNo.replace(/^GV/g, 'QP');
+        
         const updateResult = await shipStationService.markAsShipped(
           parseInt(order.shipstationOrderId),
-          jiayouResponse.data.trackingNo,
+          formattedTrackingNo,
           labelPath
         );
         
         if (updateResult) {
           console.log(`Successfully created ShipStation shipment for order ${order.shipstationOrderId}`);
-          console.log(`Tracking: ${jiayouResponse.data.trackingNo}, Label: ${labelPath}`);
+          console.log(`Tracking: ${formattedTrackingNo} (formatted from ${jiayouResponse.data.trackingNo}), Label: ${labelPath}`);
         } else {
           console.error(`Failed to create ShipStation shipment for order ${order.shipstationOrderId}`);
         }
@@ -848,7 +851,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { trackingNumber } = req.params;
       
-      const trackingData = await jiayouService.getTracking(trackingNumber);
+      // Convert QP format back to GV for API lookup (since Jiayou uses GV internally)
+      const apiTrackingNumber = trackingNumber.replace(/^QP/g, 'GV');
+      console.log(`Tracking lookup: Frontend sent ${trackingNumber}, using ${apiTrackingNumber} for API`);
+      
+      const trackingData = await jiayouService.getTracking(apiTrackingNumber);
       
       // If tracking is not available yet, return a user-friendly message
       if (trackingData.code === 0) {
