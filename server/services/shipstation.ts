@@ -117,13 +117,12 @@ export class ShipStationService {
       // Create shipment with label data if available
       const shipmentData = {
         orderId,
-        carrierCode: 'jiayou', // Use jiayou instead of other for better recognition
-        serviceCode: 'standard',
+        carrierCode: 'other', // Use 'other' since ShipStation doesn't recognize jiayou
+        serviceCode: 'other',
         packageCode: 'package',
         confirmation: 'none',
         shipDate: new Date().toISOString(),
         trackingNumber,
-        ...(trackingUrl && { trackingUrl }), // Add tracking URL for external link
         notifyCustomer: true,
         notifySalesChannel: true,
         shipTo: order.shipTo,
@@ -137,6 +136,10 @@ export class ShipStationService {
           width: 10,
           height: 4
         },
+        ...(trackingUrl && { 
+          internalNotes: `Track shipment: ${trackingUrl}`,
+          customerNotes: `Track your shipment at: ${trackingUrl}`
+        }),
         ...(labelUrl && {
           labelData: await this.getLabelDataFromUrl(labelUrl)
         })
@@ -164,12 +167,15 @@ export class ShipStationService {
         console.log('Falling back to mark as shipped...');
         const fallbackData = {
           orderId,
-          carrierCode: 'jiayou',
+          carrierCode: 'other', // Use 'other' since jiayou isn't recognized
           trackingNumber,
-          ...(trackingUrl && { trackingUrl }), // Add tracking URL to fallback too
           shipDate: new Date().toISOString().split('T')[0],
           notifyCustomer: true,
           notifySalesChannel: true,
+          ...(trackingUrl && { 
+            internalNotes: `Track shipment: ${trackingUrl}`,
+            customerNotes: `Track your shipment at: ${trackingUrl}`
+          }),
         };
 
         const fallbackResponse = await axios.post(
