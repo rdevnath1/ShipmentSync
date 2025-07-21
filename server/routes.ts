@@ -204,11 +204,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Pull and sync orders from ShipStation
-  app.post("/api/orders/pull-shipstation", requireAuth, requireOrgAccess, createAuditMiddleware('sync_shipstation_orders', 'shipstation'), async (req, res) => {
+  app.post("/api/orders/pull-shipstation", requireAuth, requireOrgAccess, createAuditMiddleware('sync_shipstation_orders', 'shipstation'), async (req: any, res) => {
     try {
       const shipStationOrders = await shipStationService.getOrders();
       const createdOrders = [];
       const updatedOrders = [];
+      
+      // Get organization ID from authenticated user
+      const userOrgId = req.user?.organizationId;
+      if (!userOrgId) {
+        return res.status(401).json({ error: "User organization not found" });
+      }
 
       for (const ssOrder of shipStationOrders) {
         // Check if order already exists
@@ -228,7 +234,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           totalAmount: ssOrder.orderTotal.toString(),
           currency: "USD",
           status: existingOrder?.status || "pending", // Preserve existing shipment status
-          organizationId: req.organizationId, // Assign to user's organization
+          organizationId: userOrgId, // Assign to user's organization
         };
 
         if (existingOrder) {
