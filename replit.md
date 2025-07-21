@@ -59,7 +59,7 @@ Preferred communication style: Simple, everyday language.
 - **Fixed QP Tracking Format**: ShipStation now receives QP format tracking numbers instead of GV format
 - **Fixed Tracking Navigation**: Clicking tracking numbers now properly navigates to tracking page with QP format
 - **Enhanced API Compatibility**: Tracking API automatically converts QP back to GV for Jiayou API compatibility
-- **Added External Tracking URLs**: Added tracking links via order notes since ShipStation API doesn't support trackingUrl parameter
+- **Researched External Tracking URLs**: Confirmed ShipStation V1 API doesn't support trackingUrl parameter - requires alternative solution
 - **Fixed Organization Context**: Resolved sync error by properly accessing user organization ID from authentication
 - **Updated Carrier Code**: Changed from 'other' to 'jiayou' for better ShipStation recognition
 - **Improved Logging**: Added detailed tracking format conversion logs for debugging
