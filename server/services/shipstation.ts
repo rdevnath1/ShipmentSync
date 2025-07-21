@@ -136,8 +136,10 @@ export class ShipStationService {
           width: 10,
           height: 4
         },
-        // Note: ShipStation API doesn't support trackingUrl parameter
-        // The tracking URL functionality needs to be handled on the client side
+        ...(trackingUrl && { 
+          internalNotes: `Track shipment: ${trackingUrl}`,
+          customerNotes: `Track your shipment at: ${trackingUrl}`
+        }),
         ...(labelUrl && {
           labelData: await this.getLabelDataFromUrl(labelUrl)
         })
@@ -165,17 +167,16 @@ export class ShipStationService {
         console.log('Falling back to mark as shipped...');
         const fallbackData = {
           orderId,
-          carrierCode: 'other', // Use 'other' since jiayou isn't recognized  
+          carrierCode: 'other', // Use 'other' since jiayou isn't recognized
           trackingNumber,
           shipDate: new Date().toISOString().split('T')[0],
           notifyCustomer: true,
           notifySalesChannel: true,
+          ...(trackingUrl && { 
+            internalNotes: `Track shipment: ${trackingUrl}`,
+            customerNotes: `Track your shipment at: ${trackingUrl}`
+          }),
         };
-
-        // Log the tracking URL for debugging - ShipStation API doesn't support it directly
-        if (trackingUrl) {
-          console.log(`Note: ShipStation API doesn't support trackingUrl parameter. Tracking link: ${trackingUrl}`);
-        }
 
         const fallbackResponse = await axios.post(
           `${this.baseUrl}/orders/markasshipped`,
