@@ -59,9 +59,12 @@ Preferred communication style: Simple, everyday language.
 - **Fixed QP Tracking Format**: ShipStation now receives QP format tracking numbers instead of GV format
 - **Fixed Tracking Navigation**: Clicking tracking numbers now properly navigates to tracking page with QP format
 - **Enhanced API Compatibility**: Tracking API automatically converts QP back to GV for Jiayou API compatibility
+- **Added External Tracking URLs**: ShipStation now receives trackingUrl parameter enabling external tracking links
+- **Fixed Organization Context**: Resolved sync error by properly accessing user organization ID from authentication
+- **Updated Carrier Code**: Changed from 'other' to 'jiayou' for better ShipStation recognition
 - **Improved Logging**: Added detailed tracking format conversion logs for debugging
 - **Rate Calculator API Integration**: Started implementing actual Jiayou API rates instead of hardcoded zone multipliers
-- **SUCCESSFUL RESULT**: Tracking numbers now display consistently as QP format across ShipStation and Quikpik platform
+- **SUCCESSFUL RESULT**: Complete tracking integration - QP format display, proper navigation, and external ShipStation links working
 
 ### Rate Calculator & Dashboard Cleanup (July 20, 2025)
 - **Rate Calculator Rename**: Renamed "Rate Preview" to "Rate Calculator" throughout the system

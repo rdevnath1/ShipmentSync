@@ -793,10 +793,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Format tracking number for ShipStation (GV -> QP)
         const formattedTrackingNo = jiayouResponse.data.trackingNo.replace(/^GV/g, 'QP');
         
+        // Create tracking URL for Quikpik tracking page
+        const trackingUrl = `${process.env.REPLIT_DOMAINS ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}` : 'https://quikpik.com'}/tracking?track=${formattedTrackingNo}`;
+        
         const updateResult = await shipStationService.markAsShipped(
           parseInt(order.shipstationOrderId),
           formattedTrackingNo,
-          labelPath
+          labelPath,
+          trackingUrl
         );
         
         if (updateResult) {

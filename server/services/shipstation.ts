@@ -103,7 +103,7 @@ export class ShipStationService {
     }
   }
 
-  async markAsShipped(orderId: number, trackingNumber: string, labelUrl?: string): Promise<boolean> {
+  async markAsShipped(orderId: number, trackingNumber: string, labelUrl?: string, trackingUrl?: string): Promise<boolean> {
     try {
       console.log(`Creating ShipStation shipment for order ${orderId} with tracking ${trackingNumber}`);
       
@@ -117,12 +117,13 @@ export class ShipStationService {
       // Create shipment with label data if available
       const shipmentData = {
         orderId,
-        carrierCode: 'other',
-        serviceCode: 'other',
+        carrierCode: 'jiayou', // Use jiayou instead of other for better recognition
+        serviceCode: 'standard',
         packageCode: 'package',
         confirmation: 'none',
         shipDate: new Date().toISOString(),
         trackingNumber,
+        ...(trackingUrl && { trackingUrl }), // Add tracking URL for external link
         notifyCustomer: true,
         notifySalesChannel: true,
         shipTo: order.shipTo,
@@ -163,8 +164,9 @@ export class ShipStationService {
         console.log('Falling back to mark as shipped...');
         const fallbackData = {
           orderId,
-          carrierCode: 'other',
+          carrierCode: 'jiayou',
           trackingNumber,
+          ...(trackingUrl && { trackingUrl }), // Add tracking URL to fallback too
           shipDate: new Date().toISOString().split('T')[0],
           notifyCustomer: true,
           notifySalesChannel: true,
@@ -202,8 +204,8 @@ export class ShipStationService {
   }
 
   // Keep the old method for backward compatibility but use the new one
-  async updateOrderWithTracking(orderId: number, trackingNumber: string, labelUrl?: string): Promise<boolean> {
-    return this.markAsShipped(orderId, trackingNumber, labelUrl);
+  async updateOrderWithTracking(orderId: number, trackingNumber: string, labelUrl?: string, trackingUrl?: string): Promise<boolean> {
+    return this.markAsShipped(orderId, trackingNumber, labelUrl, trackingUrl);
   }
 
   async createShipment(orderId: number, trackingNumber: string): Promise<boolean> {
