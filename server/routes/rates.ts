@@ -51,17 +51,33 @@ router.post("/preview", requireAuth, requireOrgAccess, createAuditMiddleware('ra
       
       console.log('Jiayou API Response:', JSON.stringify(jiayouResponse, null, 2));
       
-      // Check if API returned success
-      if (jiayouResponse.status !== 1) {
+      // Check if API returned success and has valid data
+      if (jiayouResponse.code !== 1 || !jiayouResponse.data || jiayouResponse.data.length === 0) {
         return res.status(400).json({
-          error: jiayouResponse.msg || 'Failed to get rate from carrier',
+          error: jiayouResponse.message || 'Failed to get rate from carrier',
           jiayouResponse // Include full response for debugging
         });
       }
       
+      // Check for coverage error in the data
+      const rateData = jiayouResponse.data[0];
+      if (!rateData.totalFee || rateData.errMsg) {
+        // Handle coverage error with user-friendly message
+        let errorMessage = 'Shipping not available to this ZIP code';
+        
+        if (rateData.errMsg && rateData.errMsg.includes('不在渠道分区范围内')) {
+          errorMessage = `ZIP code ${deliveryZipCode} is not covered by our shipping network. Please try a different ZIP code or contact support.`;
+        }
+        
+        return res.status(400).json({
+          error: errorMessage,
+          details: rateData.errMsg,
+          jiayouResponse
+        });
+      }
+      
       // Extract actual cost from Jiayou response
-      // The response typically includes cost in the data field
-      const actualCost = jiayouResponse.data?.cost || jiayouResponse.data?.price || 0;
+      const actualCost = rateData.totalFee;
       
       // Get shipping zone for delivery time estimation
       const shippingZone = getShippingZone('US', pickupZipCode, deliveryZipCode);

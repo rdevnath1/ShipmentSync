@@ -45,9 +45,19 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
     mutationFn: async (data: any) => {
       const response = await apiRequest("POST", "/api/rates/preview", data);
       const result = await response.json();
-      console.log("Rate preview response:", result);
+      console.log("Rate data:", result);
+      console.log("Error:", ratePreviewMutation.error);
+      console.log("Loading:", ratePreviewMutation.isPending);
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to get shipping rate');
+      }
+      
       return result;
     },
+    onError: (error) => {
+      console.error("Rate preview error:", error);
+    }
   });
 
   const handleGetRates = () => {
@@ -192,6 +202,16 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
           >
             {isLoading ? "Calculating Rates..." : "Calculate Rates"}
           </Button>
+          
+          {/* Error Display */}
+          {ratePreviewMutation.error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                {ratePreviewMutation.error.message || "Failed to calculate shipping rate"}
+              </AlertDescription>
+            </Alert>
+          )}
         </CardContent>
       </Card>
 
