@@ -1483,6 +1483,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Name and slug are required" });
       }
 
+      // Check if slug already exists
+      const existingOrg = await storage.getOrganizationBySlug(slug);
+      if (existingOrg) {
+        return res.status(400).json({ error: "Organization with this slug already exists" });
+      }
+
       const organization = await storage.createOrganization({
         name,
         slug,
@@ -1492,7 +1498,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ organization });
     } catch (error) {
       console.error("Error creating organization:", error);
-      res.status(500).json({ error: "Failed to create organization" });
+      if (error.code === '23505') { // Unique constraint violation
+        res.status(400).json({ error: "Organization with this name or slug already exists" });
+      } else {
+        res.status(500).json({ error: "Failed to create organization" });
+      }
     }
   });
 
