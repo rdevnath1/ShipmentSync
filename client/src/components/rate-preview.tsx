@@ -91,7 +91,9 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
     setDimensions(prev => ({ ...prev, [field]: value }));
   };
 
-  const { data: rateData, error, isLoading } = ratePreviewMutation;
+  const rateData = ratePreviewMutation.data;
+  const error = ratePreviewMutation.error;
+  const isLoading = ratePreviewMutation.isPending;
 
   // Debug logging
   console.log("Rate data:", rateData);
