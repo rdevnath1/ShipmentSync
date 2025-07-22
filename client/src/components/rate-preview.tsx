@@ -195,13 +195,7 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
             </div>
           </div>
 
-          {/* Working ZIP Codes Helper */}
-          <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-            <div className="text-sm text-blue-800 dark:text-blue-200">
-              <p className="font-medium mb-1">✅ Guaranteed Working ZIP Codes:</p>
-              <p className="text-xs">• 10001 (NY - Zone 1) • 33101 (Miami - Zone 3) • 60601 (Chicago - Zone 5) • 90210 (LA - Zone 8)</p>
-            </div>
-          </div>
+          
 
           <Button 
             onClick={handleGetRates} 
