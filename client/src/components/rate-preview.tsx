@@ -308,37 +308,7 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
               </div>
             )}
 
-            {/* Delivery and Details - Always Show */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {/* Estimated Delivery */}
-              <div className="flex flex-col gap-2 p-4 border rounded-lg">
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-blue-600" />
-                  <div className="font-medium">Estimated Delivery</div>
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {rateData.preview.estimatedDelivery.description}
-                </div>
-              </div>
 
-              {/* Package Details */}
-              <div className="border rounded-lg p-4 bg-muted/30">
-                <div className="space-y-2 text-xs text-muted-foreground">
-                  <div className="flex justify-between">
-                    <span>Weight:</span>
-                    <span>{(rateData.preview.rateCalculation.baseWeight * 35.274).toFixed(1)} oz</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Zone:</span>
-                    <span>{rateData.preview.rateCalculation.zone}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Service:</span>
-                    <span>Standard</span>
-                  </div>
-                </div>
-              </div>
-            </div>
 
             {/* Warnings */}
             {rateData.warnings && rateData.warnings.length > 0 && (
