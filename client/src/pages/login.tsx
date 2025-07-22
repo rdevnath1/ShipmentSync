@@ -75,7 +75,7 @@ export default function Login() {
         {/* Logo and Branding */}
         <div className="text-center">
           
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Quikpik Shipping</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Quikpik</h1>
           <p className="text-gray-600 dark:text-gray-300 mt-2">
             E-commerce Shipment Management Platform
           </p>
