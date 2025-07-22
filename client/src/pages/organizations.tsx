@@ -17,9 +17,16 @@ export default function Organizations() {
   const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isUsersDialogOpen, setIsUsersDialogOpen] = useState(false);
+  const [isCreateUserDialogOpen, setIsCreateUserDialogOpen] = useState(false);
   const [orgName, setOrgName] = useState("");
   const [orgSlug, setOrgSlug] = useState("");
   const [editingOrg, setEditingOrg] = useState<any>(null);
+  const [managingOrg, setManagingOrg] = useState<any>(null);
+  const [userEmail, setUserEmail] = useState("");
+  const [userPassword, setUserPassword] = useState("");
+  const [userFirstName, setUserFirstName] = useState("");
+  const [userLastName, setUserLastName] = useState("");
 
   // Redirect non-master users
   if (user?.role !== 'master') {
@@ -36,6 +43,11 @@ export default function Organizations() {
 
   const { data: organizations = [], isLoading } = useQuery({
     queryKey: ["/api/organizations"],
+  });
+
+  const { data: orgUsers = [], isLoading: usersLoading } = useQuery({
+    queryKey: ["/api/organizations", managingOrg?.id, "users"],
+    enabled: !!managingOrg?.id,
   });
 
 
@@ -119,6 +131,56 @@ export default function Organizations() {
       id: editingOrg.id, 
       name: orgName.trim(), 
       slug: orgSlug.trim() 
+    });
+  };
+
+  const handleManageUsers = (org: any) => {
+    setManagingOrg(org);
+    setIsUsersDialogOpen(true);
+  };
+
+  const createUserMutation = useMutation({
+    mutationFn: async (data: { email: string; password: string; firstName: string; lastName: string; organizationId: number }) => {
+      return await apiRequest("POST", "/api/users", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/organizations", managingOrg?.id, "users"] });
+      setIsCreateUserDialogOpen(false);
+      setUserEmail("");
+      setUserPassword("");
+      setUserFirstName("");
+      setUserLastName("");
+      toast({
+        title: "User Created",
+        description: "New user has been created successfully.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Creation Failed", 
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleCreateUser = () => {
+    if (!userEmail.trim() || !userPassword.trim() || !userFirstName.trim() || !userLastName.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "All fields are required.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!managingOrg) return;
+    
+    createUserMutation.mutate({
+      email: userEmail.trim(),
+      password: userPassword.trim(),
+      firstName: userFirstName.trim(),
+      lastName: userLastName.trim(),
+      organizationId: managingOrg.id
     });
   };
 
@@ -261,9 +323,13 @@ export default function Organizations() {
                         <Edit size={14} className="mr-1" />
                         Edit
                       </Button>
-                      <Button variant="outline" size="sm" disabled>
-                        <Trash2 size={14} className="mr-1" />
-                        Delete
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => handleManageUsers(org)}
+                      >
+                        <Users size={14} className="mr-1" />
+                        Users
                       </Button>
                     </div>
                   </div>
@@ -334,6 +400,128 @@ export default function Organizations() {
                     setEditingOrg(null);
                     setOrgName("");
                     setOrgSlug("");
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Manage Users Dialog */}
+        <Dialog open={isUsersDialogOpen} onOpenChange={setIsUsersDialogOpen}>
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle>Manage Users - {managingOrg?.name}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <p className="text-muted-foreground">{orgUsers.length} users in this organization</p>
+                <Button onClick={() => setIsCreateUserDialogOpen(true)}>
+                  <Plus className="mr-2" size={16} />
+                  Add User
+                </Button>
+              </div>
+
+              {/* Users List */}
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {orgUsers.map((user: any) => (
+                  <div key={user.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium">{user.firstName} {user.lastName}</p>
+                      <p className="text-sm text-muted-foreground">{user.email}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={user.isActive ? "default" : "secondary"}>
+                        {user.isActive ? "Active" : "Inactive"}
+                      </Badge>
+                      <Badge variant="outline">{user.role}</Badge>
+                    </div>
+                  </div>
+                ))}
+                {orgUsers.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No users found. Add the first user to get started.
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => {
+                  setIsUsersDialogOpen(false);
+                  setManagingOrg(null);
+                }}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create User Dialog */}
+        <Dialog open={isCreateUserDialogOpen} onOpenChange={setIsCreateUserDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add User - {managingOrg?.name}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="user-first-name">First Name</Label>
+                  <Input
+                    id="user-first-name"
+                    placeholder="John"
+                    value={userFirstName}
+                    onChange={(e) => setUserFirstName(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="user-last-name">Last Name</Label>
+                  <Input
+                    id="user-last-name"
+                    placeholder="Doe"
+                    value={userLastName}
+                    onChange={(e) => setUserLastName(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="user-email">Email</Label>
+                <Input
+                  id="user-email"
+                  type="email"
+                  placeholder="john@example.com"
+                  value={userEmail}
+                  onChange={(e) => setUserEmail(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="user-password">Password</Label>
+                <Input
+                  id="user-password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={userPassword}
+                  onChange={(e) => setUserPassword(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button 
+                  onClick={handleCreateUser} 
+                  disabled={createUserMutation.isPending}
+                  className="flex-1"
+                >
+                  {createUserMutation.isPending ? "Creating..." : "Create User"}
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setIsCreateUserDialogOpen(false);
+                    setUserEmail("");
+                    setUserPassword("");
+                    setUserFirstName("");
+                    setUserLastName("");
                   }}
                 >
                   Cancel

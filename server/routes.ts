@@ -1558,6 +1558,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Users management routes (Master admin only)
+  app.get("/api/organizations/:id/users", requireAuth, requireRole(['master']), async (req, res) => {
+    try {
+      const orgId = parseInt(req.params.id);
+      if (isNaN(orgId)) {
+        return res.status(400).json({ error: "Invalid organization ID" });
+      }
+
+      const users = await storage.getUsersByOrganization(orgId);
+      res.json(users);
+    } catch (error: any) {
+      console.error("Error fetching organization users:", error);
+      res.status(500).json({ error: "Failed to fetch users" });
+    }
+  });
+
+  app.post("/api/users", requireAuth, requireRole(['master']), createAuditMiddleware('create_user'), async (req, res) => {
+    try {
+      const { email, password, firstName, lastName, organizationId } = req.body;
+      
+      if (!email || !password || !firstName || !lastName || !organizationId) {
+        return res.status(400).json({ error: "All fields are required" });
+      }
+
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ error: "User with this email already exists" });
+      }
+
+      // Check if organization exists
+      const org = await storage.getOrganization(organizationId);
+      if (!org) {
+        return res.status(400).json({ error: "Organization not found" });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const user = await storage.createUser({
+        email,
+        password: hashedPassword,
+        firstName,
+        lastName,
+        role: 'client',
+        organizationId,
+        isActive: true
+      });
+      
+      // Return user without password hash
+      const { password: _, ...userResponse } = user;
+      res.json({ user: userResponse });
+    } catch (error: any) {
+      console.error("Error creating user:", error);
+      if (error.code === '23505') { // Unique constraint violation
+        return res.status(400).json({ error: "User with this email already exists" });
+      }
+      res.status(500).json({ error: "Failed to create user" });
+    }
+  });
+
   // All orders route (Master admin only)
   app.get("/api/orders/all", requireAuth, requireRole(['master']), createAuditMiddleware('get_all_orders'), async (req, res) => {
     try {
