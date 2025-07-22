@@ -66,6 +66,16 @@ Preferred communication style: Simple, everyday language.
 - **Rate Calculator API Integration**: Started implementing actual Jiayou API rates instead of hardcoded zone multipliers
 - **SUCCESSFUL RESULT**: Complete tracking integration - QP format display, proper navigation, and external ShipStation links working
 
+### Label Customization System & Homepage Update (July 22, 2025)
+- **Label Customization Service**: Created PDF modification service using pdf-lib to replace GV tracking numbers with QP format
+- **Logo Removal**: Added white rectangle overlay to remove Jiayou branding from shipping labels
+- **Customized Label Endpoints**: Implemented /api/labels/customized/* endpoints to serve modified labels
+- **Sample Label Preview**: Added /api/labels/sample endpoint demonstrating QP format labels
+- **Rate Calculator as Homepage**: Changed default route from Dashboard to Rate Calculator
+- **Navigation Update**: Moved Dashboard to /dashboard path and updated sidebar navigation
+- **Blue Helper Box Removal**: Removed ZIP codes helper box from rate preview as requested
+- **SUCCESSFUL RESULT**: Complete label customization system with QP tracking format and Rate Calculator as homepage
+
 ### Zone-Based Delivery Times Implementation (July 22, 2025)
 - **Exact Quikpik Rate Table**: Implemented complete customer rate table from provided rate sheet with weight brackets (4oz-19.8lbs) and zones (0-8)
 - **Smart Weight Bracket System**: Added intelligent weight lookup system matching exact Quikpik pricing tiers
