@@ -90,9 +90,6 @@ export default function Login() {
         <Card className="shadow-lg">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl text-center">Sign In</CardTitle>
-            <p className="text-sm text-muted-foreground text-center">
-              Enter your credentials to access your dashboard
-            </p>
           </CardHeader>
           <CardContent>
             <Form {...form}>
