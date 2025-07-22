@@ -74,12 +74,7 @@ export default function Login() {
       <div className="w-full max-w-md space-y-8">
         {/* Logo and Branding */}
         <div className="text-center">
-          <div className="flex justify-center items-center space-x-2 mb-4">
-            <div className="flex items-center space-x-1">
-              <Package className="text-blue-600" size={28} />
-              <Truck className="text-emerald-600" size={28} />
-            </div>
-          </div>
+          
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Quikpik Shipping</h1>
           <p className="text-gray-600 dark:text-gray-300 mt-2">
             E-commerce Shipment Management Platform
