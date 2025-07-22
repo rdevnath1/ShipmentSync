@@ -24,8 +24,8 @@ export default function Dashboard() {
   const stats = {
     totalOrders: orders.length,
     activeShipments: data?.shippedCount || 0,
-    pendingOrders: data?.pendingCount || 0,
-    deliveredOrders: orders.filter(o => o.status === 'delivered').length
+    deliveredToday: orders.filter(o => o.status === 'delivered').length,
+    successRate: orders.length > 0 ? ((data?.shippedCount || 0) / orders.length * 100).toFixed(1) + '%' : '0%'
   };
 
   // Use optimized mutation hook

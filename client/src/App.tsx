@@ -39,6 +39,7 @@ function Router() {
             <Sidebar />
             <main className="flex-1 lg:ml-64">
               <Switch>
+                <Route path="/app/" component={Dashboard} />
                 <Route path="/app" component={Dashboard} />
                 <Route path="/app/orders" component={Orders} />
                 <Route path="/app/analytics" component={Analytics} />
