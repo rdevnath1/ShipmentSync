@@ -365,15 +365,6 @@ export default function Organizations() {
                         <Users size={14} className="mr-1" />
                         Users
                       </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleDeleteOrg(org)}
-                        className="text-red-600 hover:text-red-700 hover:border-red-300"
-                      >
-                        <Trash2 size={14} className="mr-1" />
-                        Delete
-                      </Button>
                     </div>
                   </div>
                 </div>
@@ -435,6 +426,19 @@ export default function Organizations() {
                   className="flex-1"
                 >
                   {updateOrgMutation.isPending ? "Updating..." : "Update Organization"}
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  onClick={() => {
+                    if (editingOrg) {
+                      setIsEditDialogOpen(false);
+                      handleDeleteOrg(editingOrg);
+                    }
+                  }}
+                  disabled={editingOrg?.slug === 'master'}
+                >
+                  <Trash2 size={14} className="mr-1" />
+                  Delete
                 </Button>
                 <Button 
                   variant="outline" 
