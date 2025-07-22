@@ -48,14 +48,8 @@ export default function Organizations() {
   });
 
   const { data: orgUsers = [], isLoading: usersLoading, refetch: refetchUsers } = useQuery({
-    queryKey: ["/api/organizations", managingOrg?.id, "users"],
-    enabled: !!managingOrg?.id,
-    queryFn: async () => {
-      if (!managingOrg?.id) return [];
-      const response = await fetch(`/api/organizations/${managingOrg.id}/users`);
-      if (!response.ok) throw new Error('Failed to fetch users');
-      return response.json();
-    },
+    queryKey: [`/api/organizations/${managingOrg?.id}/users`],
+    enabled: !!managingOrg?.id && isUsersDialogOpen,
   });
 
   // Force refresh users when dialog opens
@@ -477,7 +471,9 @@ export default function Organizations() {
             </DialogHeader>
             <div className="space-y-6">
               <div className="flex justify-between items-center">
-                <p className="text-muted-foreground">{orgUsers.length} users in this organization</p>
+                <p className="text-muted-foreground">
+                  {usersLoading ? "Loading..." : `${orgUsers?.length || 0} users in this organization`}
+                </p>
                 <Button onClick={() => setIsCreateUserDialogOpen(true)}>
                   <Plus className="mr-2" size={16} />
                   Add User
@@ -486,21 +482,26 @@ export default function Organizations() {
 
               {/* Users List */}
               <div className="space-y-2 max-h-96 overflow-y-auto">
-                {orgUsers.map((user: any) => (
-                  <div key={user.id} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div>
-                      <p className="font-medium">{user.firstName} {user.lastName}</p>
-                      <p className="text-sm text-muted-foreground">{user.email}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={user.isActive ? "default" : "secondary"}>
-                        {user.isActive ? "Active" : "Inactive"}
-                      </Badge>
-                      <Badge variant="outline">{user.role}</Badge>
-                    </div>
+                {usersLoading ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    Loading users...
                   </div>
-                ))}
-                {orgUsers.length === 0 && (
+                ) : orgUsers && orgUsers.length > 0 ? (
+                  orgUsers.map((user: any) => (
+                    <div key={user.id} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div>
+                        <p className="font-medium">{user.firstName} {user.lastName}</p>
+                        <p className="text-sm text-muted-foreground">{user.email}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={user.isActive ? "default" : "secondary"}>
+                          {user.isActive ? "Active" : "Inactive"}
+                        </Badge>
+                        <Badge variant="outline">{user.role}</Badge>
+                      </div>
+                    </div>
+                  ))
+                ) : (
                   <div className="text-center py-8 text-muted-foreground">
                     No users found. Add the first user to get started.
                   </div>
