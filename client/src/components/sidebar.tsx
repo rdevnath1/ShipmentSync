@@ -135,13 +135,7 @@ export default function Sidebar() {
           </ul>
         </div>
         
-        {/* Theme Toggle */}
-        <div className="px-3 lg:px-4 pb-4 border-t border-border">
-          <div className="flex items-center justify-between px-3 lg:px-4 py-3">
-            <span className="text-sm text-muted-foreground">Theme</span>
-            <ThemeToggle />
-          </div>
-        </div>
+
       </nav>
     </>
   );

@@ -146,6 +146,37 @@ export async function setupAuth(app: Express) {
     res.json({ user: (req as any).user });
   });
 
+  // Change password
+  app.post('/api/auth/change-password', requireAuth, async (req, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      const userId = (req as any).user.id;
+      
+      // Get user from database
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ success: false, error: "User not found" });
+      }
+      
+      // Verify current password
+      const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+      if (!isCurrentPasswordValid) {
+        return res.status(400).json({ success: false, error: "Current password is incorrect" });
+      }
+      
+      // Hash new password
+      const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+      
+      // Update password in database
+      await storage.updateUserPassword(userId, hashedNewPassword);
+      
+      res.json({ success: true, message: "Password changed successfully" });
+    } catch (error) {
+      console.error("Password change error:", error);
+      res.status(500).json({ success: false, error: "Failed to change password" });
+    }
+  });
+
   // Register new organization and admin user (master only)
   app.post('/api/auth/register-org', requireAuth, requireRole(['master']), async (req, res) => {
     try {

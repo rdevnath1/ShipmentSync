@@ -22,6 +22,7 @@ export interface IStorage {
   getUserByEmailWithOrg(email: string): Promise<(User & { organization?: Organization }) | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUserLastLogin(id: number): Promise<void>;
+  updateUserPassword(id: number, hashedPassword: string): Promise<void>;
   
   // Order methods (now includes shipment functionality)
   getOrder(id: number): Promise<Order | undefined>;
@@ -120,6 +121,12 @@ export class DatabaseStorage implements IStorage {
   async updateUserLastLogin(id: number): Promise<void> {
     await db.update(users)
       .set({ lastLogin: new Date() })
+      .where(eq(users.id, id));
+  }
+
+  async updateUserPassword(id: number, hashedPassword: string): Promise<void> {
+    await db.update(users)
+      .set({ password: hashedPassword, updatedAt: new Date() })
       .where(eq(users.id, id));
   }
 

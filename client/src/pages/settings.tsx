@@ -14,8 +14,9 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Settings, Key, Bell, Globe, Shield, Copy, Trash2, Edit, Plus, Eye, EyeOff } from "lucide-react";
+import { Settings, Key, Bell, Globe, Shield, Copy, Trash2, Edit, Plus, Eye, EyeOff, Lock } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const apiSettingsSchema = z.object({
   shipstationApiKey: z.string().min(1, "ShipStation API key is required"),
@@ -36,15 +37,33 @@ const createApiKeySchema = z.object({
   permissions: z.array(z.string()).min(1, "At least one permission is required"),
 });
 
+const passwordChangeSchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+  newPassword: z.string().min(6, "New password must be at least 6 characters"),
+  confirmPassword: z.string().min(1, "Please confirm your new password"),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
 export default function SettingsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState("api");
+  const [activeTab, setActiveTab] = useState("general");
   const [showCreateApiKeyForm, setShowCreateApiKeyForm] = useState(false);
   const [newApiKey, setNewApiKey] = useState<any>(null);
   
   const isMasterAdmin = user?.role === 'master';
+
+  const passwordForm = useForm({
+    resolver: zodResolver(passwordChangeSchema),
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    },
+  });
 
   const apiForm = useForm({
     resolver: zodResolver(apiSettingsSchema),
@@ -73,6 +92,33 @@ export default function SettingsPage() {
       title: "Success",
       description: "API settings saved successfully",
     });
+  };
+
+  const handlePasswordChange = async (data: any) => {
+    try {
+      const response = await apiRequest("POST", "/api/auth/change-password", data);
+      const result = await response.json();
+      
+      if (result.success) {
+        toast({
+          title: "Password Changed",
+          description: "Your password has been updated successfully.",
+        });
+        passwordForm.reset();
+      } else {
+        toast({
+          title: "Password Change Failed",
+          description: result.error || "Failed to change password",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Something went wrong",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleNotificationSettingsSave = (data: any) => {
@@ -630,7 +676,73 @@ export default function SettingsPage() {
                 <p className="text-slate-600">Configure general application preferences</p>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* Password Change Section */}
+                <div className="border rounded-lg p-4">
+                  <h4 className="font-medium mb-4 flex items-center space-x-2">
+                    <Lock size={16} />
+                    <span>Change Password</span>
+                  </h4>
+                  <form onSubmit={passwordForm.handleSubmit(handlePasswordChange)} className="space-y-4">
+                    <div>
+                      <Label htmlFor="currentPassword">Current Password</Label>
+                      <Input
+                        id="currentPassword"
+                        type="password"
+                        {...passwordForm.register("currentPassword")}
+                      />
+                      {passwordForm.formState.errors.currentPassword && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {passwordForm.formState.errors.currentPassword.message}
+                        </p>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="newPassword">New Password</Label>
+                      <Input
+                        id="newPassword"
+                        type="password"
+                        {...passwordForm.register("newPassword")}
+                      />
+                      {passwordForm.formState.errors.newPassword && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {passwordForm.formState.errors.newPassword.message}
+                        </p>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                      <Input
+                        id="confirmPassword"
+                        type="password"
+                        {...passwordForm.register("confirmPassword")}
+                      />
+                      {passwordForm.formState.errors.confirmPassword && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {passwordForm.formState.errors.confirmPassword.message}
+                        </p>
+                      )}
+                    </div>
+                    
+                    <Button type="submit">Change Password</Button>
+                  </form>
+                </div>
+
+                <Separator />
+
                 <div className="space-y-4">
+                  {/* Theme Setting */}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Theme</Label>
+                      <p className="text-sm text-slate-500">Choose your preferred theme</p>
+                    </div>
+                    <ThemeToggle />
+                  </div>
+
+                  <Separator />
+
                   <div>
                     <Label htmlFor="timezone">Timezone</Label>
                     <Select defaultValue="UTC">
@@ -684,59 +796,7 @@ export default function SettingsPage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="security" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Shield size={20} />
-                  <span>Security Settings</span>
-                </CardTitle>
-                <p className="text-slate-600">Manage your account security and access controls</p>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="currentPassword">Current Password</Label>
-                    <Input
-                      id="currentPassword"
-                      type="password"
-                      placeholder="Enter current password"
-                    />
-                  </div>
 
-                  <div>
-                    <Label htmlFor="newPassword">New Password</Label>
-                    <Input
-                      id="newPassword"
-                      type="password"
-                      placeholder="Enter new password"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      placeholder="Confirm new password"
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label htmlFor="twoFactor">Two-Factor Authentication</Label>
-                      <p className="text-sm text-slate-500">Add an extra layer of security</p>
-                    </div>
-                    <Switch id="twoFactor" />
-                  </div>
-                </div>
-
-                <div className="flex justify-end">
-                  <Button>Update Security Settings</Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
       </div>
     </>
