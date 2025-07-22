@@ -81,7 +81,6 @@ export default function Login() {
         {/* Login Form */}
         <Card className="shadow-lg">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-center">Sign In</CardTitle>
           </CardHeader>
           <CardContent>
             <Form {...form}>
