@@ -66,6 +66,15 @@ Preferred communication style: Simple, everyday language.
 - **Rate Calculator API Integration**: Started implementing actual Jiayou API rates instead of hardcoded zone multipliers
 - **SUCCESSFUL RESULT**: Complete tracking integration - QP format display, proper navigation, and external ShipStation links working
 
+### Zone-Based Delivery Times Implementation (July 22, 2025)
+- **Exact Quikpik Rate Table**: Implemented complete customer rate table from provided rate sheet with weight brackets (4oz-19.8lbs) and zones (0-8)
+- **Smart Weight Bracket System**: Added intelligent weight lookup system matching exact Quikpik pricing tiers
+- **Dual Rate Display**: Master users see both internal Jiayou costs (green) and customer Quikpik rates (blue) with profit margins (yellow)
+- **Zone-Based Delivery Times**: Implemented precise delivery chart: Zone 1 (1 day), Zone 2 (1-2 days), Zone 3 (2 days), Zone 4 (2-3 days), Zone 5 (3-4 days), Zone 6 (4 days), Zone 7 (4-5 days), Zone 8 (5-6 days)
+- **Express Service**: Express shipping reduces delivery time by 1 day with minimum 1-day delivery
+- **Rate Accuracy Verification**: Confirmed 1 lb Zone 8 shows $4.84 internal vs $4.98 customer with 2.9% profit margin
+- **SUCCESSFUL RESULT**: Complete rate calculator with exact customer pricing and accurate zone-based delivery estimates
+
 ### Rate Calculator & Dashboard Cleanup (July 20, 2025)
 - **Rate Calculator Rename**: Renamed "Rate Preview" to "Rate Calculator" throughout the system
 - **Dashboard Simplification**: Removed webhook activity and rate preview sections from dashboard for cleaner interface

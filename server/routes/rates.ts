@@ -536,15 +536,15 @@ function calculateDeliveryTime(zone: string, serviceType: string): any {
   let deliveryInfo: { min: number; max: number; description: string };
   
   switch (zone) {
-    case 'Zone 0': deliveryInfo = { min: 1, max: 1, description: '1 day' }; break;
-    case 'Zone 1': deliveryInfo = { min: 1, max: 2, description: '1-2 days' }; break;
-    case 'Zone 2': deliveryInfo = { min: 2, max: 2, description: '2 days' }; break;
-    case 'Zone 3': deliveryInfo = { min: 2, max: 3, description: '2-3 days' }; break;
-    case 'Zone 4': deliveryInfo = { min: 3, max: 4, description: '3-4 days' }; break;
-    case 'Zone 5': deliveryInfo = { min: 4, max: 4, description: '4 days' }; break;
-    case 'Zone 6': deliveryInfo = { min: 4, max: 5, description: '4-5 days' }; break;
-    case 'Zone 7': deliveryInfo = { min: 5, max: 6, description: '5-6 days' }; break;
-    case 'Zone 8': deliveryInfo = { min: 6, max: 7, description: '6-7 days' }; break;
+    case 'Zone 1': deliveryInfo = { min: 1, max: 1, description: '1 day' }; break;
+    case 'Zone 2': deliveryInfo = { min: 1, max: 2, description: '1-2 days' }; break;
+    case 'Zone 3': deliveryInfo = { min: 2, max: 2, description: '2 days' }; break;
+    case 'Zone 4': deliveryInfo = { min: 2, max: 3, description: '2-3 days' }; break;
+    case 'Zone 5': deliveryInfo = { min: 3, max: 4, description: '3-4 days' }; break;
+    case 'Zone 6': deliveryInfo = { min: 4, max: 4, description: '4 days' }; break;
+    case 'Zone 7': deliveryInfo = { min: 4, max: 5, description: '4-5 days' }; break;
+    case 'Zone 8': deliveryInfo = { min: 5, max: 6, description: '5-6 days' }; break;
+    case 'Zone 0': deliveryInfo = { min: 1, max: 1, description: '1 day' }; break; // Pickup zone
     default: deliveryInfo = { min: 3, max: 4, description: '3-4 days' }; break;
   }
 
