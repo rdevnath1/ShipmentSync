@@ -14,10 +14,9 @@ export default function LandingPage() {
           </Button>
         </Link>
       </header>
-
       {/* Hero Section */}
       <section className="text-center px-8 py-16 max-w-4xl mx-auto">
-        <h1 className="text-5xl md:text-6xl font-bold text-gray-800 mb-6 leading-tight">
+        <h1 className="md:text-6xl text-gray-800 mb-6 text-[40px] font-semibold">
           E-commerce delivery for the<br />
           urban cities. Only $0.99,<br />
           delivered same day !
@@ -32,7 +31,6 @@ export default function LandingPage() {
         </Link>
         <p className="text-2xl font-semibold text-gray-700 mt-4">$0.99 per lb</p>
       </section>
-
       {/* How it works */}
       <section className="py-16 px-8 bg-gray-50">
         <div className="max-w-6xl mx-auto">
@@ -90,7 +88,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-
       {/* Why Quikpik */}
       <section className="py-16 px-8">
         <div className="max-w-6xl mx-auto">
@@ -123,7 +120,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-
       {/* Coverage */}
       <section className="py-16 px-8 bg-gray-50">
         <div className="max-w-6xl mx-auto text-center">
@@ -139,7 +135,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-
       {/* Customer Experience */}
       <section className="py-16 px-8">
         <div className="max-w-6xl mx-auto">
@@ -156,7 +151,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-
       {/* Get started */}
       <section className="py-16 px-8 bg-gray-50">
         <div className="max-w-6xl mx-auto text-center">
@@ -173,7 +167,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-
       {/* Sign Up Form */}
       <section className="py-16 px-8">
         <div className="max-w-2xl mx-auto">
@@ -210,7 +203,6 @@ export default function LandingPage() {
           </form>
         </div>
       </section>
-
       {/* Footer */}
       <footer className="bg-gray-100 py-12 px-8">
         <div className="max-w-6xl mx-auto">
