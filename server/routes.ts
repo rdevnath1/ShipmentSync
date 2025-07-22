@@ -1496,10 +1496,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       res.json({ organization });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating organization:", error);
       if (error.code === '23505') { // Unique constraint violation
-        res.status(400).json({ error: "Organization with this name or slug already exists" });
+        if (error.constraint === 'organizations_slug_key') {
+          return res.status(400).json({ error: `Organization with slug '${slug}' already exists` });
+        } else {
+          return res.status(400).json({ error: "Organization with this name already exists" });
+        }
       } else {
         res.status(500).json({ error: "Failed to create organization" });
       }
