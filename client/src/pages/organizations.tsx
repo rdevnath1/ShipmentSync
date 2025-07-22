@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import Header from "@/components/header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,10 +47,23 @@ export default function Organizations() {
     queryKey: ["/api/organizations"],
   });
 
-  const { data: orgUsers = [], isLoading: usersLoading } = useQuery({
+  const { data: orgUsers = [], isLoading: usersLoading, refetch: refetchUsers } = useQuery({
     queryKey: ["/api/organizations", managingOrg?.id, "users"],
     enabled: !!managingOrg?.id,
+    queryFn: async () => {
+      if (!managingOrg?.id) return [];
+      const response = await fetch(`/api/organizations/${managingOrg.id}/users`);
+      if (!response.ok) throw new Error('Failed to fetch users');
+      return response.json();
+    },
   });
+
+  // Force refresh users when dialog opens
+  useEffect(() => {
+    if (isUsersDialogOpen && managingOrg?.id) {
+      refetchUsers();
+    }
+  }, [isUsersDialogOpen, managingOrg?.id, refetchUsers]);
 
 
 
