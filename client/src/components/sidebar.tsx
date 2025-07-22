@@ -36,17 +36,17 @@ export default function Sidebar() {
 
   // Base navigation items for all users
   const baseNavItems = [
-    { path: "/", icon: LayoutDashboard, label: "Dashboard" },
-    { path: "/orders", icon: Package, label: "Orders" },
-    { path: "/rate-calculator", icon: BarChart3, label: "Rate Calculator" },
-    { path: "/analytics", icon: BarChart3, label: "Analytics" },
+    { path: "/app", icon: LayoutDashboard, label: "Dashboard" },
+    { path: "/app/orders", icon: Package, label: "Orders" },
+    { path: "/app/rate-calculator", icon: BarChart3, label: "Rate Calculator" },
+    { path: "/app/analytics", icon: BarChart3, label: "Analytics" },
     { path: "/tracking", icon: Route, label: "Tracking" },
-    { path: "/settings", icon: Settings, label: "Settings" },
+    { path: "/app/settings", icon: Settings, label: "Settings" },
   ];
 
   // Add admin-only items for master users
   const navItems = user?.role === 'master' 
-    ? [...baseNavItems.slice(0, -1), { path: "/audit-logs", icon: Shield, label: "Audit Logs" }, baseNavItems[baseNavItems.length - 1]]
+    ? [...baseNavItems.slice(0, -1), { path: "/app/audit-logs", icon: Shield, label: "Audit Logs" }, baseNavItems[baseNavItems.length - 1]]
     : baseNavItems;
 
   const toggleMobileMenu = () => {

@@ -13,6 +13,7 @@ import Settings from "@/pages/settings";
 import Login from "@/pages/login";
 import NotFound from "@/pages/not-found";
 import RateCalculatorPage from "@/pages/rate-calculator";
+import LandingPage from "@/pages/landing";
 import Sidebar from "@/components/sidebar";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -31,18 +32,19 @@ function Router() {
   return (
     <Switch>
       <Route path="/tracking" component={Tracking} />
-      <Route path="*">
+      <Route path="/login" component={Login} />
+      <Route path="/app/*">
         {isAuthenticated ? (
           <div className="min-h-screen flex">
             <Sidebar />
             <main className="flex-1 lg:ml-64">
               <Switch>
-                <Route path="/" component={Dashboard} />
-                <Route path="/orders" component={Orders} />
-                <Route path="/analytics" component={Analytics} />
-                <Route path="/audit-logs" component={AuditLogs} />
-                <Route path="/rate-calculator" component={RateCalculatorPage} />
-                <Route path="/settings" component={Settings} />
+                <Route path="/app" component={Dashboard} />
+                <Route path="/app/orders" component={Orders} />
+                <Route path="/app/analytics" component={Analytics} />
+                <Route path="/app/audit-logs" component={AuditLogs} />
+                <Route path="/app/rate-calculator" component={RateCalculatorPage} />
+                <Route path="/app/settings" component={Settings} />
                 <Route component={NotFound} />
               </Switch>
             </main>
@@ -51,6 +53,8 @@ function Router() {
           <Login />
         )}
       </Route>
+      <Route path="/" component={LandingPage} />
+      <Route component={NotFound} />
     </Switch>
   );
 }
