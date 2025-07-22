@@ -9,7 +9,7 @@ export default function LandingPage() {
       <header className="flex justify-between items-center px-8 py-6">
         <div className="text-2xl font-bold text-gray-800">Quikpik</div>
         <Link href="/login">
-          <Button variant="ghost" className="text-gray-600 hover:text-black">
+          <Button variant="ghost" className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent h-10 px-4 py-2 text-gray-600 hover:text-black font-extrabold">
             Sign In
           </Button>
         </Link>
