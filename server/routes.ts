@@ -13,6 +13,7 @@ import { setupAuth, requireAuth, requireOrgAccess, requireRole } from "./auth";
 import { createAuditMiddleware, errorHandlerMiddleware, rateLimitMiddleware } from "./middleware/audit-middleware";
 import { retryQueue } from "./utils/retry-queue";
 import bcrypt from 'bcrypt';
+import path from "path";
 
 // Create service instances once and reuse them
 const shipStationService = new ShipStationService();
@@ -354,11 +355,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "No label available for this order. The label may not have been generated yet." });
       }
 
-      // Return the label path for frontend to open
-      res.json({ 
-        labelPath: labelPath,
-        trackingNumber: order.trackingNumber 
-      });
+      // Create customized label with QP tracking format and no logo
+      try {
+        const LabelCustomizerService = (await import('./services/label-customizer.js')).default;
+        const labelCustomizer = new LabelCustomizerService();
+        
+        const customizedPath = await labelCustomizer.customizeLabel(labelPath, order.trackingNumber);
+        
+        // Return the customized label path
+        res.json({ 
+          labelPath: `/api/labels/customized/${path.basename(customizedPath)}`,
+          trackingNumber: order.trackingNumber.replace(/^GV/, 'QP') // Return QP format
+        });
+      } catch (customizationError) {
+        console.error("Error customizing label, falling back to original:", customizationError);
+        // Fallback to original label if customization fails
+        res.json({ 
+          labelPath: labelPath,
+          trackingNumber: order.trackingNumber.replace(/^GV/, 'QP')
+        });
+      }
     } catch (error) {
       console.error("Error printing label:", error);
       res.status(500).json({ error: "Failed to print label" });
@@ -1207,10 +1223,176 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const labelData = await jiayouService.printLabel(trackingNumbers);
       
-      res.json(labelData);
+      // Customize each label to replace GV with QP and remove logo
+      if (labelData && labelData.code === 1 && labelData.data) {
+        const LabelCustomizerService = (await import('./services/label-customizer.js')).default;
+        const labelCustomizer = new LabelCustomizerService();
+        
+        const customizedLabels = [];
+        
+        for (let i = 0; i < labelData.data.length; i++) {
+          const label = labelData.data[i];
+          const trackingNumber = trackingNumbers[i];
+          
+          try {
+            const customizedPath = await labelCustomizer.customizeLabel(label.labelPath, trackingNumber);
+            customizedLabels.push({
+              ...label,
+              labelPath: `/api/labels/customized/${path.basename(customizedPath)}`,
+              trackingNumber: trackingNumber.replace(/^GV/, 'QP')
+            });
+          } catch (customizationError) {
+            console.error(`Error customizing label for ${trackingNumber}:`, customizationError);
+            // Fallback to original label
+            customizedLabels.push({
+              ...label,
+              trackingNumber: trackingNumber.replace(/^GV/, 'QP')
+            });
+          }
+        }
+        
+        res.json({
+          ...labelData,
+          data: customizedLabels
+        });
+      } else {
+        res.json(labelData);
+      }
     } catch (error) {
       console.error("Error printing labels:", error);
       res.status(500).json({ error: "Failed to print labels" });
+    }
+  });
+
+  // Serve customized label files
+  app.get("/api/labels/customized/:filename", async (req, res) => {
+    try {
+      const filename = req.params.filename;
+      const LabelCustomizerService = (await import('./services/label-customizer.js')).default;
+      const labelCustomizer = new LabelCustomizerService();
+      
+      const filePath = path.join(process.cwd(), 'temp-labels', filename);
+      const buffer = await labelCustomizer.getLabelBuffer(filePath);
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+      res.send(buffer);
+    } catch (error) {
+      console.error("Error serving customized label:", error);
+      res.status(404).json({ error: "Label not found" });
+    }
+  });
+
+  // Create sample customized label for demonstration
+  app.get("/api/labels/sample", async (req, res) => {
+    try {
+      const { PDFDocument, rgb, StandardFonts } = await import('pdf-lib');
+      
+      // Create a sample shipping label PDF
+      const pdfDoc = await PDFDocument.create();
+      const page = pdfDoc.addPage([400, 600]);
+      const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+      
+      // Sample QP tracking number instead of GV
+      const trackingNumber = 'QP25USA0U019276074';
+      
+      // Draw shipping label content (no logo in top-left)
+      page.drawText('QUIKPIK SHIPPING LABEL', {
+        x: 50,
+        y: 550,
+        size: 16,
+        font: boldFont,
+        color: rgb(0, 0, 0),
+      });
+      
+      page.drawText(`Tracking #: ${trackingNumber}`, {
+        x: 50,
+        y: 500,
+        size: 14,
+        font: boldFont,
+        color: rgb(0, 0, 0),
+      });
+      
+      // From Address
+      page.drawText('FROM:', {
+        x: 50,
+        y: 450,
+        size: 12,
+        font: boldFont,
+        color: rgb(0, 0, 0),
+      });
+      
+      page.drawText('Quikpik Fulfillment Center\n123 Warehouse St\nNew York, NY 10001', {
+        x: 50,
+        y: 410,
+        size: 10,
+        font: font,
+        color: rgb(0, 0, 0),
+      });
+      
+      // To Address
+      page.drawText('TO:', {
+        x: 50,
+        y: 350,
+        size: 12,
+        font: boldFont,
+        color: rgb(0, 0, 0),
+      });
+      
+      page.drawText('John Doe\n456 Customer Ave\nLos Angeles, CA 90210', {
+        x: 50,
+        y: 310,
+        size: 10,
+        font: font,
+        color: rgb(0, 0, 0),
+      });
+      
+      // Service details
+      page.drawText('Service: Standard Shipping', {
+        x: 50,
+        y: 250,
+        size: 10,
+        font: font,
+        color: rgb(0, 0, 0),
+      });
+      
+      page.drawText('Weight: 1.0 lb', {
+        x: 50,
+        y: 230,
+        size: 10,
+        font: font,
+        color: rgb(0, 0, 0),
+      });
+      
+      // Barcode placeholder
+      page.drawRectangle({
+        x: 50,
+        y: 180,
+        width: 300,
+        height: 40,
+        borderColor: rgb(0, 0, 0),
+        borderWidth: 1,
+      });
+      
+      page.drawText('*QP25USA0U019276074*', {
+        x: 120,
+        y: 195,
+        size: 12,
+        font: font,
+        color: rgb(0, 0, 0),
+      });
+      
+      // Generate PDF
+      const pdfBytes = await pdfDoc.save();
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'inline; filename="sample-quikpik-label.pdf"');
+      res.send(Buffer.from(pdfBytes));
+      
+    } catch (error) {
+      console.error("Error creating sample label:", error);
+      res.status(500).json({ error: "Failed to create sample label" });
     }
   });
 
