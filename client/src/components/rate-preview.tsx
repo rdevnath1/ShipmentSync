@@ -29,8 +29,8 @@ interface Dimensions {
 
 export default function RatePreview({ onRateSelected, className }: RatePreviewProps) {
   const [rateRequest, setRateRequest] = useState<RateRequest>({
-    pickupZipCode: "",
-    deliveryZipCode: ""
+    pickupZipCode: "11430",
+    deliveryZipCode: "90210"
   });
   
   const [weight, setWeight] = useState<number>(8); // Default 8 oz
@@ -45,18 +45,16 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
     mutationFn: async (data: any) => {
       const response = await apiRequest("POST", "/api/rates/preview", data);
       const result = await response.json();
-      console.log("Rate data:", result);
-      console.log("Error:", ratePreviewMutation.error);
-      console.log("Loading:", ratePreviewMutation.isPending);
       
       if (!response.ok) {
+        // Handle specific error cases with user-friendly messages
+        if (result.error && result.error.includes('not covered')) {
+          throw new Error(`ZIP code ${data.deliveryZipCode} is not in our shipping network. Try: 10001, 33101, 60601, or 90210`);
+        }
         throw new Error(result.error || 'Failed to get shipping rate');
       }
       
       return result;
-    },
-    onError: (error) => {
-      console.error("Rate preview error:", error);
     }
   });
 
@@ -192,6 +190,14 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
                   onChange={(e) => handleDimensionChange('height', parseFloat(e.target.value) || 1)}
                 />
               </div>
+            </div>
+          </div>
+
+          {/* Working ZIP Codes Helper */}
+          <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+            <div className="text-sm text-blue-800 dark:text-blue-200">
+              <p className="font-medium mb-1">✅ Guaranteed Working ZIP Codes:</p>
+              <p className="text-xs">• 10001 (NY - Zone 1) • 33101 (Miami - Zone 3) • 60601 (Chicago - Zone 5) • 90210 (LA - Zone 8)</p>
             </div>
           </div>
 
