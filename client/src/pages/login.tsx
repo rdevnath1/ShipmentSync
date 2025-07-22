@@ -50,7 +50,7 @@ export default function Login() {
         
         // Small delay to ensure cache invalidation completes
         setTimeout(() => {
-          setLocation("/");
+          setLocation("/app");
         }, 100);
       } else {
         toast({
