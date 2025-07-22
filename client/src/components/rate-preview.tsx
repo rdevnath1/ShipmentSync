@@ -310,20 +310,7 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
 
 
 
-            {/* Warnings */}
-            {rateData.warnings && rateData.warnings.length > 0 && (
-              <Alert>
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  <div className="font-medium mb-1">Please Note:</div>
-                  <ul className="list-disc list-inside space-y-1 text-sm">
-                    {rateData.warnings.map((warning: string, index: number) => (
-                      <li key={index}>{warning}</li>
-                    ))}
-                  </ul>
-                </AlertDescription>
-              </Alert>
-            )}
+            
 
             {onRateSelected && (
               <Button 
