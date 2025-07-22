@@ -304,19 +304,7 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
                   </div>
                 </div>
 
-                {/* Rate Breakdown */}
-                <div className="border rounded-lg p-4 bg-muted/30">
-                  <div className="space-y-2 text-xs text-muted-foreground">
-                    <div className="flex justify-between">
-                      <span>Base Weight:</span>
-                      <span>{(rateData.preview.rateCalculation.baseWeight * 35.274).toFixed(1)} oz</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Zone:</span>
-                      <span>{rateData.preview.rateCalculation.zone}</span>
-                    </div>
-                  </div>
-                </div>
+                
               </div>
             )}
 
