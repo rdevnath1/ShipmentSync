@@ -63,8 +63,8 @@ async function initializeDemoData() {
       await storage.createUser({
         email: 'demo@client.com',
         password: hashedPassword,
-        firstName: 'Demo',
-        lastName: 'User',
+        firstName: 'Trend',
+        lastName: '36',
         role: 'client',
         organizationId: demoOrg.id
       });
