@@ -37,8 +37,7 @@ function Router() {
             <Sidebar />
             <main className="flex-1 lg:ml-64">
               <Switch>
-                <Route path="/" component={RateCalculatorPage} />
-                <Route path="/dashboard" component={Dashboard} />
+                <Route path="/" component={Dashboard} />
                 <Route path="/orders" component={Orders} />
                 <Route path="/analytics" component={Analytics} />
                 <Route path="/audit-logs" component={AuditLogs} />

@@ -36,9 +36,9 @@ export default function Sidebar() {
 
   // Base navigation items for all users
   const baseNavItems = [
-    { path: "/", icon: BarChart3, label: "Rate Calculator" },
-    { path: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+    { path: "/", icon: LayoutDashboard, label: "Dashboard" },
     { path: "/orders", icon: Package, label: "Orders" },
+    { path: "/rate-calculator", icon: BarChart3, label: "Rate Calculator" },
     { path: "/analytics", icon: BarChart3, label: "Analytics" },
     { path: "/tracking", icon: Route, label: "Tracking" },
     { path: "/settings", icon: Settings, label: "Settings" },
