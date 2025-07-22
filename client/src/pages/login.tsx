@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { Package, Truck } from "lucide-react";
+import logoImg from "@assets/logo_1753221752315.png";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email"),
@@ -74,7 +75,11 @@ export default function Login() {
       <div className="w-full max-w-md space-y-8">
         {/* Logo and Branding */}
         <div className="text-center">
-          
+          <img 
+            src={logoImg} 
+            alt="Quikpik Logo" 
+            className="w-20 h-20 mx-auto mb-4"
+          />
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Quikpik</h1>
         </div>
 
