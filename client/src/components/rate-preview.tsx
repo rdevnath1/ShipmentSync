@@ -236,21 +236,96 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
           <CardHeader className="flex flex-col space-y-1.5 p-6 pl-[8px] pr-[8px] pt-[1px] pb-[1px]">
           </CardHeader>
           <CardContent className="p-6 space-y-4 ml-[0px] mr-[0px] mt-[0px] mb-[0px] pl-[24px] pr-[24px] pt-[15px] pb-[15px]">
-            {/* Three-column layout for rate information */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              {/* Estimated Cost */}
-              <div className="flex flex-col justify-between p-4 border rounded-lg">
-                <div>
-                  <div className="font-medium">Estimated Shipping Cost</div>
-                  <div className="text-sm text-muted-foreground">
-                    {rateData.preview.rateCalculation.zone}
+            {/* Dual Rate Display for Master Users or Single Rate for Regular Users */}
+            {rateData.preview.dualRates ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+                {/* Internal Rate */}
+                <div className="flex flex-col justify-between p-4 border rounded-lg bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
+                  <div>
+                    <div className="font-medium text-green-800 dark:text-green-200">Internal Rate</div>
+                    <div className="text-sm text-green-600 dark:text-green-400">
+                      {rateData.preview.rateCalculation.zone} • Your Cost
+                    </div>
+                  </div>
+                  <div className="text-xl font-bold text-green-600 mt-2">
+                    {rateData.preview.dualRates.internal.formatted}
                   </div>
                 </div>
-                <div className="text-xl font-bold text-green-600 mt-2">
-                  {rateData.preview.estimatedCost.formatted}
+
+                {/* Customer Rate */}
+                <div className="flex flex-col justify-between p-4 border rounded-lg bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
+                  <div>
+                    <div className="font-medium text-blue-800 dark:text-blue-200">Customer Rate</div>
+                    <div className="text-sm text-blue-600 dark:text-blue-400">
+                      {rateData.preview.rateCalculation.zone} • Customer Price
+                    </div>
+                  </div>
+                  <div className="text-xl font-bold text-blue-600 mt-2">
+                    {rateData.preview.dualRates.customer.formatted}
+                  </div>
+                </div>
+
+                {/* Profit Margin */}
+                {rateData.preview.dualRates.profitMargin && (
+                  <div className="col-span-full p-4 border rounded-lg bg-yellow-50 dark:bg-yellow-950 border-yellow-200 dark:border-yellow-800">
+                    <div className="flex justify-between items-center">
+                      <div className="text-yellow-800 dark:text-yellow-200 font-medium">Profit Margin</div>
+                      <div className="text-right">
+                        <div className="text-lg font-bold text-yellow-700 dark:text-yellow-300">
+                          +${rateData.preview.dualRates.profitMargin.amount.toFixed(2)}
+                        </div>
+                        <div className="text-sm text-yellow-600 dark:text-yellow-400">
+                          {rateData.preview.dualRates.profitMargin.percentage.toFixed(1)}% markup
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                {/* Single Rate Display */}
+                <div className="flex flex-col justify-between p-4 border rounded-lg">
+                  <div>
+                    <div className="font-medium">Estimated Shipping Cost</div>
+                    <div className="text-sm text-muted-foreground">
+                      {rateData.preview.rateCalculation.zone}
+                    </div>
+                  </div>
+                  <div className="text-xl font-bold text-green-600 mt-2">
+                    {rateData.preview.estimatedCost.formatted}
+                  </div>
+                </div>
+
+                {/* Estimated Delivery */}
+                <div className="flex flex-col gap-2 p-4 border rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-blue-600" />
+                    <div className="font-medium">Estimated Delivery</div>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {rateData.preview.estimatedDelivery.description}
+                  </div>
+                </div>
+
+                {/* Rate Breakdown */}
+                <div className="border rounded-lg p-4 bg-muted/30">
+                  <div className="space-y-2 text-xs text-muted-foreground">
+                    <div className="flex justify-between">
+                      <span>Base Weight:</span>
+                      <span>{(rateData.preview.rateCalculation.baseWeight * 35.274).toFixed(1)} oz</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Zone:</span>
+                      <span>{rateData.preview.rateCalculation.zone}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
+            )}
 
+            {/* Delivery and Details - Always Show */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {/* Estimated Delivery */}
               <div className="flex flex-col gap-2 p-4 border rounded-lg">
                 <div className="flex items-center gap-2">
@@ -262,24 +337,20 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
                 </div>
               </div>
 
-              {/* Rate Breakdown */}
+              {/* Package Details */}
               <div className="border rounded-lg p-4 bg-muted/30">
                 <div className="space-y-2 text-xs text-muted-foreground">
                   <div className="flex justify-between">
-                    <span>Base Weight:</span>
+                    <span>Weight:</span>
                     <span>{(rateData.preview.rateCalculation.baseWeight * 35.274).toFixed(1)} oz</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Dimensional:</span>
-                    <span>{(rateData.preview.rateCalculation.factors.dimensionalWeight * 35.274).toFixed(1)} oz</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Zone:</span>
                     <span>{rateData.preview.rateCalculation.zone}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Multiplier:</span>
-                    <span>{rateData.preview.rateCalculation.factors.zoneFactor}x</span>
+                    <span>Service:</span>
+                    <span>Standard</span>
                   </div>
                 </div>
               </div>

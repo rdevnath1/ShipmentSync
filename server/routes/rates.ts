@@ -2,6 +2,7 @@ import express from "express";
 import { requireAuth, requireOrgAccess } from "../auth";
 import { createAuditMiddleware } from "../middleware/audit-middleware";
 import { JiayouService } from "../services/jiayou";
+import { CustomerRateService } from "../services/customer-rates";
 
 const router = express.Router();
 
@@ -39,6 +40,7 @@ router.post("/preview", requireAuth, requireOrgAccess, createAuditMiddleware('ra
 
     // Get actual rate from Jiayou API
     const jiayouService = new JiayouService();
+    const customerRateService = new CustomerRateService();
     
     try {
       // Call Jiayou's costCal API to get actual shipping cost
@@ -78,8 +80,15 @@ router.post("/preview", requireAuth, requireOrgAccess, createAuditMiddleware('ra
       
       // Extract actual cost from Jiayou response
       const actualCost = parseFloat(rateData.totalFee);
+      const zone = parseInt(rateData.areaCode);
       
-      // Get shipping zone for delivery time estimation
+      // Calculate customer rate (higher markup)
+      const customerRate = customerRateService.calculateCustomerRate(zone, weight);
+      
+      // Calculate profit margin
+      const profitMargin = customerRate ? customerRateService.calculateProfitMargin(actualCost, customerRate) : null;
+      
+      // Get shipping zone for delivery time estimation  
       const shippingZone = getShippingZone('US', pickupZipCode, deliveryZipCode);
       
       // Calculate estimated delivery time based on zone
@@ -88,14 +97,36 @@ router.post("/preview", requireAuth, requireOrgAccess, createAuditMiddleware('ra
       // Get service options
       const serviceOptions = getAvailableServices('US');
 
+      // Determine which rates to show based on user role
+      const isMasterUser = (req as any).user?.role === 'master';
+      
       const responseData = {
         success: true,
         preview: {
+          // Show internal rate for master users, customer rate for regular users
           estimatedCost: {
-            amount: actualCost,
+            amount: isMasterUser ? actualCost : (customerRate || actualCost),
             currency: 'USD',
-            formatted: `$${actualCost.toFixed(2)}`
+            formatted: `$${(isMasterUser ? actualCost : (customerRate || actualCost)).toFixed(2)}`
           },
+          // Include dual rates for master users
+          ...(isMasterUser && customerRate && {
+            dualRates: {
+              internal: {
+                amount: actualCost,
+                currency: 'USD',
+                formatted: `$${actualCost.toFixed(2)}`,
+                label: 'Internal Rate'
+              },
+              customer: {
+                amount: customerRate,
+                currency: 'USD', 
+                formatted: `$${customerRate.toFixed(2)}`,
+                label: 'Customer Rate'
+              },
+              profitMargin: profitMargin
+            }
+          }),
           estimatedDelivery: {
             businessDays: estimatedDelivery.days,
             description: estimatedDelivery.description,
