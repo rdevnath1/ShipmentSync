@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a full-stack web application built with React and Express that manages shipments between ShipStation and Jiayou. The system allows users to import orders from ShipStation, create shipments with Jiayou, and track the shipping process. Enhanced with production-ready features including rate preview API, webhook support, and comprehensive error handling. It features a modern UI built with shadcn/ui components and uses PostgreSQL for data persistence.
+This is a full-stack web application built with React and Express that manages shipments between ShipStation and Jiayou. The system allows users to import orders from ShipStation, create shipments with Jiayou, and track the shipping process. Enhanced with production-ready features including rate preview API, webhook support, and comprehensive error handling. It features a modern UI built with shadcn/ui components and uses PostgreSQL for data persistence. The platform is focused purely on shipping operations and costs, without profit margin tracking or revenue analytics.
 
 ## User Preferences
 
@@ -54,6 +54,15 @@ Preferred communication style: Simple, everyday language.
 4. **Dashboard Analytics**: Aggregated data is displayed on the dashboard
 
 ## Recent Changes
+
+### Operational Focus Platform Refactor (July 22, 2025)
+- **Removed All Financial Analytics**: Eliminated profit margin calculations, revenue tracking, and financial insights from analytics page
+- **Shipping-Only Dashboard**: Dashboard now focuses exclusively on operational metrics (Total Orders, Active Shipments, Success Rate)
+- **Cost-Focused Analytics**: Analytics page converted to show shipping cost trends, average cost per order, and operational insights
+- **Business Insights Refactored**: Replaced profit-based insights with shipping cost optimization and package dimension recommendations
+- **Chart Updates**: Revenue trend charts replaced with shipping cost trend visualization
+- **Simplified Metrics**: Platform now tracks only shipping operations without financial performance indicators
+- **SUCCESSFUL RESULT**: Clean operational platform focused purely on shipping management without profit/revenue tracking
 
 ### Simplified Authentication Routing (July 22, 2025)
 - **Fixed 404 Errors**: Restructured routing to eliminate nested wildcards that were causing authentication issues

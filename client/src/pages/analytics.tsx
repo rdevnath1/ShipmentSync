@@ -25,36 +25,34 @@ export default function Analytics() {
   // Calculate analytics from order data
   const orders = ordersData?.orders || [];
   
-  const totalRevenue = orders.reduce((sum: number, order: any) => 
-    sum + parseFloat(order.totalAmount || 0), 0);
-  
+  // Calculate shipping-focused metrics
   const totalShippingCost = orders.reduce((sum: number, order: any) => 
     sum + parseFloat(order.shippingCost || 0), 0);
   
-  const profit = totalRevenue - totalShippingCost;
+  const averageShippingCost = orders.length > 0 ? totalShippingCost / orders.length : 0;
   
   const statusDistribution = orders.reduce((acc: any, order: any) => {
     acc[order.status] = (acc[order.status] || 0) + 1;
     return acc;
   }, {});
 
-  // Generate chart data
-  const revenueByDay = generateDailyRevenue(orders);
+  // Generate chart data focused on shipping
+  const shippingByDay = generateDailyShipping(orders);
   const ordersByStatus = Object.entries(statusDistribution).map(([status, count]) => ({
     status,
     count,
     color: getStatusColor(status)
   }));
 
-  function generateDailyRevenue(orders: any[]) {
+  function generateDailyShipping(orders: any[]) {
     const dailyData: any = {};
     
     orders.forEach(order => {
       const date = new Date(order.createdAt).toISOString().split('T')[0];
       if (!dailyData[date]) {
-        dailyData[date] = { date, revenue: 0, orders: 0 };
+        dailyData[date] = { date, shippingCost: 0, orders: 0 };
       }
-      dailyData[date].revenue += parseFloat(order.totalAmount || 0);
+      dailyData[date].shippingCost += parseFloat(order.shippingCost || 0);
       dailyData[date].orders += 1;
     });
     
@@ -73,25 +71,24 @@ export default function Analytics() {
     }
   }
 
-  // Generate unique business insights
+  // Generate shipping-focused business insights
   function generateInsights() {
     const insights = [];
     
-    // Profit margin analysis
-    const profitMargin = totalRevenue > 0 ? (profit / totalRevenue) * 100 : 0;
-    if (profitMargin > 50) {
-      insights.push({
-        type: 'success',
-        icon: CheckCircle,
-        title: 'Excellent Profit Margins',
-        description: `Your profit margin of ${profitMargin.toFixed(1)}% is exceptional. Consider scaling operations to maximize this advantage.`
-      });
-    } else if (profitMargin < 20 && profitMargin > 0) {
+    // Shipping cost analysis
+    if (averageShippingCost > 10) {
       insights.push({
         type: 'warning',
         icon: AlertTriangle,
-        title: 'Low Profit Margins',
-        description: `Your profit margin of ${profitMargin.toFixed(1)}% suggests high shipping costs. Consider negotiating better rates or optimizing package sizing.`
+        title: 'High Shipping Costs',
+        description: `Your average shipping cost of $${averageShippingCost.toFixed(2)} per order is above optimal. Consider package optimization or negotiating better carrier rates.`
+      });
+    } else if (averageShippingCost < 5) {
+      insights.push({
+        type: 'success',
+        icon: CheckCircle,
+        title: 'Optimized Shipping Costs',
+        description: `Your average shipping cost of $${averageShippingCost.toFixed(2)} per order shows excellent cost control.`
       });
     }
     
@@ -113,21 +110,14 @@ export default function Analytics() {
       });
     }
     
-    // Average order value
-    const avgOrderValue = orders.length > 0 ? totalRevenue / orders.length : 0;
-    if (avgOrderValue > 50) {
+    // Package size optimization opportunity
+    const ordersWithDimensions = orders.filter((order: any) => order.dimensions);
+    if (ordersWithDimensions.length < orders.length * 0.8) {
       insights.push({
         type: 'insight',
         icon: Target,
-        title: 'High-Value Customers',
-        description: `Your average order value of $${avgOrderValue.toFixed(2)} indicates premium customer base. Consider upselling strategies.`
-      });
-    } else if (avgOrderValue < 20 && avgOrderValue > 0) {
-      insights.push({
-        type: 'insight',
-        icon: TrendingUp,
-        title: 'Low Order Values',
-        description: `Average order value is $${avgOrderValue.toFixed(2)}. Bundle products or offer free shipping thresholds to increase basket size.`
+        title: 'Package Optimization Opportunity',
+        description: `Only ${((ordersWithDimensions.length / orders.length) * 100).toFixed(1)}% of orders have dimension data. Adding package dimensions could help optimize shipping costs.`
       });
     }
     
@@ -251,25 +241,13 @@ export default function Analytics() {
           </CardContent>
         </Card>
 
-        {/* Key Metrics */}
+        {/* Key Shipping Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Revenue</p>
-                  <p className="text-2xl font-bold">${totalRevenue.toFixed(2)}</p>
-                </div>
-                <DollarSign className="text-green-600" size={24} />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Shipping Costs</p>
+                  <p className="text-sm text-muted-foreground">Total Shipping Costs</p>
                   <p className="text-2xl font-bold">${totalShippingCost.toFixed(2)}</p>
                 </div>
                 <Package className="text-blue-600" size={24} />
@@ -281,8 +259,8 @@ export default function Analytics() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Profit Margin</p>
-                  <p className="text-2xl font-bold">${profit.toFixed(2)}</p>
+                  <p className="text-sm text-muted-foreground">Average Cost/Order</p>
+                  <p className="text-2xl font-bold">${averageShippingCost.toFixed(2)}</p>
                 </div>
                 <TrendingUp className="text-emerald-600" size={24} />
               </div>
@@ -300,33 +278,45 @@ export default function Analytics() {
               </div>
             </CardContent>
           </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Shipped Orders</p>
+                  <p className="text-2xl font-bold">{statusDistribution.shipped || 0}</p>
+                </div>
+                <DollarSign className="text-green-600" size={24} />
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Revenue Trend */}
+          {/* Shipping Cost Trend */}
           <Card>
             <CardHeader>
-              <CardTitle>Revenue Trend</CardTitle>
+              <CardTitle>Shipping Cost Trend</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={revenueByDay}>
+                <LineChart data={shippingByDay}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" />
                   <YAxis />
                   <Tooltip 
                     formatter={(value: any, name: string) => [
-                      name === 'revenue' ? `$${value.toFixed(2)}` : value,
-                      name === 'revenue' ? 'Revenue' : 'Orders'
+                      name === 'shippingCost' ? `$${value.toFixed(2)}` : value,
+                      name === 'shippingCost' ? 'Shipping Cost' : 'Orders'
                     ]}
                   />
                   <Line 
                     type="monotone" 
-                    dataKey="revenue" 
-                    stroke="#10b981" 
+                    dataKey="shippingCost" 
+                    stroke="#3b82f6" 
                     strokeWidth={2}
-                    name="revenue"
+                    name="shippingCost"
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -420,7 +410,7 @@ export default function Analytics() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={revenueByDay}>
+              <BarChart data={shippingByDay}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" />
                 <YAxis />
