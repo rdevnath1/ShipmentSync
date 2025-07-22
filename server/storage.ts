@@ -15,6 +15,7 @@ export interface IStorage {
   getOrganizationBySlug(slug: string): Promise<Organization | undefined>;
   createOrganization(org: InsertOrganization): Promise<Organization>;
   updateOrganization(id: number, org: Partial<InsertOrganization>): Promise<Organization>;
+  deleteOrganization(id: number): Promise<void>;
   getAllOrganizations(): Promise<Organization[]>;
   
   // User methods
@@ -98,6 +99,18 @@ export class DatabaseStorage implements IStorage {
       .where(eq(organizations.id, id))
       .returning();
     return org;
+  }
+
+  async deleteOrganization(id: number): Promise<void> {
+    // Delete related data first (cascade delete)
+    await db.delete(users).where(eq(users.organizationId, id));
+    await db.delete(orders).where(eq(orders.organizationId, id));
+    await db.delete(analytics).where(eq(analytics.organizationId, id));
+    await db.delete(auditLogs).where(eq(auditLogs.organizationId, id));
+    await db.delete(retryQueue).where(eq(retryQueue.organizationId, id));
+    
+    // Finally delete the organization
+    await db.delete(organizations).where(eq(organizations.id, id));
   }
 
   async getAllOrganizations(): Promise<Organization[]> {

@@ -1558,6 +1558,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete("/api/organizations/:id", requireAuth, requireRole(['master']), createAuditMiddleware('delete_organization'), async (req, res) => {
+    try {
+      const { id } = req.params;
+      const orgId = parseInt(id);
+      
+      if (isNaN(orgId)) {
+        return res.status(400).json({ error: "Invalid organization ID" });
+      }
+
+      // Check if organization exists
+      const existingOrg = await storage.getOrganization(orgId);
+      if (!existingOrg) {
+        return res.status(404).json({ error: "Organization not found" });
+      }
+
+      // Prevent deletion of master organization
+      if (existingOrg.slug === 'master') {
+        return res.status(400).json({ error: "Cannot delete master organization" });
+      }
+
+      await storage.deleteOrganization(orgId);
+      res.json({ message: "Organization deleted successfully" });
+    } catch (error: any) {
+      console.error("Error deleting organization:", error);
+      res.status(500).json({ error: "Failed to delete organization" });
+    }
+  });
+
   // Users management routes (Master admin only)
   app.get("/api/organizations/:id/users", requireAuth, requireRole(['master']), async (req, res) => {
     try {

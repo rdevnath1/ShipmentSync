@@ -19,10 +19,12 @@ export default function Organizations() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isUsersDialogOpen, setIsUsersDialogOpen] = useState(false);
   const [isCreateUserDialogOpen, setIsCreateUserDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [orgName, setOrgName] = useState("");
   const [orgSlug, setOrgSlug] = useState("");
   const [editingOrg, setEditingOrg] = useState<any>(null);
   const [managingOrg, setManagingOrg] = useState<any>(null);
+  const [deletingOrg, setDeletingOrg] = useState<any>(null);
   const [userEmail, setUserEmail] = useState("");
   const [userPassword, setUserPassword] = useState("");
   const [userFirstName, setUserFirstName] = useState("");
@@ -184,6 +186,38 @@ export default function Organizations() {
     });
   };
 
+  const deleteOrgMutation = useMutation({
+    mutationFn: async (orgId: number) => {
+      return await apiRequest("DELETE", `/api/organizations/${orgId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/organizations"] });
+      setIsDeleteDialogOpen(false);
+      setDeletingOrg(null);
+      toast({
+        title: "Organization Deleted",
+        description: "Organization has been deleted successfully.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Delete Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDeleteOrg = (org: any) => {
+    setDeletingOrg(org);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteOrg = () => {
+    if (!deletingOrg) return;
+    deleteOrgMutation.mutate(deletingOrg.id);
+  };
+
   // Generate slug from name
   const handleNameChange = (name: string) => {
     setOrgName(name);
@@ -330,6 +364,15 @@ export default function Organizations() {
                       >
                         <Users size={14} className="mr-1" />
                         Users
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleDeleteOrg(org)}
+                        className="text-red-600 hover:text-red-700 hover:border-red-300"
+                      >
+                        <Trash2 size={14} className="mr-1" />
+                        Delete
                       </Button>
                     </div>
                   </div>
@@ -522,6 +565,45 @@ export default function Organizations() {
                     setUserPassword("");
                     setUserFirstName("");
                     setUserLastName("");
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete Organization</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <AlertTriangle className="text-red-600" size={20} />
+                <div>
+                  <p className="font-medium text-red-900">Are you sure you want to delete "{deletingOrg?.name}"?</p>
+                  <p className="text-sm text-red-700 mt-1">
+                    This action cannot be undone. All users, orders, and data associated with this organization will be permanently deleted.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button 
+                  variant="destructive" 
+                  onClick={confirmDeleteOrg}
+                  disabled={deleteOrgMutation.isPending}
+                  className="flex-1"
+                >
+                  {deleteOrgMutation.isPending ? "Deleting..." : "Delete Organization"}
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setIsDeleteDialogOpen(false);
+                    setDeletingOrg(null);
                   }}
                 >
                   Cancel
