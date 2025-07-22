@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Settings, Key, Bell, Globe, Shield, Copy, Trash2, Edit, Plus, Eye, EyeOff } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const apiSettingsSchema = z.object({
   shipstationApiKey: z.string().min(1, "ShipStation API key is required"),
@@ -38,9 +39,12 @@ const createApiKeySchema = z.object({
 export default function SettingsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("api");
   const [showCreateApiKeyForm, setShowCreateApiKeyForm] = useState(false);
   const [newApiKey, setNewApiKey] = useState<any>(null);
+  
+  const isMasterAdmin = user?.role === 'master';
 
   const apiForm = useForm({
     resolver: zodResolver(apiSettingsSchema),
@@ -190,15 +194,17 @@ export default function SettingsPage() {
       
       <div className="p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className={`grid w-full ${isMasterAdmin ? 'grid-cols-4' : 'grid-cols-3'}`}>
             <TabsTrigger value="api" className="flex items-center space-x-2">
               <Key size={16} />
               <span>API Keys</span>
             </TabsTrigger>
-            <TabsTrigger value="sharing" className="flex items-center space-x-2">
-              <Globe size={16} />
-              <span>API Sharing</span>
-            </TabsTrigger>
+            {isMasterAdmin && (
+              <TabsTrigger value="sharing" className="flex items-center space-x-2">
+                <Globe size={16} />
+                <span>API Sharing</span>
+              </TabsTrigger>
+            )}
             <TabsTrigger value="notifications" className="flex items-center space-x-2">
               <Bell size={16} />
               <span>Notifications</span>
@@ -307,7 +313,8 @@ export default function SettingsPage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="sharing" className="space-y-6">
+          {isMasterAdmin && (
+            <TabsContent value="sharing" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
@@ -538,7 +545,8 @@ export default function SettingsPage() {
                 </Card>
               </CardContent>
             </Card>
-          </TabsContent>
+            </TabsContent>
+          )}
 
           <TabsContent value="notifications" className="space-y-6">
             <Card>
