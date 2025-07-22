@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/header";
+import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +11,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { TrendingUp, Package, DollarSign, Users, Calendar, Download, Lightbulb, AlertTriangle, CheckCircle, Target } from "lucide-react";
 
 export default function Analytics() {
+  const { user } = useAuth();
   const [dateRange, setDateRange] = useState<"7d" | "30d" | "90d" | "custom">("30d");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -25,11 +27,19 @@ export default function Analytics() {
   // Calculate analytics from order data
   const orders = ordersData?.orders || [];
   
-  // Calculate shipping-focused metrics
+  // Role-based metrics calculation
+  const isMasterUser = user?.role === 'master';
+  
   const totalShippingCost = orders.reduce((sum: number, order: any) => 
     sum + parseFloat(order.shippingCost || 0), 0);
   
   const averageShippingCost = orders.length > 0 ? totalShippingCost / orders.length : 0;
+  
+  // Financial metrics (master admin only)
+  const totalRevenue = isMasterUser ? orders.reduce((sum: number, order: any) => 
+    sum + parseFloat(order.totalAmount || 0), 0) : 0;
+  
+  const totalProfit = isMasterUser ? totalRevenue - totalShippingCost : 0;
   
   const statusDistribution = orders.reduce((acc: any, order: any) => {
     acc[order.status] = (acc[order.status] || 0) + 1;
@@ -241,31 +251,63 @@ export default function Analytics() {
           </CardContent>
         </Card>
 
-        {/* Key Shipping Metrics */}
+        {/* Key Metrics - Role-based Display */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Total Shipping Costs</p>
-                  <p className="text-2xl font-bold">${totalShippingCost.toFixed(2)}</p>
-                </div>
-                <Package className="text-blue-600" size={24} />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Average Cost/Order</p>
-                  <p className="text-2xl font-bold">${averageShippingCost.toFixed(2)}</p>
-                </div>
-                <TrendingUp className="text-emerald-600" size={24} />
-              </div>
-            </CardContent>
-          </Card>
+          {isMasterUser ? (
+            // Master admin sees financial metrics
+            <>
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Total Revenue</p>
+                      <p className="text-2xl font-bold text-green-600">${totalRevenue.toFixed(2)}</p>
+                    </div>
+                    <DollarSign className="text-green-600" size={24} />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Net Profit</p>
+                      <p className="text-2xl font-bold text-emerald-600">${totalProfit.toFixed(2)}</p>
+                    </div>
+                    <TrendingUp className="text-emerald-600" size={24} />
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          ) : (
+            // Clients see operational metrics only
+            <>
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Total Shipping Costs</p>
+                      <p className="text-2xl font-bold">${totalShippingCost.toFixed(2)}</p>
+                    </div>
+                    <Package className="text-blue-600" size={24} />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Average Cost/Order</p>
+                      <p className="text-2xl font-bold">${averageShippingCost.toFixed(2)}</p>
+                    </div>
+                    <TrendingUp className="text-emerald-600" size={24} />
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          )}
           
           <Card>
             <CardContent className="p-6">
@@ -286,7 +328,7 @@ export default function Analytics() {
                   <p className="text-sm text-muted-foreground">Shipped Orders</p>
                   <p className="text-2xl font-bold">{statusDistribution.shipped || 0}</p>
                 </div>
-                <DollarSign className="text-green-600" size={24} />
+                <Package className="text-green-600" size={24} />
               </div>
             </CardContent>
           </Card>

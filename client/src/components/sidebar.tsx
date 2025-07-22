@@ -34,20 +34,31 @@ export default function Sidebar() {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  // Base navigation items for all users
-  const baseNavItems = [
-    { path: "/app", icon: LayoutDashboard, label: "Dashboard" },
-    { path: "/app/orders", icon: Package, label: "Orders" },
-    { path: "/app/rate-calculator", icon: BarChart3, label: "Rate Calculator" },
-    { path: "/app/analytics", icon: BarChart3, label: "Analytics" },
-    { path: "/tracking", icon: Route, label: "Tracking" },
-    { path: "/app/settings", icon: Settings, label: "Settings" },
-  ];
+  // Role-based navigation
+  const getNavItems = () => {
+    if (user?.role === 'master') {
+      // Master admin gets full navigation + admin features
+      return [
+        { path: "/app", icon: LayoutDashboard, label: "Master Dashboard" },
+        { path: "/app/organizations", icon: User, label: "Organizations" },
+        { path: "/app/orders", icon: Package, label: "All Orders" },
+        { path: "/app/analytics", icon: BarChart3, label: "Analytics" },
+        { path: "/app/audit-logs", icon: Shield, label: "Audit Logs" },
+        { path: "/app/rate-calculator", icon: BarChart3, label: "Rate Calculator" },
+        { path: "/tracking", icon: Route, label: "Tracking" },
+        { path: "/app/settings", icon: Settings, label: "Settings" },
+      ];
+    } else {
+      // Clients get simplified 3-section navigation
+      return [
+        { path: "/app", icon: Package, label: "Shipments" },
+        { path: "/tracking", icon: Route, label: "Tracking" },
+        { path: "/app/tools", icon: Settings, label: "Tools" },
+      ];
+    }
+  };
 
-  // Add admin-only items for master users
-  const navItems = user?.role === 'master' 
-    ? [...baseNavItems.slice(0, -1), { path: "/app/audit-logs", icon: Shield, label: "Audit Logs" }, baseNavItems[baseNavItems.length - 1]]
-    : baseNavItems;
+  const navItems = getNavItems();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);

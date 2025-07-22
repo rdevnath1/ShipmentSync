@@ -1464,6 +1464,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Organization routes (Master admin only)
+  app.get("/api/organizations", requireAuth, requireRole(['master']), createAuditMiddleware('get_organizations'), async (req, res) => {
+    try {
+      const organizations = await storage.getAllOrganizations();
+      res.json({ organizations });
+    } catch (error) {
+      console.error("Error fetching organizations:", error);
+      res.status(500).json({ error: "Failed to fetch organizations" });
+    }
+  });
+
+  app.post("/api/organizations", requireAuth, requireRole(['master']), createAuditMiddleware('create_organization'), async (req, res) => {
+    try {
+      const { name, slug } = req.body;
+      
+      if (!name || !slug) {
+        return res.status(400).json({ error: "Name and slug are required" });
+      }
+
+      const organization = await storage.createOrganization({
+        name,
+        slug,
+        settings: {}
+      });
+      
+      res.json({ organization });
+    } catch (error) {
+      console.error("Error creating organization:", error);
+      res.status(500).json({ error: "Failed to create organization" });
+    }
+  });
+
+  // All orders route (Master admin only)
+  app.get("/api/orders/all", requireAuth, requireRole(['master']), createAuditMiddleware('get_all_orders'), async (req, res) => {
+    try {
+      const orders = await storage.getAllOrders();
+      res.json({ orders });
+    } catch (error) {
+      console.error("Error fetching all orders:", error);
+      res.status(500).json({ error: "Failed to fetch orders" });
+    }
+  });
+
   // Audit logs endpoint (master admin only)
   app.get("/api/audit-logs", requireAuth, requireRole(['master']), createAuditMiddleware('view_audit_logs', 'internal'), async (req: any, res) => {
     try {
