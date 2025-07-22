@@ -29,34 +29,37 @@ function Router() {
   }
 
   // Public routes (available without authentication)
-  return (
-    <Switch>
-      <Route path="/tracking" component={Tracking} />
-      <Route path="/login" component={Login} />
-      <Route path="/app/*">
-        {isAuthenticated ? (
-          <div className="min-h-screen flex">
-            <Sidebar />
-            <main className="flex-1 lg:ml-64">
-              <Switch>
-                <Route path="/app/" component={Dashboard} />
-                <Route path="/app" component={Dashboard} />
-                <Route path="/app/orders" component={Orders} />
-                <Route path="/app/analytics" component={Analytics} />
-                <Route path="/app/audit-logs" component={AuditLogs} />
-                <Route path="/app/rate-calculator" component={RateCalculatorPage} />
-                <Route path="/app/settings" component={Settings} />
-                <Route component={NotFound} />
-              </Switch>
-            </main>
-          </div>
-        ) : (
+  if (!isAuthenticated) {
+    return (
+      <Switch>
+        <Route path="/tracking" component={Tracking} />
+        <Route path="/login" component={Login} />
+        <Route path="/" component={LandingPage} />
+        <Route>
           <Login />
-        )}
-      </Route>
-      <Route path="/" component={LandingPage} />
-      <Route component={NotFound} />
-    </Switch>
+        </Route>
+      </Switch>
+    );
+  }
+
+  // Authenticated routes
+  return (
+    <div className="min-h-screen flex">
+      <Sidebar />
+      <main className="flex-1 lg:ml-64">
+        <Switch>
+          <Route path="/app" component={Dashboard} />
+          <Route path="/app/orders" component={Orders} />
+          <Route path="/app/analytics" component={Analytics} />
+          <Route path="/app/audit-logs" component={AuditLogs} />
+          <Route path="/app/rate-calculator" component={RateCalculatorPage} />
+          <Route path="/app/settings" component={Settings} />
+          <Route path="/tracking" component={Tracking} />
+          <Route path="/" component={Dashboard} />
+          <Route component={NotFound} />
+        </Switch>
+      </main>
+    </div>
   );
 }
 

@@ -55,6 +55,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Simplified Authentication Routing (July 22, 2025)
+- **Fixed 404 Errors**: Restructured routing to eliminate nested wildcards that were causing authentication issues
+- **Cleaner Route Structure**: Separated authenticated and unauthenticated routes for clearer navigation flow
+- **Force Reload on Login**: Changed login redirect to use window.location.href for proper state refresh
+- **Login Page Updates**: Added Quikpik logo, removed placeholder text, and applied minimal styling
+- **Button Styling**: Updated Sign In button with font-extrabold for better visibility
+- **SUCCESSFUL RESULT**: Fixed all sign-in issues - users can now properly authenticate and access dashboard
+
 ### Tracking Number Format & Navigation Fix (July 20, 2025)
 - **Fixed QP Tracking Format**: ShipStation now receives QP format tracking numbers instead of GV format
 - **Fixed Tracking Navigation**: Clicking tracking numbers now properly navigates to tracking page with QP format

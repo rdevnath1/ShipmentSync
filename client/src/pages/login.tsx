@@ -48,9 +48,9 @@ export default function Login() {
         // Invalidate auth cache and refetch user data
         queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
         
-        // Small delay to ensure cache invalidation completes
+        // Force a page reload to ensure authentication state is refreshed
         setTimeout(() => {
-          setLocation("/app");
+          window.location.href = "/app";
         }, 100);
       } else {
         toast({
