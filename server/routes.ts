@@ -1468,7 +1468,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/organizations", requireAuth, requireRole(['master']), createAuditMiddleware('get_organizations'), async (req, res) => {
     try {
       const organizations = await storage.getAllOrganizations();
-      res.json({ organizations });
+      console.log("Organizations endpoint - returning:", organizations.length, "organizations");
+      res.json(organizations);
     } catch (error) {
       console.error("Error fetching organizations:", error);
       res.status(500).json({ error: "Failed to fetch organizations" });

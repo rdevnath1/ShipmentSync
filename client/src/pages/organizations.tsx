@@ -32,11 +32,11 @@ export default function Organizations() {
     );
   }
 
-  const { data: organizationsData, isLoading } = useQuery({
+  const { data: organizations = [], isLoading } = useQuery({
     queryKey: ["/api/organizations"],
   });
 
-  const organizations = organizationsData?.organizations || [];
+  console.log("Organizations data:", organizations);
 
   const createOrgMutation = useMutation({
     mutationFn: async (data: { name: string; slug: string }) => {
