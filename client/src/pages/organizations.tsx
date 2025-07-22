@@ -16,8 +16,10 @@ export default function Organizations() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [orgName, setOrgName] = useState("");
   const [orgSlug, setOrgSlug] = useState("");
+  const [editingOrg, setEditingOrg] = useState<any>(null);
 
   // Redirect non-master users
   if (user?.role !== 'master') {
@@ -36,7 +38,7 @@ export default function Organizations() {
     queryKey: ["/api/organizations"],
   });
 
-  console.log("Organizations data:", organizations);
+
 
   const createOrgMutation = useMutation({
     mutationFn: async (data: { name: string; slug: string }) => {
@@ -61,6 +63,30 @@ export default function Organizations() {
     },
   });
 
+  const updateOrgMutation = useMutation({
+    mutationFn: async (data: { id: number; name: string; slug: string }) => {
+      return await apiRequest("PUT", `/api/organizations/${data.id}`, { name: data.name, slug: data.slug });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/organizations"] });
+      setIsEditDialogOpen(false);
+      setEditingOrg(null);
+      setOrgName("");
+      setOrgSlug("");
+      toast({
+        title: "Organization Updated",
+        description: "Organization has been updated successfully.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Update Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleCreateOrg = () => {
     if (!orgName.trim() || !orgSlug.trim()) {
       toast({
@@ -71,6 +97,29 @@ export default function Organizations() {
       return;
     }
     createOrgMutation.mutate({ name: orgName.trim(), slug: orgSlug.trim() });
+  };
+
+  const handleEditOrg = (org: any) => {
+    setEditingOrg(org);
+    setOrgName(org.name);
+    setOrgSlug(org.slug);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateOrg = () => {
+    if (!orgName.trim() || !orgSlug.trim() || !editingOrg) {
+      toast({
+        title: "Validation Error",
+        description: "Organization name and slug are required.",
+        variant: "destructive",
+      });
+      return;
+    }
+    updateOrgMutation.mutate({ 
+      id: editingOrg.id, 
+      name: orgName.trim(), 
+      slug: orgSlug.trim() 
+    });
   };
 
   // Generate slug from name
@@ -203,7 +252,12 @@ export default function Organizations() {
                   </div>
                   <div className="pt-2 border-t">
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="flex-1">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1"
+                        onClick={() => handleEditOrg(org)}
+                      >
                         <Edit size={14} className="mr-1" />
                         Edit
                       </Button>
@@ -236,6 +290,58 @@ export default function Organizations() {
             </CardContent>
           </Card>
         )}
+
+        {/* Edit Organization Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Organization</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="edit-org-name">Organization Name</Label>
+                <Input
+                  id="edit-org-name"
+                  placeholder="e.g., Acme Corp"
+                  value={orgName}
+                  onChange={(e) => handleNameChange(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-org-slug">URL Slug</Label>
+                <Input
+                  id="edit-org-slug"
+                  placeholder="e.g., acme-corp"
+                  value={orgSlug}
+                  onChange={(e) => setOrgSlug(e.target.value)}
+                />
+                <p className="text-sm text-muted-foreground mt-1">
+                  Used for API endpoints and URLs
+                </p>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button 
+                  onClick={handleUpdateOrg} 
+                  disabled={updateOrgMutation.isPending}
+                  className="flex-1"
+                >
+                  {updateOrgMutation.isPending ? "Updating..." : "Update Organization"}
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setIsEditDialogOpen(false);
+                    setEditingOrg(null);
+                    setOrgName("");
+                    setOrgSlug("");
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </>
   );

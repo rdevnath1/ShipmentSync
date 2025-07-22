@@ -1511,6 +1511,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put("/api/organizations/:id", requireAuth, requireRole(['master']), createAuditMiddleware('update_organization'), async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { name, slug } = req.body;
+      
+      if (!name || !slug) {
+        return res.status(400).json({ error: "Name and slug are required" });
+      }
+
+      const orgId = parseInt(id);
+      if (isNaN(orgId)) {
+        return res.status(400).json({ error: "Invalid organization ID" });
+      }
+
+      // Check if organization exists
+      const existingOrg = await storage.getOrganization(orgId);
+      if (!existingOrg) {
+        return res.status(404).json({ error: "Organization not found" });
+      }
+
+      // Check if slug is taken by another organization
+      const orgWithSlug = await storage.getOrganizationBySlug(slug);
+      if (orgWithSlug && orgWithSlug.id !== orgId) {
+        return res.status(400).json({ error: "Organization with this slug already exists" });
+      }
+
+      const organization = await storage.updateOrganization(orgId, {
+        name,
+        slug,
+        updatedAt: new Date()
+      });
+      
+      res.json({ organization });
+    } catch (error: any) {
+      console.error("Error updating organization:", error);
+      if (error.code === '23505') { // Unique constraint violation
+        if (error.constraint === 'organizations_slug_key') {
+          return res.status(400).json({ error: `Organization with slug '${req.body.slug}' already exists` });
+        } else {
+          return res.status(400).json({ error: "Organization with this name already exists" });
+        }
+      } else {
+        res.status(500).json({ error: "Failed to update organization" });
+      }
+    }
+  });
+
   // All orders route (Master admin only)
   app.get("/api/orders/all", requireAuth, requireRole(['master']), createAuditMiddleware('get_all_orders'), async (req, res) => {
     try {
