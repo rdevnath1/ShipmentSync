@@ -147,31 +147,9 @@ export default function Login() {
           </CardContent>
         </Card>
 
-        {/* Demo Credentials */}
-        <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
-          <CardContent className="pt-4">
-            <h3 className="font-semibold text-sm text-blue-900 dark:text-blue-100 mb-2">Demo Access</h3>
-            <div className="space-y-2 text-sm">
-              <div>
-                <span className="font-medium">Master Account:</span>
-                <div className="text-blue-700 dark:text-blue-300">
-                  rajan@quikpik.io / admin123
-                </div>
-              </div>
-              <div>
-                <span className="font-medium">Client Account:</span>
-                <div className="text-blue-700 dark:text-blue-300">
-                  demo@client.com / demo123
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        
 
-        {/* Footer */}
-        <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-          <p>© 2025 Quikpik Shipping Management System</p>
-        </div>
+        
       </div>
     </div>
   );
