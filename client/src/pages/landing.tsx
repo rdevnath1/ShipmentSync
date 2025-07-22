@@ -3,155 +3,163 @@ import { Link } from "wouter";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div id="wrapper">
-        <div id="main">
-          <div className="inner max-w-5xl mx-auto px-12 py-12">
-            
-            {/* Header Navigation */}
-            <div className="flex justify-between items-center mb-16">
-              <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 bg-black rounded flex items-center justify-center">
-                  <span className="text-white font-bold text-xs">Q</span>
-                </div>
-                <span className="text-black font-medium">Quikpik</span>
-              </div>
-              <div className="flex items-center space-x-4">
-                <Link href="/login">
-                  <Button variant="ghost" className="text-gray-600 hover:text-black">Sign In</Button>
-                </Link>
-                <Link href="/login">
-                  <Button className="bg-black text-white hover:bg-gray-800">Get Started</Button>
-                </Link>
-              </div>
-            </div>
-
-            {/* Main Hero - Large Price */}
-            <h1 className="text-center text-7xl md:text-8xl font-semibold text-gray-800 mb-2 tracking-tight">
-              $0.99
-            </h1>
-
-            {/* Subtitle */}
-            <p className="text-center text-3xl md:text-4xl text-gray-800 font-medium mb-12">
-              e-commerce package, delivered same day!
-            </p>
-
-            {/* Description */}
-            <p className="text-left text-lg text-gray-700 font-light leading-relaxed mb-12 max-w-4xl">
-              Quikpik revolutionizes e-commerce shipping with ultra-fast delivery at unbeatable prices. 
-              Starting at just $0.99, we connect your business to a nationwide network of fulfillment centers, 
-              ensuring your customers receive their packages in 1-6 days. Our zone-based pricing model 
-              provides transparent costs with no hidden fees, while seamless ShipStation integration 
-              makes setup effortless.
-            </p>
-
-            {/* CTA Button */}
-            <div className="mb-16">
-              <Link href="/login">
-                <Button className="bg-black text-white hover:bg-gray-800 px-8 py-3 text-lg">
-                  Get Started
-                </Button>
-              </Link>
-            </div>
-
-            {/* Small Text */}
-            <p className="text-center text-xs text-gray-500 font-light tracking-wide mb-16">
-              TRUSTED BY E-COMMERCE BUSINESSES NATIONWIDE
-            </p>
-
-            {/* Features Section */}
-            <div className="space-y-16 mb-20">
-              
-              {/* Feature 1 */}
-              <div className="text-center">
-                <h2 className="text-4xl font-semibold text-gray-800 mb-8">Fast</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-                  <div className="text-left">
-                    <p className="font-semibold text-gray-800 mb-2">1-6 Day Delivery</p>
-                    <p className="text-gray-700 font-light">
-                      Zone-based delivery times ensure predictable shipping across all 50 states. 
-                      Express options available for next-day delivery.
-                    </p>
-                  </div>
-                  <div className="w-full h-48 bg-gray-200 rounded flex items-center justify-center">
-                    <span className="text-gray-500 text-sm">Shipping Map</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Feature 2 */}
-              <div className="text-center">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-                  <div className="w-full h-48 bg-gray-200 rounded md:order-1 flex items-center justify-center">
-                    <span className="text-gray-500 text-sm">Integration Dashboard</span>
-                  </div>
-                  <div className="text-left md:order-2">
-                    <p className="font-semibold text-gray-800 mb-2">ShipStation Integration</p>
-                    <p className="text-gray-700 font-light">
-                      Seamless integration with your existing e-commerce workflow. 
-                      Import orders and create shipments in just a few clicks.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Feature 3 */}
-              <div className="text-center">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-                  <div className="text-left">
-                    <p className="font-semibold text-gray-800 mb-2">Transparent Pricing</p>
-                    <p className="text-gray-700 font-light">
-                      No hidden fees or monthly subscriptions. Pay only for what you ship 
-                      with clear zone-based pricing starting at $0.99.
-                    </p>
-                  </div>
-                  <div className="w-full h-48 bg-gray-200 rounded flex items-center justify-center">
-                    <span className="text-gray-500 text-sm">Pricing Calculator</span>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-
-            {/* Zone Coverage */}
-            <div className="text-center mb-20">
-              <h2 className="text-4xl font-semibold text-gray-800 mb-12">Coverage</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div className="text-center">
-                  <div className="text-2xl font-semibold text-gray-800 mb-1">Zone 1-2</div>
-                  <div className="text-sm text-gray-600">1-2 Days</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-semibold text-gray-800 mb-1">Zone 3-4</div>
-                  <div className="text-sm text-gray-600">2-3 Days</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-semibold text-gray-800 mb-1">Zone 5-6</div>
-                  <div className="text-sm text-gray-600">3-4 Days</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-semibold text-gray-800 mb-1">Zone 7-8</div>
-                  <div className="text-sm text-gray-600">4-6 Days</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Final CTA */}
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-medium text-gray-800 mb-8">Ready to get started?</h2>
-              <Link href="/login">
-                <Button className="bg-black text-white hover:bg-gray-800 px-10 py-4 text-xl">
-                  Start Shipping
-                </Button>
-              </Link>
-            </div>
-
-            {/* Footer */}
-            <div className="text-center text-xs text-gray-500 font-light tracking-wide border-t border-gray-300 pt-8">
-              © 2025 Quikpik. All rights reserved.
-            </div>
-
+    <div className="min-h-screen" style={{ backgroundColor: '#F7F7F7' }}>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="max-w-6xl mx-auto px-12 py-12">
+          
+          {/* Top Right Navigation */}
+          <div className="flex justify-end mb-16">
+            <Link href="/login">
+              <Button variant="ghost" className="text-gray-600 hover:text-black text-sm font-light">
+                Sign In
+              </Button>
+            </Link>
           </div>
+
+          {/* Main Hero - Large Price */}
+          <h1 className="text-center font-semibold mb-2" style={{ 
+            fontSize: '3.75em', 
+            lineHeight: '1.625', 
+            color: '#474747',
+            fontFamily: "'Source Sans 3', sans-serif",
+            letterSpacing: '0.025rem'
+          }}>
+            $0.99
+          </h1>
+
+          {/* Subtitle */}
+          <p className="text-center mb-4" style={{ 
+            fontSize: '1.625em', 
+            lineHeight: '1.25', 
+            fontWeight: '500',
+            color: '#474747',
+            fontFamily: "'Source Sans 3', sans-serif",
+            letterSpacing: '0.025rem'
+          }}>
+            e-commerce package, delivered same day!
+          </p>
+
+          {/* Description */}
+          <p className="text-left mb-12 max-w-4xl" style={{ 
+            fontSize: '1.125em', 
+            lineHeight: '1.5', 
+            fontWeight: '300',
+            color: '#474747',
+            fontFamily: "'Source Sans Pro', sans-serif"
+          }}>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed cursus turpis a purus aliquam sagittis. Morbi mattis porta mattis. Proin et lacus cursus, posuere tellus eget, cursus magna. Pellentesque molestie aliquam dui sagittis viverra. Quisque in tempus leo, sed dictum ligula. Vivamus vehicula mauris sed lorem sodales, in vestibulum orci feugiat.
+          </p>
+
+          {/* CTA Button */}
+          <div className="mb-16">
+            <Link href="/login">
+              <Button className="bg-gray-800 text-white hover:bg-gray-900 px-6 py-2 text-base font-normal">
+                Get Started
+              </Button>
+            </Link>
+          </div>
+
+          {/* Small Text */}
+          <p className="text-center mb-16" style={{ 
+            fontSize: '0.625em', 
+            lineHeight: '1.625', 
+            fontWeight: '300',
+            color: '#474747',
+            fontFamily: "'Source Sans Pro', sans-serif",
+            letterSpacing: '0.025rem'
+          }}>
+            LOREM IPSUM DOLOR SIT AMET CONSECTETUR
+          </p>
+
+          {/* Image Placeholder */}
+          <div className="w-full h-96 bg-gray-300 rounded mb-16 flex items-center justify-center">
+            <img src="/image12.jpg" alt="Hero" className="w-full h-full object-cover rounded" />
+          </div>
+
+          {/* Fast Section */}
+          <div className="text-center mb-16">
+            <h2 className="mb-8" style={{ 
+              fontSize: '2em', 
+              lineHeight: '1.625', 
+              fontWeight: '600',
+              color: '#474747',
+              fontFamily: "'Source Sans Pro', sans-serif",
+              letterSpacing: '0.025rem'
+            }}>
+              Fast
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+              <div className="text-left">
+                <p className="mb-1" style={{ 
+                  fontSize: '1em', 
+                  lineHeight: '1.625', 
+                  fontWeight: '600',
+                  color: '#474747',
+                  fontFamily: "'Source Sans Pro', sans-serif",
+                  letterSpacing: '0.025rem'
+                }}>
+                  Lorem ipsum dolor sit amet, consectetur.
+                </p>
+                <p style={{ 
+                  fontSize: '1em', 
+                  lineHeight: '1.125', 
+                  fontWeight: '300',
+                  color: '#474747',
+                  fontFamily: "'Source Sans Pro', sans-serif"
+                }}>
+                  Sed cursus turpis a purus aliquam sagittis. Morbi mattis porta mattis. Proin et lacus cursus, posuere tellus eget, cursus magna.
+                </p>
+              </div>
+              <div className="w-full h-48">
+                <img src="/image03.png" alt="Fast delivery" className="w-full h-full object-cover rounded" />
+              </div>
+            </div>
+          </div>
+
+          {/* Second Feature */}
+          <div className="text-center mb-16">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+              <div className="w-full h-48 md:order-1">
+                <img src="/image13.png" alt="Feature 2" className="w-full h-full object-cover rounded" />
+              </div>
+              <div className="text-left md:order-2">
+                <p className="mb-1" style={{ 
+                  fontSize: '1em', 
+                  lineHeight: '1.625', 
+                  fontWeight: '600',
+                  color: '#474747',
+                  fontFamily: "'Source Sans Pro', sans-serif",
+                  letterSpacing: '0.025rem'
+                }}>
+                  Pellentesque molestie aliquam.
+                </p>
+                <p style={{ 
+                  fontSize: '1em', 
+                  lineHeight: '1.125', 
+                  fontWeight: '300',
+                  color: '#474747',
+                  fontFamily: "'Source Sans Pro', sans-serif"
+                }}>
+                  Quisque in tempus leo, sed dictum ligula. Vivamus vehicula mauris sed lorem sodales, in vestibulum orci feugiat.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer Text */}
+          <div className="text-center text-right mt-24">
+            <p style={{ 
+              fontSize: '0.875em', 
+              lineHeight: '1.875', 
+              fontWeight: '300',
+              color: '#B3B3B3',
+              fontFamily: "'Source Sans Pro', sans-serif",
+              letterSpacing: '0.025rem'
+            }}>
+              © 2025 Quikpik Inc.
+            </p>
+          </div>
+
         </div>
       </div>
     </div>
