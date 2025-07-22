@@ -532,30 +532,39 @@ function getZoneMultiplier(zone: string): number {
 }
 
 function calculateDeliveryTime(zone: string, serviceType: string): any {
-  let baseDays = 3;
+  // Zone-based delivery times from customer's delivery chart
+  let deliveryInfo: { min: number; max: number; description: string };
   
   switch (zone) {
-    case 'Zone 1': baseDays = 3; break;
-    case 'Zone 2': baseDays = 4; break;
-    case 'Zone 3': baseDays = 5; break;
-    case 'Zone 4': baseDays = 6; break;
-    case 'Zone 5': baseDays = 7; break;
-    case 'Zone 6': baseDays = 8; break;
-    case 'Zone 7': baseDays = 9; break;
-    case 'Zone 8': baseDays = 10; break;
-    default: baseDays = 3; break;
+    case 'Zone 0': deliveryInfo = { min: 1, max: 1, description: '1 day' }; break;
+    case 'Zone 1': deliveryInfo = { min: 1, max: 2, description: '1-2 days' }; break;
+    case 'Zone 2': deliveryInfo = { min: 2, max: 2, description: '2 days' }; break;
+    case 'Zone 3': deliveryInfo = { min: 2, max: 3, description: '2-3 days' }; break;
+    case 'Zone 4': deliveryInfo = { min: 3, max: 4, description: '3-4 days' }; break;
+    case 'Zone 5': deliveryInfo = { min: 4, max: 4, description: '4 days' }; break;
+    case 'Zone 6': deliveryInfo = { min: 4, max: 5, description: '4-5 days' }; break;
+    case 'Zone 7': deliveryInfo = { min: 5, max: 6, description: '5-6 days' }; break;
+    case 'Zone 8': deliveryInfo = { min: 6, max: 7, description: '6-7 days' }; break;
+    default: deliveryInfo = { min: 3, max: 4, description: '3-4 days' }; break;
   }
 
+  // Express service reduces delivery time by 1 day (minimum 1 day)
   if (serviceType === 'express') {
-    baseDays = Math.max(1, baseDays - 2);
+    deliveryInfo.min = Math.max(1, deliveryInfo.min - 1);
+    deliveryInfo.max = Math.max(1, deliveryInfo.max - 1);
+    if (deliveryInfo.min === deliveryInfo.max) {
+      deliveryInfo.description = `${deliveryInfo.min} day${deliveryInfo.min > 1 ? 's' : ''}`;
+    } else {
+      deliveryInfo.description = `${deliveryInfo.min}-${deliveryInfo.max} days`;
+    }
   }
 
   const deliveryDate = new Date();
-  deliveryDate.setDate(deliveryDate.getDate() + baseDays);
+  deliveryDate.setDate(deliveryDate.getDate() + deliveryInfo.max);
 
   return {
-    days: baseDays,
-    description: `${baseDays}-${baseDays + 2} business days`,
+    days: deliveryInfo.max,
+    description: deliveryInfo.description,
     date: deliveryDate.toISOString().split('T')[0] // YYYY-MM-DD
   };
 }
