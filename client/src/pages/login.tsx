@@ -100,7 +100,6 @@ export default function Login() {
                         <Input
                           {...field}
                           type="email"
-                          placeholder="Enter your email"
                           disabled={isLoading}
                         />
                       </FormControl>
@@ -119,7 +118,6 @@ export default function Login() {
                         <Input
                           {...field}
                           type="password"
-                          placeholder="Enter your password"
                           disabled={isLoading}
                         />
                       </FormControl>
