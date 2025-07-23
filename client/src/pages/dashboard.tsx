@@ -27,7 +27,7 @@ export default function Dashboard() {
   
   // Extract orders and compute stats from the optimized response
   const orders = data?.orders || [];
-  const shipments = shipmentsData || [];
+  const shipments = Array.isArray(shipmentsData) ? shipmentsData : [];
   const activeShipmentsCount = shipments.filter((s: any) => 
     s.status === 'shipped' || s.status === 'in_transit'
   ).length;
