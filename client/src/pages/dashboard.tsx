@@ -19,11 +19,22 @@ export default function Dashboard() {
   // Use optimized hook that fetches orders with stats in one call
   const { data, refetch: refetchOrders } = useOrders();
   
+  // Fetch shipments data separately to get accurate active count
+  const { data: shipmentsData } = useQuery({
+    queryKey: ["/api/shipments"],
+    staleTime: 30000,
+  });
+  
   // Extract orders and compute stats from the optimized response
   const orders = data?.orders || [];
+  const shipments = shipmentsData || [];
+  const activeShipmentsCount = shipments.filter((s: any) => 
+    s.status === 'shipped' || s.status === 'in_transit'
+  ).length;
+  
   const stats = {
     totalOrders: orders.length,
-    activeShipments: data?.shippedCount || 0,
+    activeShipments: activeShipmentsCount,
     deliveredToday: orders.filter(o => o.status === 'delivered').length,
     successRate: orders.length > 0 ? ((data?.shippedCount || 0) / orders.length * 100).toFixed(1) + '%' : '0%',
     pendingOrders: data?.pendingCount || 0

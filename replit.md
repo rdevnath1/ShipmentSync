@@ -63,7 +63,10 @@ Preferred communication style: Simple, everyday language.
 - **Authentication Debug**: Resolved password corruption issue during user organization transfers with proper bcrypt rehashing
 - **Rate Calculator Accuracy**: Fixed Zone 3 showing correct "2 days" delivery instead of incorrect "5-6 days" estimate
 - **Database Query Optimization**: Enhanced organization statistics calculation with proper grouping and counting
-- **SUCCESSFUL RESULT**: All user management and delivery time calculation issues resolved with accurate data display
+- **Active Shipments Count Fix**: Fixed dashboard showing 0 active shipments when data exists by properly querying shipments API
+- **Rate Calculator Navigation**: Moved Rate Calculator from Tools submenu to main sidebar for direct client access
+- **Rate Calculator Defaults**: Set default delivery ZIP to 02108 and dimensions to 2x2x2 inches with improved result box alignment
+- **SUCCESSFUL RESULT**: All user management, delivery time calculation, and dashboard statistics issues resolved with accurate data display
 
 ### Complete Organization & User Management System Implementation (July 22, 2025)
 - **Master Admin Dashboard**: Created comprehensive master admin dashboard with system-wide metrics, revenue analytics, and client performance tracking
