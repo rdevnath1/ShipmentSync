@@ -30,15 +30,15 @@ interface Dimensions {
 export default function RatePreview({ onRateSelected, className }: RatePreviewProps) {
   const [rateRequest, setRateRequest] = useState<RateRequest>({
     pickupZipCode: "11430",
-    deliveryZipCode: "90210"
+    deliveryZipCode: "02108"
   });
   
   const [weight, setWeight] = useState<number>(8); // Default 8 oz
   const [weightUnit, setWeightUnit] = useState<string>("oz"); // Default to ounces
   const [dimensions, setDimensions] = useState<Dimensions>({
-    length: 10,
-    width: 10,
-    height: 5
+    length: 2,
+    width: 2,
+    height: 2
   });
 
   const ratePreviewMutation = useMutation({
@@ -229,9 +229,10 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
 
       {rateData?.success && (
         <Card>
-          <CardHeader className="flex flex-col space-y-1.5 p-6 pl-[8px] pr-[8px] pt-[1px] pb-[1px]">
+          <CardHeader>
+            <CardTitle>Rate Quote Results</CardTitle>
           </CardHeader>
-          <CardContent className="p-6 space-y-4 ml-[0px] mr-[0px] mt-[0px] mb-[0px] pl-[24px] pr-[24px] pt-[15px] pb-[15px]">
+          <CardContent className="space-y-4">
             {/* Dual Rate Display for Master Users or Single Rate for Regular Users */}
             {rateData.preview.dualRates ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
@@ -279,7 +280,7 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
                 )}
               </div>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Single Rate Display */}
                 <div className="flex flex-col justify-between p-4 border rounded-lg">
                   <div>
@@ -294,17 +295,17 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
                 </div>
 
                 {/* Estimated Delivery */}
-                <div className="flex flex-col gap-2 p-4 border rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-blue-600" />
-                    <div className="font-medium">Estimated Delivery</div>
+                <div className="flex flex-col justify-between p-4 border rounded-lg">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-blue-600" />
+                      <div className="font-medium">Estimated Delivery</div>
+                    </div>
                   </div>
-                  <div className="text-sm text-muted-foreground">
+                  <div className="text-xl font-bold text-blue-600 mt-2">
                     {rateData.preview.estimatedDelivery.description}
                   </div>
                 </div>
-
-                
               </div>
             )}
 
