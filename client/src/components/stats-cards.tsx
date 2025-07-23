@@ -95,7 +95,7 @@ export default function StatsCards({ stats }: StatsCardsProps) {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Success Rate</p>
-              <p className="text-3xl font-bold text-foreground">{stats.successRate}%</p>
+              <p className="text-3xl font-bold text-foreground">{stats.successRate}</p>
             </div>
             <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
               <TrendingUp className="text-purple-600 dark:text-purple-400" size={20} />
