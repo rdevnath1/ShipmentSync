@@ -55,6 +55,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Label Customization & Navigation Enhancement (July 23, 2025)
+- **Orders Tab Restoration**: Added Orders tab back to client user navigation sidebar for direct order management access
+- **Enhanced Logo Removal**: Improved label customizer to cover larger areas for logo removal, including top-left and bottom-left positions
+- **Advanced QP Tracking Replacement**: Enhanced tracking number replacement with white background coverage and multiple positioning strategies
+- **Batch Print Label Optimization**: Strengthened label customization for batch printing with better logo removal and QP format conversion
+- **Client Navigation Update**: Changed "Shipments" to "Dashboard" for clearer main page access while maintaining Orders access
+- **SUCCESSFUL RESULT**: Client users now have clear Orders tab access and batch printed labels have enhanced logo removal with QP tracking format
+
 ### System Debugging & User Management Fixes (July 23, 2025)
 - **User Count Display Fix**: Fixed organization cards showing 0 users by adding proper JOIN queries and user count calculations
 - **Login Issue Resolution**: Fixed corrupted password for rc@trend36fashion.com after organization transfer, generated new bcrypt hash
