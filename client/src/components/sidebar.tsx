@@ -51,7 +51,8 @@ export default function Sidebar() {
     } else {
       // Clients get simplified navigation with Rate Calculator in main panel
       return [
-        { path: "/app", icon: Package, label: "Shipments" },
+        { path: "/app", icon: LayoutDashboard, label: "Dashboard" },
+        { path: "/app/orders", icon: Package, label: "Orders" },
         { path: "/tracking", icon: Route, label: "Tracking" },
         { path: "/app/rate-calculator", icon: BarChart3, label: "Rate Calculator" },
         { path: "/app/settings", icon: Settings, label: "Settings" },
