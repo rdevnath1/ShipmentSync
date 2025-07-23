@@ -55,6 +55,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### System Debugging & User Management Fixes (July 23, 2025)
+- **User Count Display Fix**: Fixed organization cards showing 0 users by adding proper JOIN queries and user count calculations
+- **Login Issue Resolution**: Fixed corrupted password for rc@trend36fashion.com after organization transfer, generated new bcrypt hash
+- **Zone 3 Delivery Time Fix**: Corrected delivery time calculation to use actual Jiayou API zone data instead of pickup ZIP lookup
+- **API Enhancement**: Updated getAllOrganizations to include userCount and orderCount with LEFT JOIN queries
+- **Authentication Debug**: Resolved password corruption issue during user organization transfers with proper bcrypt rehashing
+- **Rate Calculator Accuracy**: Fixed Zone 3 showing correct "2 days" delivery instead of incorrect "5-6 days" estimate
+- **Database Query Optimization**: Enhanced organization statistics calculation with proper grouping and counting
+- **SUCCESSFUL RESULT**: All user management and delivery time calculation issues resolved with accurate data display
+
 ### Complete Organization & User Management System Implementation (July 22, 2025)
 - **Master Admin Dashboard**: Created comprehensive master admin dashboard with system-wide metrics, revenue analytics, and client performance tracking
 - **Role-Based Navigation**: Implemented simplified 3-section navigation for clients (Shipments, Tracking, Tools) vs full navigation for master admin
