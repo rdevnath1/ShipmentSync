@@ -16,7 +16,7 @@ export interface IStorage {
   createOrganization(org: InsertOrganization): Promise<Organization>;
   updateOrganization(id: number, org: Partial<InsertOrganization>): Promise<Organization>;
   deleteOrganization(id: number): Promise<void>;
-  getAllOrganizations(): Promise<Organization[]>;
+  getAllOrganizations(): Promise<any[]>;
   
   // User methods
   getUser(id: number): Promise<User | undefined>;
@@ -113,8 +113,28 @@ export class DatabaseStorage implements IStorage {
     await db.delete(organizations).where(eq(organizations.id, id));
   }
 
-  async getAllOrganizations(): Promise<Organization[]> {
-    return await db.select().from(organizations).orderBy(desc(organizations.createdAt));
+  async getAllOrganizations(): Promise<any[]> {
+    // Get organizations with user and order counts
+    const orgsWithStats = await db
+      .select({
+        id: organizations.id,
+        name: organizations.name,
+        slug: organizations.slug,
+        logo: organizations.logo,
+        settings: organizations.settings,
+        isActive: organizations.isActive,
+        createdAt: organizations.createdAt,
+        updatedAt: organizations.updatedAt,
+        userCount: count(users.id),
+        orderCount: count(orders.id)
+      })
+      .from(organizations)
+      .leftJoin(users, eq(organizations.id, users.organizationId))
+      .leftJoin(orders, eq(organizations.id, orders.organizationId))
+      .groupBy(organizations.id)
+      .orderBy(desc(organizations.createdAt));
+
+    return orgsWithStats;
   }
 
   // User methods
