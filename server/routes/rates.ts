@@ -538,7 +538,7 @@ function calculateDeliveryTime(zone: string, serviceType: string): any {
   switch (zone) {
     case 'Zone 1': deliveryInfo = { min: 1, max: 1, description: '1 day' }; break;
     case 'Zone 2': deliveryInfo = { min: 1, max: 2, description: '1-2 days' }; break;
-    case 'Zone 3': deliveryInfo = { min: 2, max: 3, description: '2-3 days' }; break;
+    case 'Zone 3': deliveryInfo = { min: 2, max: 2, description: '2 days' }; break;
     case 'Zone 4': deliveryInfo = { min: 2, max: 3, description: '2-3 days' }; break;
     case 'Zone 5': deliveryInfo = { min: 3, max: 4, description: '3-4 days' }; break;
     case 'Zone 6': deliveryInfo = { min: 4, max: 4, description: '4 days' }; break;
