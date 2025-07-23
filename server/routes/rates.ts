@@ -89,7 +89,7 @@ router.post("/preview", requireAuth, requireOrgAccess, createAuditMiddleware('ra
       const profitMargin = customerRate ? customerRateService.calculateProfitMargin(actualCost, customerRate) : null;
       
       // Get shipping zone for delivery time estimation  
-      const shippingZone = getShippingZone('US', pickupZipCode, deliveryZipCode);
+      const shippingZone = `Zone ${rateData.areaCode}`;
       
       // Calculate estimated delivery time based on zone
       const estimatedDelivery = calculateDeliveryTime(shippingZone, serviceType);
