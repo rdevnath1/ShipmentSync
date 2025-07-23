@@ -62,7 +62,6 @@ function Router() {
           <Route path="/app/analytics" component={Analytics} />
           <Route path="/app/audit-logs" component={AuditLogs} />
           <Route path="/app/rate-calculator" component={RateCalculatorPage} />
-          <Route path="/app/tools" component={Tools} />
           <Route path="/app/settings" component={Settings} />
           <Route path="/tracking" component={Tracking} />
           <Route path="/" component={getDashboardComponent()} />

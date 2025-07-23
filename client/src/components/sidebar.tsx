@@ -49,11 +49,12 @@ export default function Sidebar() {
         { path: "/app/settings", icon: Settings, label: "Settings" },
       ];
     } else {
-      // Clients get simplified 3-section navigation
+      // Clients get simplified navigation with Rate Calculator in main panel
       return [
         { path: "/app", icon: Package, label: "Shipments" },
         { path: "/tracking", icon: Route, label: "Tracking" },
-        { path: "/app/tools", icon: Settings, label: "Tools" },
+        { path: "/app/rate-calculator", icon: BarChart3, label: "Rate Calculator" },
+        { path: "/app/settings", icon: Settings, label: "Settings" },
       ];
     }
   };
