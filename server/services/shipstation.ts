@@ -209,6 +209,45 @@ export class ShipStationService {
     }
   }
 
+  async getRates(fromZip: string, toZip: string, weight: number, dimensions: { length: number; width: number; height: number }): Promise<any[]> {
+    try {
+      const rateRequest = {
+        carrierCode: null, // Get rates from all carriers
+        fromPostalCode: fromZip,
+        toState: null,
+        toCountry: 'US',
+        toPostalCode: toZip,
+        toCity: null,
+        weight: {
+          value: weight,
+          units: 'pounds'
+        },
+        dimensions: {
+          units: 'inches',
+          length: dimensions.length,
+          width: dimensions.width,
+          height: dimensions.height
+        },
+        confirmation: 'none',
+        residential: false
+      };
+
+      console.log('ShipStation rate request:', JSON.stringify(rateRequest, null, 2));
+
+      const response = await axios.post(
+        `${this.baseUrl}/shipments/getrates`,
+        rateRequest,
+        { headers: this.getAuthHeaders() }
+      );
+
+      console.log('ShipStation rate response:', JSON.stringify(response.data, null, 2));
+      return response.data || [];
+    } catch (error: any) {
+      console.error('Error getting rates from ShipStation:', error.response?.data || error.message);
+      return [];
+    }
+  }
+
   // Keep the old method for backward compatibility but use the new one
   async updateOrderWithTracking(orderId: number, trackingNumber: string, labelUrl?: string, trackingUrl?: string): Promise<boolean> {
     return this.markAsShipped(orderId, trackingNumber, labelUrl, trackingUrl);

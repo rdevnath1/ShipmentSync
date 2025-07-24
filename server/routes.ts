@@ -19,6 +19,49 @@ import path from "path";
 const shipStationService = new ShipStationService();
 const jiayouService = new JiayouService();
 
+// Helper functions for ShipStation rate processing
+function mapCarrierName(carrierCode: string): string {
+  const carrierMap: { [key: string]: string } = {
+    'fedex': 'FedEx',
+    'ups': 'UPS',
+    'usps': 'USPS',
+    'dhl_express': 'DHL',
+    'dhl': 'DHL',
+    'ontrac': 'OnTrac',
+    'lasership': 'LaserShip',
+    'other': 'Other'
+  };
+  
+  return carrierMap[carrierCode.toLowerCase()] || carrierCode;
+}
+
+function formatDeliveryDays(deliveryDays: number | string | undefined): string {
+  if (!deliveryDays) return '3-5';
+  
+  if (typeof deliveryDays === 'number') {
+    if (deliveryDays === 1) return '1';
+    if (deliveryDays === 2) return '2';
+    if (deliveryDays <= 3) return '2-3';
+    return `${deliveryDays}`;
+  }
+  
+  return deliveryDays.toString();
+}
+
+function getCarrierLogo(carrier: string): string {
+  const logoMap: { [key: string]: string } = {
+    'fedex': 'https://upload.wikimedia.org/wikipedia/commons/b/b9/FedEx_Corporation_-_2016_Logo.svg',
+    'ups': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/UPS_logo_2014.svg/512px-UPS_logo_2014.svg.png',
+    'usps': 'https://upload.wikimedia.org/wikipedia/commons/4/4a/USPS_Logo.svg',
+    'dhl': 'https://upload.wikimedia.org/wikipedia/commons/a/ac/DHL_Logo.svg',
+    'ontrac': 'https://www.ontrac.com/images/ontrac-logo.png',
+    'lasership': 'https://lasership.com/wp-content/uploads/2019/05/lasership-logo.png',
+    'other': '/assets/logo_1752442395960.png'
+  };
+  
+  return logoMap[carrier.toLowerCase()] || logoMap['other'];
+}
+
 // Type for authenticated requests
 interface AuthRequest extends Request {
   user?: {
@@ -1860,39 +1903,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("Error getting Jiayou rate:", error);
       }
       
-      // Always show USPS rates (no account needed for USPS)
-      rates.push({
-        carrier: 'usps',
-        service: 'Priority Mail',
-        rate: 3.95, // USPS typically cheaper than Quikpik
-        deliveryDays: '1-3',
-        logo: 'https://upload.wikimedia.org/wikipedia/commons/4/4a/USPS_Logo.svg'
-      });
-      
-      // Get FedEx rate if account exists
-      const fedexAccount = await storage.getActiveCarrierAccount(organizationId, 'fedex');
-      if (fedexAccount) {
-        // TODO: Implement FedEx API call
-        rates.push({
-          carrier: 'fedex',
-          service: 'Ground',
-          rate: 8.50, // Mock rate for now
-          deliveryDays: '3-5',
-          logo: 'https://upload.wikimedia.org/wikipedia/commons/b/b9/FedEx_Corporation_-_2016_Logo.svg'
-        });
-      }
-      
-      // Get DHL rate if account exists
-      const dhlAccount = await storage.getActiveCarrierAccount(organizationId, 'dhl');
-      if (dhlAccount) {
-        // TODO: Implement DHL API call
-        rates.push({
-          carrier: 'dhl',
-          service: 'Express',
-          rate: 12.25, // Mock rate for now
-          deliveryDays: '2-3',
-          logo: 'https://upload.wikimedia.org/wikipedia/commons/a/ac/DHL_Logo.svg'
-        });
+      // Get rates from ShipStation (includes client's FedEx, USPS, UPS accounts)
+      try {
+        const shipStationRates = await shipStationService.getRates(
+          fromZip,
+          toZip,
+          weight / 16, // Convert oz to lbs
+          dimensions
+        );
+
+        // Process ShipStation rates
+        for (const ssRate of shipStationRates) {
+          const carrierName = mapCarrierName(ssRate.carrierCode);
+          const serviceName = ssRate.serviceName || ssRate.serviceCode || 'Standard';
+          
+          if (ssRate.shipmentCost && ssRate.shipmentCost > 0) {
+            rates.push({
+              carrier: carrierName.toLowerCase(),
+              service: serviceName,
+              rate: parseFloat(ssRate.shipmentCost),
+              deliveryDays: formatDeliveryDays(ssRate.deliveryDays),
+              logo: getCarrierLogo(carrierName.toLowerCase())
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error getting ShipStation rates:", error);
       }
       
       // Sort by rate (cheapest first)
