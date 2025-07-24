@@ -368,7 +368,7 @@ export default function SettingsPage() {
       
       <div className="p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className={`grid w-full ${isMasterAdmin ? 'grid-cols-5' : 'grid-cols-4'}`}>
+          <TabsList className={`grid w-full ${isMasterAdmin ? 'grid-cols-4' : 'grid-cols-3'}`}>
             <TabsTrigger value="api" className="flex items-center space-x-2">
               <Key size={16} />
               <span>API Keys</span>
@@ -383,10 +383,6 @@ export default function SettingsPage() {
                 <span>API Sharing</span>
               </TabsTrigger>
             )}
-            <TabsTrigger value="notifications" className="flex items-center space-x-2">
-              <Bell size={16} />
-              <span>Notifications</span>
-            </TabsTrigger>
             <TabsTrigger value="general" className="flex items-center space-x-2">
               <Settings size={16} />
               <span>General</span>
@@ -950,77 +946,7 @@ export default function SettingsPage() {
             </TabsContent>
           )}
 
-          <TabsContent value="notifications" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Bell size={20} />
-                  <span>Notification Settings</span>
-                </CardTitle>
-                <p className="text-slate-600">Configure how you receive updates about your shipments</p>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={notificationForm.handleSubmit(handleNotificationSettingsSave)} className="space-y-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <Label htmlFor="emailNotifications">Email Notifications</Label>
-                        <p className="text-sm text-slate-500">Receive updates via email</p>
-                      </div>
-                      <Switch
-                        id="emailNotifications"
-                        checked={notificationForm.watch("emailNotifications")}
-                        onCheckedChange={(checked) => notificationForm.setValue("emailNotifications", checked)}
-                      />
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <Label htmlFor="smsNotifications">SMS Notifications</Label>
-                        <p className="text-sm text-slate-500">Receive updates via SMS</p>
-                      </div>
-                      <Switch
-                        id="smsNotifications"
-                        checked={notificationForm.watch("smsNotifications")}
-                        onCheckedChange={(checked) => notificationForm.setValue("smsNotifications", checked)}
-                      />
-                    </div>
 
-                    <div>
-                      <Label htmlFor="webhookUrl">Webhook URL</Label>
-                      <Input
-                        id="webhookUrl"
-                        placeholder="https://yourapi.com/webhook"
-                        {...notificationForm.register("webhookUrl")}
-                      />
-                      <p className="text-sm text-slate-500 mt-1">Optional: Send notifications to your webhook endpoint</p>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="notificationFrequency">Notification Frequency</Label>
-                      <Select
-                        value={notificationForm.watch("notificationFrequency")}
-                        onValueChange={(value: any) => notificationForm.setValue("notificationFrequency", value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select frequency" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="realtime">Real-time</SelectItem>
-                          <SelectItem value="hourly">Hourly</SelectItem>
-                          <SelectItem value="daily">Daily</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-end">
-                    <Button type="submit">Save Notification Settings</Button>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
-          </TabsContent>
 
           <TabsContent value="general" className="space-y-6">
             <Card>
@@ -1082,6 +1008,70 @@ export default function SettingsPage() {
                     </div>
                     
                     <Button type="submit">Change Password</Button>
+                  </form>
+                </div>
+
+                {/* Notification Settings */}
+                <div className="border rounded-lg p-4">
+                  <h4 className="font-medium mb-4 flex items-center space-x-2">
+                    <Bell size={16} />
+                    <span>Notification Settings</span>
+                  </h4>
+                  <form onSubmit={notificationForm.handleSubmit(handleNotificationSettingsSave)} className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="emailNotifications">Email Notifications</Label>
+                        <p className="text-sm text-slate-500">Receive updates via email</p>
+                      </div>
+                      <Switch
+                        id="emailNotifications"
+                        checked={notificationForm.watch("emailNotifications")}
+                        onCheckedChange={(checked) => notificationForm.setValue("emailNotifications", checked)}
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="smsNotifications">SMS Notifications</Label>
+                        <p className="text-sm text-slate-500">Receive updates via SMS</p>
+                      </div>
+                      <Switch
+                        id="smsNotifications"
+                        checked={notificationForm.watch("smsNotifications")}
+                        onCheckedChange={(checked) => notificationForm.setValue("smsNotifications", checked)}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="webhookUrl">Webhook URL</Label>
+                      <Input
+                        id="webhookUrl"
+                        placeholder="https://yourapi.com/webhook"
+                        {...notificationForm.register("webhookUrl")}
+                      />
+                      <p className="text-sm text-slate-500 mt-1">Optional: Send notifications to your webhook endpoint</p>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="notificationFrequency">Notification Frequency</Label>
+                      <Select
+                        value={notificationForm.watch("notificationFrequency")}
+                        onValueChange={(value: any) => notificationForm.setValue("notificationFrequency", value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select frequency" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="realtime">Real-time</SelectItem>
+                          <SelectItem value="hourly">Hourly</SelectItem>
+                          <SelectItem value="daily">Daily</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex justify-end">
+                      <Button type="submit">Save Notification Settings</Button>
+                    </div>
                   </form>
                 </div>
 
