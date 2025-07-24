@@ -210,42 +210,57 @@ export class ShipStationService {
   }
 
   async getRates(fromZip: string, toZip: string, weight: number, dimensions: { length: number; width: number; height: number }): Promise<any[]> {
-    try {
-      const rateRequest = {
-        carrierCode: null, // Get rates from all carriers
-        fromPostalCode: fromZip,
-        toState: null,
-        toCountry: 'US',
-        toPostalCode: toZip,
-        toCity: null,
-        weight: {
-          value: weight,
-          units: 'pounds'
-        },
-        dimensions: {
-          units: 'inches',
-          length: dimensions.length,
-          width: dimensions.width,
-          height: dimensions.height
-        },
-        confirmation: 'none',
-        residential: false
-      };
+    const carriers = ['fedex', 'usps', 'ups']; // Common carriers
+    const allRates: any[] = [];
 
-      console.log('ShipStation rate request:', JSON.stringify(rateRequest, null, 2));
+    for (const carrierCode of carriers) {
+      try {
+        const rateRequest = {
+          carrierCode: carrierCode,
+          fromPostalCode: fromZip,
+          toState: null,
+          toCountry: 'US',
+          toPostalCode: toZip,
+          toCity: null,
+          weight: {
+            value: weight,
+            units: 'pounds'
+          },
+          dimensions: {
+            units: 'inches',
+            length: dimensions.length,
+            width: dimensions.width,
+            height: dimensions.height
+          },
+          confirmation: 'none',
+          residential: false
+        };
 
-      const response = await axios.post(
-        `${this.baseUrl}/shipments/getrates`,
-        rateRequest,
-        { headers: this.getAuthHeaders() }
-      );
+        console.log(`ShipStation ${carrierCode} rate request:`, JSON.stringify(rateRequest, null, 2));
 
-      console.log('ShipStation rate response:', JSON.stringify(response.data, null, 2));
-      return response.data || [];
-    } catch (error: any) {
-      console.error('Error getting rates from ShipStation:', error.response?.data || error.message);
-      return [];
+        const response = await axios.post(
+          `${this.baseUrl}/shipments/getrates`,
+          rateRequest,
+          { headers: this.getAuthHeaders() }
+        );
+
+        console.log(`ShipStation ${carrierCode} rate response:`, JSON.stringify(response.data, null, 2));
+        
+        // Add carrier code to each rate for identification
+        if (response.data && Array.isArray(response.data)) {
+          const ratesWithCarrier = response.data.map((rate: any) => ({
+            ...rate,
+            carrierCode: carrierCode
+          }));
+          allRates.push(...ratesWithCarrier);
+        }
+      } catch (error: any) {
+        console.error(`Error getting ${carrierCode} rates from ShipStation:`, error.response?.data || error.message);
+        // Continue with other carriers even if one fails
+      }
     }
+
+    return allRates;
   }
 
   // Keep the old method for backward compatibility but use the new one
