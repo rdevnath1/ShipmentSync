@@ -481,7 +481,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Carrier account management endpoints
   app.get('/api/carrier-accounts', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
       
       if (!user) {
@@ -498,7 +498,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/carrier-accounts', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
       
       if (!user) {
@@ -520,7 +520,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/carrier-accounts/:id', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
       
       if (!user) {

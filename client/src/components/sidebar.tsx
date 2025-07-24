@@ -56,7 +56,6 @@ export default function Sidebar() {
         { path: "/app/orders", icon: Package, label: "Orders" },
         { path: "/tracking", icon: Route, label: "Tracking" },
         { path: "/app/rate-calculator", icon: BarChart3, label: "Rate Calculator" },
-        { path: "/app/carrier-settings", icon: Truck, label: "Carrier Settings" },
         { path: "/app/settings", icon: Settings, label: "Settings" },
       ];
     }

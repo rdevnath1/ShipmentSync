@@ -16,7 +16,6 @@ import Tools from "@/pages/tools";
 import Login from "@/pages/login";
 import NotFound from "@/pages/not-found";
 import RateCalculatorPage from "@/pages/rate-calculator";
-import CarrierSettings from "@/pages/carrier-settings";
 import LandingPage from "@/pages/landing";
 import Sidebar from "@/components/sidebar";
 import { useAuth } from "@/hooks/useAuth";
@@ -63,7 +62,6 @@ function Router() {
           <Route path="/app/analytics" component={Analytics} />
           <Route path="/app/audit-logs" component={AuditLogs} />
           <Route path="/app/rate-calculator" component={RateCalculatorPage} />
-          <Route path="/app/carrier-settings" component={CarrierSettings} />
           <Route path="/app/settings" component={Settings} />
           <Route path="/tracking" component={Tracking} />
           <Route path="/" component={getDashboardComponent()} />

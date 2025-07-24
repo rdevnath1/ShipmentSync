@@ -49,12 +49,13 @@ const passwordChangeSchema = z.object({
 });
 
 const carrierAccountSchema = z.object({
-  carrier: z.enum(["fedex", "dhl"]),
-  accountNumber: z.string().min(1, "Account number is required"),
-  meterNumber: z.string().optional(),
-  key: z.string().min(1, "API key is required"),
-  password: z.string().min(1, "Password is required"),
+  carrier: z.enum(["fedex", "usps"]),
+  accountNumber: z.string().optional(),
+  clientId: z.string().optional(),
+  clientSecret: z.string().optional(),
+  userId: z.string().optional(),
   apiUrl: z.string().optional(),
+  enabled: z.boolean().default(false),
 });
 
 export default function SettingsPage() {
@@ -491,6 +492,152 @@ export default function SettingsPage() {
           </TabsContent>
 
           <TabsContent value="carriers" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Truck size={20} />
+                  <span>Carrier API Settings</span>
+                </CardTitle>
+                <p className="text-slate-600">Configure your carrier API credentials to get real-time shipping rates</p>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="fedex" className="space-y-6">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="fedex">FedEx</TabsTrigger>
+                    <TabsTrigger value="usps">USPS</TabsTrigger>
+                    <TabsTrigger value="ups">UPS (Coming Soon)</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="fedex">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>FedEx API Settings</CardTitle>
+                        <p className="text-sm text-gray-600">
+                          Configure your FedEx Developer Portal credentials
+                        </p>
+                      </CardHeader>
+                      <CardContent>
+                        <form className="space-y-4">
+                          <div className="flex items-center justify-between mb-4">
+                            <Label htmlFor="fedex_enabled">Enable FedEx Integration</Label>
+                            <Switch
+                              id="fedex_enabled"
+                              name="fedex_enabled"
+                            />
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="fedex_account_number">Account Number</Label>
+                              <Input
+                                id="fedex_account_number"
+                                placeholder="9-digit FedEx account number"
+                              />
+                            </div>
+                            
+                            <div>
+                              <Label htmlFor="fedex_client_id">Client ID</Label>
+                              <Input
+                                id="fedex_client_id"
+                                placeholder="From FedEx Developer Portal"
+                              />
+                            </div>
+                            
+                            <div>
+                              <Label htmlFor="fedex_client_secret">Client Secret</Label>
+                              <Input
+                                id="fedex_client_secret"
+                                type="password"
+                                placeholder="From FedEx Developer Portal"
+                              />
+                            </div>
+                            
+                            <div>
+                              <Label htmlFor="fedex_api_url">API Environment</Label>
+                              <Select defaultValue="https://apis-sandbox.fedex.com">
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="https://apis-sandbox.fedex.com">Sandbox (Testing)</SelectItem>
+                                  <SelectItem value="https://apis.fedex.com">Production</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          
+                          <Button type="submit">
+                            Save FedEx Settings
+                          </Button>
+                        </form>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="usps">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>USPS API Settings</CardTitle>
+                        <p className="text-sm text-gray-600">
+                          Configure your USPS Web Tools credentials
+                        </p>
+                      </CardHeader>
+                      <CardContent>
+                        <form className="space-y-4">
+                          <div className="flex items-center justify-between mb-4">
+                            <Label htmlFor="usps_enabled">Enable USPS Integration</Label>
+                            <Switch
+                              id="usps_enabled"
+                              name="usps_enabled"
+                            />
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor="usps_user_id">USPS User ID</Label>
+                            <Input
+                              id="usps_user_id"
+                              placeholder="From USPS Web Tools registration"
+                            />
+                            <p className="text-sm text-gray-500 mt-1">
+                              Register at{" "}
+                              <a 
+                                href="https://registration.shippingapis.com/" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline"
+                              >
+                                registration.shippingapis.com
+                              </a>
+                            </p>
+                          </div>
+                          
+                          <Button type="submit">
+                            Save USPS Settings
+                          </Button>
+                        </form>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="ups">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>UPS API Settings</CardTitle>
+                        <p className="text-sm text-gray-600">
+                          UPS integration coming soon
+                        </p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-center py-8 text-gray-500">
+                          <Truck className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                          <p>UPS integration will be available in a future update.</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
