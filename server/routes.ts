@@ -1845,13 +1845,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         if (jiayouRate.code === 1 && jiayouRate.data && jiayouRate.data.length > 0) {
           const rateData = jiayouRate.data[0];
-          rates.push({
-            carrier: 'quikpik',
-            service: 'Standard',
-            rate: parseFloat(rateData.totalFee),
-            deliveryDays: '1-2', // Default delivery days for Quikpik
-            logo: '/assets/logo_1752442395960.png'
-          });
+          // Only add rate if totalFee is not null
+          if (rateData.totalFee !== null && rateData.totalFee !== undefined) {
+            rates.push({
+              carrier: 'quikpik',
+              service: 'Standard',
+              rate: parseFloat(rateData.totalFee),
+              deliveryDays: '1-2', // Default delivery days for Quikpik
+              logo: '/assets/logo_1752442395960.png'
+            });
+          }
         }
       } catch (error) {
         console.error("Error getting Jiayou rate:", error);

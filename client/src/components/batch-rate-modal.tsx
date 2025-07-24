@@ -98,10 +98,12 @@ export default function BatchRateModal({ isOpen, onClose, selectedOrders }: Batc
     
     rateResults.forEach(result => {
       result.rates.forEach(rate => {
-        if (!totals[rate.carrier]) {
-          totals[rate.carrier] = 0;
+        if (rate.rate !== null && rate.rate !== undefined) {
+          if (!totals[rate.carrier]) {
+            totals[rate.carrier] = 0;
+          }
+          totals[rate.carrier] += rate.rate;
         }
-        totals[rate.carrier] += rate.rate;
       });
     });
     
@@ -109,7 +111,10 @@ export default function BatchRateModal({ isOpen, onClose, selectedOrders }: Batc
   };
 
   const carrierTotals = calculateTotalsByCarrier();
-  const carriers = rateResults.length > 0 ? rateResults[0].rates.map(r => r.carrier) : [];
+  // Get unique list of all carriers from all results
+  const carriers = Array.from(new Set(
+    rateResults.flatMap(result => result.rates.map(rate => rate.carrier))
+  )).sort();
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -152,7 +157,18 @@ export default function BatchRateModal({ isOpen, onClose, selectedOrders }: Batc
                           <TableCell className="text-sm text-muted-foreground">
                             {result.destination}
                           </TableCell>
-                          {result.rates.map(rate => {
+                          {carriers.map(carrier => {
+                            const rate = result.rates.find(r => r.carrier === carrier);
+                            if (!rate || rate.rate === null || rate.rate === undefined) {
+                              return (
+                                <TableCell key={carrier} className="text-center">
+                                  <div className="text-muted-foreground">-</div>
+                                  <div className="text-xs text-muted-foreground">
+                                    Not available
+                                  </div>
+                                </TableCell>
+                              );
+                            }
                             const isCheapest = result.cheapest && rate.carrier === result.cheapest.carrier;
                             return (
                               <TableCell key={rate.carrier} className="text-center">
@@ -207,10 +223,12 @@ export default function BatchRateModal({ isOpen, onClose, selectedOrders }: Batc
                       Best individual rates total: $
                       {rateResults.reduce((sum, r) => sum + (r.cheapest?.rate || 0), 0).toFixed(2)}
                     </p>
-                    <p>
-                      Lowest batch total: ${Math.min(...Object.values(carrierTotals)).toFixed(2)} 
-                      ({carriers.find(c => carrierTotals[c] === Math.min(...Object.values(carrierTotals)))})
-                    </p>
+                    {Object.keys(carrierTotals).length > 0 && (
+                      <p>
+                        Lowest batch total: ${Math.min(...Object.values(carrierTotals)).toFixed(2)} 
+                        ({carriers.find(c => carrierTotals[c] === Math.min(...Object.values(carrierTotals)))})
+                      </p>
+                    )}
                   </div>
                 </div>
               </>
