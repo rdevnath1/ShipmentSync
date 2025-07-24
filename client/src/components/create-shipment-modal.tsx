@@ -294,7 +294,7 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
             <div className="border-t border-slate-200 pt-6">
               <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg">
                 <p className="text-sm text-blue-800 dark:text-blue-200">
-                  Click "Compare Rates" above to see shipping options from Quikpik, FedEx, and DHL before creating your shipment.
+                  Click "Compare Rates" above to see shipping options from USPS, Quikpik, FedEx, and DHL before creating your shipment.
                 </p>
               </div>
             </div>

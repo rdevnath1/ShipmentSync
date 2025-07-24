@@ -11,6 +11,7 @@ import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import CreateShipmentModal from "./create-shipment-modal";
 import BatchPrintModal from "./batch-print-modal";
+import BatchRateModal from "./batch-rate-modal";
 import EditShipmentModal from "./edit-shipment-modal";
 import EditOrderModal from "./edit-order-modal";
 import DebugJiayouModal from "./debug-jiayou-modal";
@@ -35,6 +36,8 @@ export default function OrderTable({ orders, showShipmentActions = false, showBa
   const [showDebugModal, setShowDebugModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedOrderIds, setSelectedOrderIds] = useState<number[]>([]);
+  const [showBatchRateModal, setShowBatchRateModal] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
@@ -117,6 +120,34 @@ export default function OrderTable({ orders, showShipmentActions = false, showBa
     setShowEditModal(true);
   };
 
+  const toggleOrderSelection = (orderId: number) => {
+    setSelectedOrderIds(prev => 
+      prev.includes(orderId) 
+        ? prev.filter(id => id !== orderId)
+        : [...prev, orderId]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedOrderIds.length === filteredOrders.length) {
+      setSelectedOrderIds([]);
+    } else {
+      setSelectedOrderIds(filteredOrders.map(order => order.id));
+    }
+  };
+
+  const handleBatchRatePreview = () => {
+    if (selectedOrderIds.length === 0) {
+      toast({
+        title: "No Orders Selected",
+        description: "Please select at least one order to compare rates",
+        variant: "destructive",
+      });
+      return;
+    }
+    setShowBatchRateModal(true);
+  };
+
 
 
   const printMutation = useMutation({
@@ -177,20 +208,38 @@ export default function OrderTable({ orders, showShipmentActions = false, showBa
               </div>
               
               {showBatchActions && (
-                <Button
-                  onClick={() => setShowBatchPrintModal(true)}
-                  disabled={!orders.some(order => order.status === 'shipped' && order.trackingNumber)}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  <Printer className="mr-2" size={16} />
-                  Batch Print Labels
-                </Button>
+                <>
+                  <Button
+                    onClick={handleBatchRatePreview}
+                    disabled={selectedOrderIds.length === 0}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    <Package className="mr-2" size={16} />
+                    Compare Rates ({selectedOrderIds.length})
+                  </Button>
+                  <Button
+                    onClick={() => setShowBatchPrintModal(true)}
+                    disabled={!orders.some(order => order.status === 'shipped' && order.trackingNumber)}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Printer className="mr-2" size={16} />
+                    Batch Print Labels
+                  </Button>
+                </>
               )}
             </div>
           </div>
         </CardHeader>
 
         <CardContent>
+          {showBatchActions && selectedOrderIds.length > 0 && (
+            <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
+              <p className="text-sm text-blue-800 dark:text-blue-200">
+                {selectedOrderIds.length} order{selectedOrderIds.length > 1 ? 's' : ''} selected
+              </p>
+            </div>
+          )}
+          
           {!orders || orders.length === 0 ? (
             <div className="text-center py-12">
               <Package className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
@@ -204,6 +253,16 @@ export default function OrderTable({ orders, showShipmentActions = false, showBa
                 <table className="w-full">
                   <thead className="bg-muted">
                     <tr>
+                      {showBatchActions && (
+                        <th className="px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                          <input
+                            type="checkbox"
+                            checked={selectedOrderIds.length > 0 && selectedOrderIds.length === filteredOrders.length}
+                            onChange={toggleSelectAll}
+                            className="h-4 w-4 rounded border-gray-300"
+                          />
+                        </th>
+                      )}
                       <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Order ID
                       </th>
@@ -235,6 +294,16 @@ export default function OrderTable({ orders, showShipmentActions = false, showBa
                       const shippingAddress = order.shippingAddress as any;
                       return (
                         <tr key={order.id} className="hover:bg-muted transition-colors">
+                          {showBatchActions && (
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <input
+                                type="checkbox"
+                                checked={selectedOrderIds.includes(order.id)}
+                                onChange={() => toggleOrderSelection(order.id)}
+                                className="h-4 w-4 rounded border-gray-300"
+                              />
+                            </td>
+                          )}
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm font-medium text-foreground">
                               #{order.orderNumber}
@@ -509,6 +578,12 @@ export default function OrderTable({ orders, showShipmentActions = false, showBa
           onClose={() => setShowDebugModal(false)}
         />
       )}
+      
+      <BatchRateModal
+        isOpen={showBatchRateModal}
+        onClose={() => setShowBatchRateModal(false)}
+        selectedOrders={orders.filter(order => selectedOrderIds.includes(order.id))}
+      />
     </>
   );
 }

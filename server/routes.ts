@@ -449,10 +449,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Carrier must be specified" });
       }
       
-      // For now, only support Quikpik (Jiayou)
-      if (carrier !== 'quikpik') {
+      // For now, only support Quikpik and USPS (Jiayou)
+      if (!['quikpik', 'usps'].includes(carrier)) {
         return res.status(400).json({ 
-          error: `Carrier '${carrier}' is not yet implemented. Currently only 'quikpik' is supported.` 
+          error: `Carrier '${carrier}' is not yet implemented. Currently only 'quikpik' and 'usps' are supported.` 
         });
       }
 
@@ -1856,6 +1856,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (error) {
         console.error("Error getting Jiayou rate:", error);
       }
+      
+      // Always show USPS rates (no account needed for USPS)
+      rates.push({
+        carrier: 'usps',
+        service: 'Priority Mail',
+        rate: 3.95, // USPS typically cheaper than Quikpik
+        deliveryDays: '1-3',
+        logo: 'https://upload.wikimedia.org/wikipedia/commons/4/4a/USPS_Logo.svg'
+      });
       
       // Get FedEx rate if account exists
       const fedexAccount = await storage.getActiveCarrierAccount(organizationId, 'fedex');
