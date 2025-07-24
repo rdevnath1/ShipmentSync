@@ -197,17 +197,27 @@ export const enhancedTrackingEvents = pgTable("enhanced_tracking_events", {
   index("idx_enhanced_tracking_timestamp").on(table.timestamp),
 ]);
 
-// Carrier accounts table
+// Carrier accounts table - updated for modern APIs
 export const carrierAccounts = pgTable("carrier_accounts", {
   id: serial("id").primaryKey(),
   organizationId: integer("organization_id").notNull().references(() => organizations.id, { onDelete: "cascade" }),
-  carrier: varchar("carrier", { length: 50 }).notNull(), // 'fedex', 'dhl', 'ups', etc.
-  accountNumber: varchar("account_number", { length: 255 }).notNull(),
-  meterNumber: varchar("meter_number", { length: 255 }), // For FedEx
-  key: varchar("key", { length: 255 }).notNull(),
-  password: varchar("password", { length: 255 }).notNull(),
-  apiUrl: varchar("api_url", { length: 500 }), // Custom API URL if needed
-  isActive: boolean("is_active").default(true),
+  carrier: varchar("carrier", { length: 50 }).notNull(), // 'fedex', 'usps', 'ups', etc.
+  
+  // FedEx fields
+  accountNumber: varchar("account_number", { length: 255 }),
+  clientId: varchar("client_id", { length: 255 }),
+  clientSecret: varchar("client_secret", { length: 255 }),
+  
+  // USPS fields  
+  userId: varchar("user_id", { length: 255 }),
+  
+  // UPS fields (for future)
+  key: varchar("key", { length: 255 }),
+  password: varchar("password", { length: 255 }),
+  
+  // Common fields
+  apiUrl: varchar("api_url", { length: 500 }),
+  enabled: boolean("enabled").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [

@@ -19,12 +19,21 @@ export interface USPSRate {
   deliveryDays?: string;
 }
 
+export interface USPSCredentials {
+  userId: string;
+}
+
 class USPSService {
   private baseUrl = 'https://secure.shippingapis.com/ShippingAPI.dll';
   private userId: string;
 
-  constructor() {
-    this.userId = process.env.USPS_USER_ID || '';
+  constructor(credentials?: USPSCredentials) {
+    if (credentials) {
+      this.userId = credentials.userId;
+    } else {
+      // Fallback to environment variables for backward compatibility
+      this.userId = process.env.USPS_USER_ID || '';
+    }
   }
 
   async getRates(request: USPSRateRequest): Promise<USPSRate[]> {

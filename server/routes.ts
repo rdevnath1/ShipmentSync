@@ -478,7 +478,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Carrier account management endpoints
+  app.get('/api/carrier-accounts', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
 
+      const accounts = await storage.getCarrierAccounts(user.organizationId);
+      res.json(accounts);
+    } catch (error) {
+      console.error('Error fetching carrier accounts:', error);
+      res.status(500).json({ error: 'Failed to fetch carrier accounts' });
+    }
+  });
+
+  app.post('/api/carrier-accounts', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      const accountData = {
+        ...req.body,
+        organizationId: user.organizationId,
+      };
+
+      const account = await storage.createCarrierAccount(accountData);
+      res.json(account);
+    } catch (error) {
+      console.error('Error creating carrier account:', error);
+      res.status(500).json({ error: 'Failed to create carrier account' });
+    }
+  });
+
+  app.put('/api/carrier-accounts/:id', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      const accountId = parseInt(req.params.id);
+      const account = await storage.updateCarrierAccount(accountId, req.body);
+      res.json(account);
+    } catch (error) {
+      console.error('Error updating carrier account:', error);
+      res.status(500).json({ error: 'Failed to update carrier account' });
+    }
+  });
 
   // Create shipment with Jiayou
   app.post("/api/shipments/create", async (req, res) => {

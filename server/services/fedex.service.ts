@@ -17,6 +17,13 @@ export interface FedExRate {
   deliveryDays: string;
 }
 
+export interface FedExCredentials {
+  apiUrl: string;
+  clientId: string;
+  clientSecret: string;
+  accountNumber: string;
+}
+
 class FedExService {
   private baseUrl: string;
   private clientId: string;
@@ -25,11 +32,19 @@ class FedExService {
   private accessToken: string | null = null;
   private tokenExpiry: Date | null = null;
 
-  constructor() {
-    this.baseUrl = process.env.FEDEX_API_URL || 'https://apis.fedex.com';
-    this.clientId = process.env.FEDEX_CLIENT_ID || '';
-    this.clientSecret = process.env.FEDEX_CLIENT_SECRET || '';
-    this.accountNumber = process.env.FEDEX_ACCOUNT_NUMBER || '';
+  constructor(credentials?: FedExCredentials) {
+    if (credentials) {
+      this.baseUrl = credentials.apiUrl;
+      this.clientId = credentials.clientId;
+      this.clientSecret = credentials.clientSecret;
+      this.accountNumber = credentials.accountNumber;
+    } else {
+      // Fallback to environment variables for backward compatibility
+      this.baseUrl = process.env.FEDEX_API_URL || 'https://apis.fedex.com';
+      this.clientId = process.env.FEDEX_CLIENT_ID || '';
+      this.clientSecret = process.env.FEDEX_CLIENT_SECRET || '';
+      this.accountNumber = process.env.FEDEX_ACCOUNT_NUMBER || '';
+    }
   }
 
   private async getAccessToken(): Promise<string> {

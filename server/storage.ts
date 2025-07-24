@@ -552,7 +552,7 @@ export class DatabaseStorage implements IStorage {
         and(
           eq(carrierAccounts.organizationId, organizationId),
           eq(carrierAccounts.carrier, carrier),
-          eq(carrierAccounts.isActive, true)
+          eq(carrierAccounts.enabled, true)
         )
       );
     return account || undefined;
