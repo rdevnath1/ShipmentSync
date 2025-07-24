@@ -259,35 +259,28 @@ export class DatabaseStorage implements IStorage {
 
   // Optimized: Get orders with status counts in single query (with org filtering)
   async getOrdersWithStats(orgId?: number): Promise<{ orders: Order[], pendingCount: number, shippedCount: number }> {
-    const baseQuery = orgId ? 
-      db.select().from(orders).where(eq(orders.organizationId, orgId)) :
-      db.select().from(orders);
-    
-    const statsQuery = orgId ?
-      db.select({ 
-        status: orders.status, 
-        count: sql<number>`count(*)::int`
-      }).from(orders).where(eq(orders.organizationId, orgId)).groupBy(orders.status) :
-      db.select({ 
-        status: orders.status, 
-        count: sql<number>`count(*)::int`
-      }).from(orders).groupBy(orders.status);
-
-    const [ordersResult, stats] = await Promise.all([
-      baseQuery.orderBy(desc(orders.createdAt)),
-      statsQuery
-    ]);
-    
-    const statusMap = stats.reduce((acc, row) => {
-      acc[row.status] = Number(row.count);
-      return acc;
-    }, {} as Record<string, number>);
-
-    return {
-      orders: ordersResult,
-      pendingCount: statusMap.pending || 0,
-      shippedCount: statusMap.shipped || 0
-    };
+    try {
+      let query = db.select().from(orders);
+      
+      if (orgId) {
+        query = query.where(eq(orders.organizationId, orgId));
+      }
+      
+      const allOrders = await query.orderBy(desc(orders.createdAt));
+      
+      // Calculate stats efficiently
+      const pendingCount = allOrders.filter(order => order.status === 'pending').length;
+      const shippedCount = allOrders.filter(order => order.status === 'shipped').length;
+      
+      return {
+        orders: allOrders,
+        pendingCount,
+        shippedCount
+      };
+    } catch (error) {
+      console.error('Error fetching orders with stats:', error);
+      throw error;
+    }
   }
 
   // Analytics methods
@@ -601,41 +594,56 @@ export class DatabaseStorage implements IStorage {
     addedBy: number, 
     referenceId?: string
   ): Promise<WalletTransaction> {
-    // Get or create wallet
-    let wallet = await this.getWallet(organizationId);
-    if (!wallet) {
-      wallet = await this.createWallet(organizationId);
-    }
+    // Use database transaction to prevent race conditions
+    return await db.transaction(async (tx) => {
+      // Get or create wallet with row lock
+      let [wallet] = await tx
+        .select()
+        .from(wallets)
+        .where(eq(wallets.organizationId, organizationId))
+        .for('update');
 
-    const currentBalance = parseFloat(wallet.balance);
-    const newBalance = currentBalance + amount;
+      if (!wallet) {
+        // Create wallet if it doesn't exist
+        [wallet] = await tx
+          .insert(wallets)
+          .values({
+            organizationId,
+            balance: '0.00'
+          })
+          .returning();
+      }
 
-    // Update wallet balance
-    await db
-      .update(wallets)
-      .set({ 
-        balance: newBalance.toFixed(2),
-        lastUpdated: new Date()
-      })
-      .where(eq(wallets.id, wallet.id));
+      const currentBalance = parseFloat(wallet.balance);
+      const newBalance = currentBalance + amount;
 
-    // Create transaction record
-    const [transaction] = await db
-      .insert(walletTransactions)
-      .values({
-        walletId: wallet.id,
-        organizationId,
-        type: 'credit',
-        amount: amount.toFixed(2),
-        balanceBefore: currentBalance.toFixed(2),
-        balanceAfter: newBalance.toFixed(2),
-        description,
-        referenceId,
-        addedBy
-      })
-      .returning();
+      // Update wallet balance
+      await tx
+        .update(wallets)
+        .set({ 
+          balance: newBalance.toFixed(2),
+          lastUpdated: new Date()
+        })
+        .where(eq(wallets.id, wallet.id));
 
-    return transaction;
+      // Create transaction record
+      const [transaction] = await tx
+        .insert(walletTransactions)
+        .values({
+          walletId: wallet.id,
+          organizationId,
+          type: 'credit',
+          amount: amount.toFixed(2),
+          balanceBefore: currentBalance.toFixed(2),
+          balanceAfter: newBalance.toFixed(2),
+          description,
+          referenceId,
+          addedBy
+        })
+        .returning();
+
+      return transaction;
+    });
   }
 
   async deductAmount(
@@ -644,43 +652,52 @@ export class DatabaseStorage implements IStorage {
     description: string, 
     referenceId?: string
   ): Promise<WalletTransaction> {
-    const wallet = await this.getWallet(organizationId);
-    if (!wallet) {
-      throw new Error('Wallet not found');
-    }
+    // Use database transaction to prevent race conditions
+    return await db.transaction(async (tx) => {
+      // Get wallet with row lock to prevent concurrent modifications
+      const [wallet] = await tx
+        .select()
+        .from(wallets)
+        .where(eq(wallets.organizationId, organizationId))
+        .for('update');
 
-    const currentBalance = parseFloat(wallet.balance);
-    if (currentBalance < amount) {
-      throw new Error('Insufficient balance');
-    }
+      if (!wallet) {
+        throw new Error('Wallet not found');
+      }
 
-    const newBalance = currentBalance - amount;
+      const currentBalance = parseFloat(wallet.balance);
+      if (currentBalance < amount) {
+        throw new Error('Insufficient balance');
+      }
 
-    // Update wallet balance
-    await db
-      .update(wallets)
-      .set({ 
-        balance: newBalance.toFixed(2),
-        lastUpdated: new Date()
-      })
-      .where(eq(wallets.id, wallet.id));
+      const newBalance = currentBalance - amount;
 
-    // Create transaction record
-    const [transaction] = await db
-      .insert(walletTransactions)
-      .values({
-        walletId: wallet.id,
-        organizationId,
-        type: 'debit',
-        amount: amount.toFixed(2),
-        balanceBefore: currentBalance.toFixed(2),
-        balanceAfter: newBalance.toFixed(2),
-        description,
-        referenceId
-      })
-      .returning();
+      // Update wallet balance
+      await tx
+        .update(wallets)
+        .set({ 
+          balance: newBalance.toFixed(2),
+          lastUpdated: new Date()
+        })
+        .where(eq(wallets.id, wallet.id));
 
-    return transaction;
+      // Create transaction record
+      const [transaction] = await tx
+        .insert(walletTransactions)
+        .values({
+          walletId: wallet.id,
+          organizationId,
+          type: 'debit',
+          amount: amount.toFixed(2),
+          balanceBefore: currentBalance.toFixed(2),
+          balanceAfter: newBalance.toFixed(2),
+          description,
+          referenceId
+        })
+        .returning();
+
+      return transaction;
+    });
   }
 
   async getWalletTransactions(organizationId: number, limit: number = 50): Promise<WalletTransaction[]> {

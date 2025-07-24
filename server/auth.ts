@@ -15,8 +15,12 @@ export function getSession() {
     tableName: "sessions",
   });
 
+  if (!process.env.SESSION_SECRET) {
+    throw new Error('SESSION_SECRET environment variable is required');
+  }
+
   return session({
-    secret: process.env.SESSION_SECRET || 'your-session-secret-here',
+    secret: process.env.SESSION_SECRET,
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
@@ -24,6 +28,7 @@ export function getSession() {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       maxAge: sessionTtl,
+      sameSite: 'strict',
     },
   });
 }

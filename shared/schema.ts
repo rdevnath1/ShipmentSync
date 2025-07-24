@@ -61,6 +61,11 @@ export const orders = pgTable("orders", {
   index("idx_orders_organization").on(table.organizationId),
   index("idx_orders_status").on(table.status),
   index("idx_orders_created").on(table.createdAt),
+  index("idx_orders_shipstation_id").on(table.shipstationOrderId),
+  index("idx_orders_tracking_number").on(table.trackingNumber),
+  index("idx_orders_jiayou_id").on(table.jiayouOrderId),
+  index("idx_orders_org_status").on(table.organizationId, table.status),
+  index("idx_orders_org_created").on(table.organizationId, table.createdAt),
 ]);
 
 // Removed shipments table - shipment data is now part of orders table

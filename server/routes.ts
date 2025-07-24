@@ -98,7 +98,8 @@ async function initializeDemoData() {
     // Create master user
     const masterExists = await storage.getUserByEmail('rajan@quikpik.io');
     if (!masterExists) {
-      const hashedPassword = await bcrypt.hash('admin123', 10);
+      const masterPassword = process.env.MASTER_ADMIN_PASSWORD || 'admin123';
+      const hashedPassword = await bcrypt.hash(masterPassword, 10);
       await storage.createUser({
         email: 'rajan@quikpik.io',
         password: hashedPassword,
@@ -112,7 +113,8 @@ async function initializeDemoData() {
     // Create demo client user
     const demoExists = await storage.getUserByEmail('demo@client.com');
     if (!demoExists) {
-      const hashedPassword = await bcrypt.hash('demo123', 10);
+      const demoPassword = process.env.DEMO_USER_PASSWORD || 'demo123';
+      const hashedPassword = await bcrypt.hash(demoPassword, 10);
       await storage.createUser({
         email: 'demo@client.com',
         password: hashedPassword,
