@@ -197,11 +197,30 @@ export const enhancedTrackingEvents = pgTable("enhanced_tracking_events", {
   index("idx_enhanced_tracking_timestamp").on(table.timestamp),
 ]);
 
+// Carrier accounts table
+export const carrierAccounts = pgTable("carrier_accounts", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+  carrier: varchar("carrier", { length: 50 }).notNull(), // 'fedex', 'dhl', 'ups', etc.
+  accountNumber: varchar("account_number", { length: 255 }).notNull(),
+  meterNumber: varchar("meter_number", { length: 255 }), // For FedEx
+  key: varchar("key", { length: 255 }).notNull(),
+  password: varchar("password", { length: 255 }).notNull(),
+  apiUrl: varchar("api_url", { length: 500 }), // Custom API URL if needed
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_carrier_accounts_org").on(table.organizationId),
+  index("idx_carrier_accounts_carrier").on(table.carrier),
+]);
+
 // Define all relations
 export const organizationsRelations = relations(organizations, ({ many }) => ({
   users: many(users),
   orders: many(orders),
   analytics: many(analytics),
+  carrierAccounts: many(carrierAccounts),
 }));
 
 export const usersRelations = relations(users, ({ one }) => ({
@@ -269,6 +288,13 @@ export const enhancedTrackingEventsRelations = relations(enhancedTrackingEvents,
   }),
 }));
 
+export const carrierAccountsRelations = relations(carrierAccounts, ({ one }) => ({
+  organization: one(organizations, {
+    fields: [carrierAccounts.organizationId],
+    references: [organizations.id],
+  }),
+}));
+
 // Export types for TypeScript
 export type Organization = typeof organizations.$inferSelect;
 export type InsertOrganization = typeof organizations.$inferInsert;
@@ -290,6 +316,8 @@ export type CarrierLog = typeof carrierLogs.$inferSelect;
 export type InsertCarrierLog = typeof carrierLogs.$inferInsert;
 export type EnhancedTrackingEvent = typeof enhancedTrackingEvents.$inferSelect;
 export type InsertEnhancedTrackingEvent = typeof enhancedTrackingEvents.$inferInsert;
+export type CarrierAccount = typeof carrierAccounts.$inferSelect;
+export type InsertCarrierAccount = typeof carrierAccounts.$inferInsert;
 
 // Zod schemas for validation
 export const insertOrganizationSchema = createInsertSchema(organizations);
@@ -302,3 +330,8 @@ export const insertAuditLogSchema = createInsertSchema(auditLogs);
 export const insertRetryQueueItemSchema = createInsertSchema(retryQueue);
 export const insertCarrierLogSchema = createInsertSchema(carrierLogs);
 export const insertEnhancedTrackingEventSchema = createInsertSchema(enhancedTrackingEvents);
+export const insertCarrierAccountSchema = createInsertSchema(carrierAccounts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});

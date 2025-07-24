@@ -43,7 +43,15 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
 
   const ratePreviewMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await apiRequest("POST", "/api/rates/preview", data);
+      // Convert to ounces for the API
+      const weightInOz = data.weightUnit === "lb" ? data.weight * 16 : data.weight;
+      
+      const response = await apiRequest("POST", "/api/rates/compare", {
+        fromZip: data.pickupZipCode,
+        toZip: data.deliveryZipCode,
+        weight: weightInOz,
+        dimensions: data.dimensions
+      });
       const result = await response.json();
       
       if (!response.ok) {
@@ -51,7 +59,7 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
         if (result.error && result.error.includes('not covered')) {
           throw new Error(`ZIP code ${data.deliveryZipCode} is not in our shipping network. Try: 10001, 33101, 60601, or 90210`);
         }
-        throw new Error(result.error || 'Failed to get shipping rate');
+        throw new Error(result.error || 'Failed to get shipping rates');
       }
       
       return result;
@@ -63,23 +71,12 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
       return;
     }
 
-    // Convert weight to kg for API (Jiayou expects kg)
-    const weightInKg = weightUnit === "lb" ? weight * 0.453592 : weight * 0.0283495;
-    
-    // Convert dimensions from inches to cm for API (Jiayou expects cm)
-    const dimensionsInCm = {
-      length: Math.round(dimensions.length * 2.54),
-      width: Math.round(dimensions.width * 2.54),
-      height: Math.round(dimensions.height * 2.54)
-    };
-    
     ratePreviewMutation.mutate({
       pickupZipCode: rateRequest.pickupZipCode,
       deliveryZipCode: rateRequest.deliveryZipCode,
-      weight: weightInKg,
-      dimensions: dimensionsInCm,
-      serviceType: 'standard',
-      channelCode: 'US001'
+      weight: weight,
+      weightUnit: weightUnit,
+      dimensions: dimensions
     });
   };
 
@@ -227,102 +224,84 @@ export default function RatePreview({ onRateSelected, className }: RatePreviewPr
         </Alert>
       )}
 
-      {rateData?.success && (
+      {rateData?.rates && rateData.rates.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Rate Quote Results</CardTitle>
+            <CardTitle>Shipping Rate Comparison</CardTitle>
+            {rateData.cheapest && (
+              <p className="text-sm text-muted-foreground">
+                {rateData.count} carrier{rateData.count > 1 ? 's' : ''} available • Best rate: ${rateData.cheapest.rate.toFixed(2)}
+              </p>
+            )}
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Dual Rate Display for Master Users or Single Rate for Regular Users */}
-            {rateData.preview.dualRates ? (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-                {/* Internal Rate */}
-                <div className="flex flex-col justify-between p-4 border rounded-lg bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
-                  <div>
-                    <div className="font-medium text-green-800 dark:text-green-200">Internal Rate</div>
-                    <div className="text-sm text-green-600 dark:text-green-400">
-                      {rateData.preview.rateCalculation.zone} • Your Cost
-                    </div>
-                  </div>
-                  <div className="text-xl font-bold text-green-600 mt-2">
-                    {rateData.preview.dualRates.internal.formatted}
-                  </div>
-                </div>
-
-                {/* Customer Rate */}
-                <div className="flex flex-col justify-between p-4 border rounded-lg bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
-                  <div>
-                    <div className="font-medium text-blue-800 dark:text-blue-200">Customer Rate</div>
-                    <div className="text-sm text-blue-600 dark:text-blue-400">
-                      {rateData.preview.rateCalculation.zone} • Customer Price
-                    </div>
-                  </div>
-                  <div className="text-xl font-bold text-blue-600 mt-2">
-                    {rateData.preview.dualRates.customer.formatted}
-                  </div>
-                </div>
-
-                {/* Profit Margin */}
-                {rateData.preview.dualRates.profitMargin && (
-                  <div className="col-span-full p-4 border rounded-lg bg-yellow-50 dark:bg-yellow-950 border-yellow-200 dark:border-yellow-800">
-                    <div className="flex justify-between items-center">
-                      <div className="text-yellow-800 dark:text-yellow-200 font-medium">Profit Margin</div>
-                      <div className="text-right">
-                        <div className="text-lg font-bold text-yellow-700 dark:text-yellow-300">
-                          +${rateData.preview.dualRates.profitMargin.amount.toFixed(2)}
+            <div className="space-y-3">
+              {rateData.rates.map((rate: any, index: number) => {
+                const isCheapest = rateData.cheapest && rate.carrier === rateData.cheapest.carrier;
+                return (
+                  <div 
+                    key={index}
+                    className={`p-4 border rounded-lg transition-all ${
+                      isCheapest 
+                        ? 'border-green-500 bg-green-50 dark:bg-green-950 ring-2 ring-green-500/20' 
+                        : 'hover:border-slate-300'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        {rate.logo && (
+                          <img 
+                            src={rate.logo} 
+                            alt={rate.carrier} 
+                            className="h-8 w-auto object-contain"
+                          />
+                        )}
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-medium capitalize">{rate.carrier}</h4>
+                            {isCheapest && (
+                              <Badge variant="default" className="bg-green-500">
+                                Best Rate
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {rate.service} • {rate.deliveryDays} {typeof rate.deliveryDays === 'number' ? 'days' : ''}
+                          </p>
                         </div>
-                        <div className="text-sm text-yellow-600 dark:text-yellow-400">
-                          {rateData.preview.dualRates.profitMargin.percentage.toFixed(1)}% markup
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold">
+                          ${rate.rate.toFixed(2)}
+                        </div>
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                          <Clock className="h-3 w-3" />
+                          <span>{rate.deliveryDays} {typeof rate.deliveryDays === 'number' ? 'days' : ''}</span>
                         </div>
                       </div>
                     </div>
                   </div>
-                )}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {/* Single Rate Display */}
-                <div className="flex flex-col justify-between p-4 border rounded-lg">
-                  <div>
-                    <div className="font-medium">Estimated Shipping Cost</div>
-                    <div className="text-sm text-muted-foreground">
-                      {rateData.preview.rateCalculation.zone}
-                    </div>
-                  </div>
-                  <div className="text-xl font-bold text-green-600 mt-2">
-                    {rateData.preview.estimatedCost.formatted}
-                  </div>
-                </div>
+                );
+              })}
+            </div>
 
-                {/* Estimated Delivery */}
-                <div className="flex flex-col justify-between p-4 border rounded-lg">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-blue-600" />
-                      <div className="font-medium">Estimated Delivery</div>
-                    </div>
-                  </div>
-                  <div className="text-xl font-bold text-blue-600 mt-2">
-                    {rateData.preview.estimatedDelivery.description}
-                  </div>
-                </div>
-              </div>
+            {rateData.rates.length === 1 && (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Only showing Quikpik rates. Add FedEx or DHL accounts in Settings to compare rates across carriers.
+                </AlertDescription>
+              </Alert>
             )}
 
-
-
-            
-
-            {onRateSelected && (
+            {onRateSelected && rateData.cheapest && (
               <Button 
-                onClick={() => onRateSelected(rateData.preview)}
+                onClick={() => onRateSelected(rateData.cheapest)}
                 className="w-full"
               >
-                Select This Rate
+                Use {rateData.cheapest.carrier.toUpperCase()} (${rateData.cheapest.rate.toFixed(2)})
               </Button>
             )}
-
-            
           </CardContent>
         </Card>
       )}

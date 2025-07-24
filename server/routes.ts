@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { ShipStationService } from "./services/shipstation";
@@ -18,6 +18,16 @@ import path from "path";
 // Create service instances once and reuse them
 const shipStationService = new ShipStationService();
 const jiayouService = new JiayouService();
+
+// Type for authenticated requests
+interface AuthRequest extends Request {
+  user?: {
+    id: number;
+    email: string;
+    role: string;
+    organizationId: number;
+  };
+}
 
 // Demo data initialization
 async function initializeDemoData() {
@@ -430,9 +440,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create shipment with Jiayou
   app.post("/api/shipments/create", async (req, res) => {
     try {
-      const { orderId, weight, dimensions } = req.body;
+      const { orderId, weight, dimensions, carrier } = req.body;
       const { length = 10, width = 10, height = 2 } = dimensions ?? {};
-      console.log("Create shipment request:", { orderId, weight, dimensions });
+      console.log("Create shipment request:", { orderId, weight, dimensions, carrier });
+      
+      // Check if carrier is supported
+      if (!carrier) {
+        return res.status(400).json({ error: "Carrier must be specified" });
+      }
+      
+      // For now, only support Quikpik (Jiayou)
+      if (carrier !== 'quikpik') {
+        return res.status(400).json({ 
+          error: `Carrier '${carrier}' is not yet implemented. Currently only 'quikpik' is supported.` 
+        });
+      }
 
       // Get order details
       const order = await storage.getOrder(orderId);
@@ -1667,6 +1689,211 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching audit logs:", error);
       res.status(500).json({ error: "Failed to fetch audit logs" });
+    }
+  });
+
+  // Carrier Account Management Routes
+  
+  // Get all carrier accounts for an organization
+  app.get("/api/carrier-accounts", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const organizationId = req.user!.organizationId;
+      const accounts = await storage.getCarrierAccounts(organizationId);
+      res.json(accounts);
+    } catch (error) {
+      console.error("Error fetching carrier accounts:", error);
+      res.status(500).json({ error: "Failed to fetch carrier accounts" });
+    }
+  });
+
+  // Get a specific carrier account
+  app.get("/api/carrier-accounts/:id", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const account = await storage.getCarrierAccount(id);
+      
+      if (!account) {
+        return res.status(404).json({ error: "Carrier account not found" });
+      }
+      
+      // Ensure user can only access their organization's accounts
+      if (account.organizationId !== req.user!.organizationId && req.user!.role !== 'master') {
+        return res.status(403).json({ error: "Access denied" });
+      }
+      
+      res.json(account);
+    } catch (error) {
+      console.error("Error fetching carrier account:", error);
+      res.status(500).json({ error: "Failed to fetch carrier account" });
+    }
+  });
+
+  // Create a new carrier account
+  app.post("/api/carrier-accounts", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const organizationId = req.user!.organizationId;
+      const { carrier, accountNumber, meterNumber, key, password, apiUrl } = req.body;
+      
+      // Validate required fields
+      if (!carrier || !accountNumber || !key || !password) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+      
+      // Check if account already exists for this carrier
+      const existingAccount = await storage.getActiveCarrierAccount(organizationId, carrier);
+      if (existingAccount) {
+        return res.status(400).json({ error: `An active ${carrier} account already exists` });
+      }
+      
+      const account = await storage.createCarrierAccount({
+        organizationId,
+        carrier,
+        accountNumber,
+        meterNumber,
+        key,
+        password,
+        apiUrl,
+        isActive: true,
+      });
+      
+      res.json({ message: "Carrier account created successfully", account });
+    } catch (error) {
+      console.error("Error creating carrier account:", error);
+      res.status(500).json({ error: "Failed to create carrier account" });
+    }
+  });
+
+  // Update a carrier account
+  app.put("/api/carrier-accounts/:id", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { accountNumber, meterNumber, key, password, apiUrl, isActive } = req.body;
+      
+      // Get existing account to check ownership
+      const existingAccount = await storage.getCarrierAccount(id);
+      if (!existingAccount) {
+        return res.status(404).json({ error: "Carrier account not found" });
+      }
+      
+      // Ensure user can only update their organization's accounts
+      if (existingAccount.organizationId !== req.user!.organizationId && req.user!.role !== 'master') {
+        return res.status(403).json({ error: "Access denied" });
+      }
+      
+      const account = await storage.updateCarrierAccount(id, {
+        accountNumber,
+        meterNumber,
+        key,
+        password,
+        apiUrl,
+        isActive,
+      });
+      
+      res.json({ message: "Carrier account updated successfully", account });
+    } catch (error) {
+      console.error("Error updating carrier account:", error);
+      res.status(500).json({ error: "Failed to update carrier account" });
+    }
+  });
+
+  // Delete a carrier account
+  app.delete("/api/carrier-accounts/:id", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      // Get existing account to check ownership
+      const existingAccount = await storage.getCarrierAccount(id);
+      if (!existingAccount) {
+        return res.status(404).json({ error: "Carrier account not found" });
+      }
+      
+      // Ensure user can only delete their organization's accounts
+      if (existingAccount.organizationId !== req.user!.organizationId && req.user!.role !== 'master') {
+        return res.status(403).json({ error: "Access denied" });
+      }
+      
+      await storage.deleteCarrierAccount(id);
+      res.json({ message: "Carrier account deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting carrier account:", error);
+      res.status(500).json({ error: "Failed to delete carrier account" });
+    }
+  });
+
+  // Get rates from all carriers
+  app.post("/api/rates/compare", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const organizationId = req.user!.organizationId;
+      const { weight, dimensions, fromZip, toZip } = req.body;
+      
+      if (!weight || !dimensions || !fromZip || !toZip) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+      
+      const rates = [];
+      
+      // Get Quikpik (Jiayou) rate
+      try {
+        const jiayouRate = await jiayouService.checkPostalCodeCoverage(
+          "US001",
+          toZip,
+          dimensions,
+          weight / 16 // Convert oz to lbs for Jiayou API
+        );
+        
+        console.log("Jiayou rate response:", JSON.stringify(jiayouRate, null, 2));
+        
+        if (jiayouRate.code === 1 && jiayouRate.data && jiayouRate.data.length > 0) {
+          const rateData = jiayouRate.data[0];
+          rates.push({
+            carrier: 'quikpik',
+            service: 'Standard',
+            rate: parseFloat(rateData.totalFee),
+            deliveryDays: '1-2', // Default delivery days for Quikpik
+            logo: '/assets/logo_1752442395960.png'
+          });
+        }
+      } catch (error) {
+        console.error("Error getting Jiayou rate:", error);
+      }
+      
+      // Get FedEx rate if account exists
+      const fedexAccount = await storage.getActiveCarrierAccount(organizationId, 'fedex');
+      if (fedexAccount) {
+        // TODO: Implement FedEx API call
+        rates.push({
+          carrier: 'fedex',
+          service: 'Ground',
+          rate: 8.50, // Mock rate for now
+          deliveryDays: '3-5',
+          logo: 'https://upload.wikimedia.org/wikipedia/commons/b/b9/FedEx_Corporation_-_2016_Logo.svg'
+        });
+      }
+      
+      // Get DHL rate if account exists
+      const dhlAccount = await storage.getActiveCarrierAccount(organizationId, 'dhl');
+      if (dhlAccount) {
+        // TODO: Implement DHL API call
+        rates.push({
+          carrier: 'dhl',
+          service: 'Express',
+          rate: 12.25, // Mock rate for now
+          deliveryDays: '2-3',
+          logo: 'https://upload.wikimedia.org/wikipedia/commons/a/ac/DHL_Logo.svg'
+        });
+      }
+      
+      // Sort by rate (cheapest first)
+      rates.sort((a, b) => a.rate - b.rate);
+      
+      res.json({
+        rates,
+        cheapest: rates[0] || null,
+        count: rates.length
+      });
+    } catch (error) {
+      console.error("Error comparing rates:", error);
+      res.status(500).json({ error: "Failed to compare rates" });
     }
   });
 

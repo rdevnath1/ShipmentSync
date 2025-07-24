@@ -33,8 +33,9 @@ interface CreateShipmentModalProps {
 export default function CreateShipmentModal({ isOpen, onClose, order }: CreateShipmentModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [isCheckingCoverage, setIsCheckingCoverage] = useState(false);
-  const [coverageResult, setCoverageResult] = useState<any>(null);
+  const [isCheckingRates, setIsCheckingRates] = useState(false);
+  const [ratesResult, setRatesResult] = useState<any>(null);
+  const [selectedCarrier, setSelectedCarrier] = useState<string>("");
 
   const form = useForm<CreateShipmentForm>({
     resolver: zodResolver(createShipmentSchema),
@@ -49,7 +50,7 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
     },
   });
 
-  const checkCoverage = async () => {
+  const checkRates = async () => {
     if (!order?.shippingAddress?.postalCode) {
       toast({
         title: "Error",
@@ -59,37 +60,46 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
       return;
     }
 
-    setIsCheckingCoverage(true);
+    setIsCheckingRates(true);
     try {
-      const response = await apiRequest("POST", "/api/jiayou/check-coverage", {
-        channelCode: "US001", // Always use US001
-        postCode: order.shippingAddress.postalCode,
+      const response = await apiRequest("POST", "/api/rates/compare", {
+        fromZip: "11430", // Default pickup location
+        toZip: order.shippingAddress.postalCode,
+        weight: form.getValues("weight"), // Already in oz
         dimensions: form.getValues("dimensions"),
-        weight: form.getValues("weight"),
       });
       const result = await response.json();
-      setCoverageResult(result);
       
-      if (result.code === 1 && result.data[0].errMsg) {
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to get rates");
+      }
+      
+      setRatesResult(result);
+      
+      if (result.count === 0) {
         toast({
-          title: "Coverage Check",
-          description: `Postal code ${order.shippingAddress.postalCode} is not supported by US001 channel.`,
+          title: "No Rates Available",
+          description: `No carriers can ship to postal code ${order.shippingAddress.postalCode}`,
           variant: "destructive",
         });
       } else {
-        toast({
-          title: "Coverage Check",
-          description: `Postal code ${order.shippingAddress.postalCode} is supported by US001! Estimated cost: $${result.data[0].totalFee}`,
-        });
+        // Automatically select the cheapest carrier
+        if (result.cheapest) {
+          setSelectedCarrier(result.cheapest.carrier);
+          toast({
+            title: "Rates Available",
+            description: `${result.count} carrier(s) available. Best rate: ${result.cheapest.carrier.toUpperCase()} at $${result.cheapest.rate.toFixed(2)}`,
+          });
+        }
       }
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to check coverage",
+        description: error instanceof Error ? error.message : "Failed to check rates",
         variant: "destructive",
       });
     } finally {
-      setIsCheckingCoverage(false);
+      setIsCheckingRates(false);
     }
   };
 
@@ -103,9 +113,15 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
 
   const createShipmentMutation = useMutation({
     mutationFn: async (data: CreateShipmentForm) => {
+      // Check if a carrier is selected
+      if (!selectedCarrier) {
+        throw new Error("Please select a carrier first");
+      }
+      
       const shipmentData = {
         ...data,
-        channelCode: "US001", // Always use US001
+        carrier: selectedCarrier,
+        channelCode: "US001", // Always use US001 for Quikpik
         serviceType: "standard" // Always use standard service
       };
       console.log("Sending shipment data:", shipmentData);
@@ -192,10 +208,10 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
                   <Button 
                     type="button" 
                     variant="outline" 
-                    onClick={checkCoverage}
-                    disabled={isCheckingCoverage}
+                    onClick={checkRates}
+                    disabled={isCheckingRates}
                   >
-                    {isCheckingCoverage ? "Checking..." : "Check Coverage"}
+                    {isCheckingRates ? "Checking..." : "Compare Rates"}
                   </Button>
                 </div>
               </div>
@@ -272,6 +288,69 @@ export default function CreateShipmentModal({ isOpen, onClose, order }: CreateSh
 
             </div>
           </div>
+
+          {/* Carrier Selection */}
+          {!ratesResult && (
+            <div className="border-t border-slate-200 pt-6">
+              <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg">
+                <p className="text-sm text-blue-800 dark:text-blue-200">
+                  Click "Compare Rates" above to see shipping options from Quikpik, FedEx, and DHL before creating your shipment.
+                </p>
+              </div>
+            </div>
+          )}
+          
+          {ratesResult && ratesResult.rates && ratesResult.rates.length > 0 && (
+            <div className="border-t border-slate-200 pt-6">
+              <h4 className="text-md font-medium text-foreground mb-4">Select Carrier</h4>
+              <div className="space-y-3">
+                {ratesResult.rates.map((rate: any, index: number) => {
+                  const isSelected = selectedCarrier === rate.carrier;
+                  const isCheapest = ratesResult.cheapest && rate.carrier === ratesResult.cheapest.carrier;
+                  return (
+                    <div 
+                      key={index}
+                      className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                        isSelected 
+                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-950' 
+                          : 'hover:border-slate-300'
+                      }`}
+                      onClick={() => setSelectedCarrier(rate.carrier)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <input 
+                            type="radio" 
+                            checked={isSelected}
+                            onChange={() => setSelectedCarrier(rate.carrier)}
+                            className="h-4 w-4 text-blue-600"
+                          />
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h5 className="font-medium capitalize">{rate.carrier}</h5>
+                              {isCheapest && (
+                                <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                                  Best Rate
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              {rate.service} • {rate.deliveryDays}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-lg font-bold">
+                            ${rate.rate.toFixed(2)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <div className="flex items-center justify-end space-x-3 pt-6 border-t border-slate-200">
             <Button type="button" variant="outline" onClick={onClose}>

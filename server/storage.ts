@@ -1,10 +1,11 @@
 import { 
-  organizations, users, orders, trackingEvents, analytics, apiKeys, auditLogs, retryQueue, carrierLogs, enhancedTrackingEvents,
+  organizations, users, orders, trackingEvents, analytics, apiKeys, auditLogs, retryQueue, carrierLogs, enhancedTrackingEvents, carrierAccounts,
   type Organization, type InsertOrganization, type User, type InsertUser, 
   type Order, type InsertOrder, type TrackingEvent, type InsertTrackingEvent, 
   type Analytics, type InsertAnalytics, type ApiKey, type InsertApiKey,
   type AuditLog, type InsertAuditLog, type RetryQueueItem, type InsertRetryQueueItem,
-  type CarrierLog, type InsertCarrierLog, type EnhancedTrackingEvent, type InsertEnhancedTrackingEvent
+  type CarrierLog, type InsertCarrierLog, type EnhancedTrackingEvent, type InsertEnhancedTrackingEvent,
+  type CarrierAccount, type InsertCarrierAccount
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, gte, lte, count } from "drizzle-orm";
@@ -73,6 +74,14 @@ export interface IStorage {
   // Enhanced Tracking methods
   createEnhancedTrackingEvent(event: InsertEnhancedTrackingEvent): Promise<EnhancedTrackingEvent>;
   getEnhancedTrackingEvents(trackingNumber: string): Promise<EnhancedTrackingEvent[]>;
+  
+  // Carrier Account methods
+  getCarrierAccounts(organizationId: number): Promise<CarrierAccount[]>;
+  getCarrierAccount(id: number): Promise<CarrierAccount | undefined>;
+  createCarrierAccount(data: InsertCarrierAccount): Promise<CarrierAccount>;
+  updateCarrierAccount(id: number, data: Partial<InsertCarrierAccount>): Promise<CarrierAccount | undefined>;
+  deleteCarrierAccount(id: number): Promise<void>;
+  getActiveCarrierAccount(organizationId: number, carrier: string): Promise<CarrierAccount | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -495,6 +504,58 @@ export class DatabaseStorage implements IStorage {
       .from(enhancedTrackingEvents)
       .where(eq(enhancedTrackingEvents.trackingNumber, trackingNumber))
       .orderBy(desc(enhancedTrackingEvents.timestamp));
+  }
+
+  // Carrier Account methods
+  async getCarrierAccounts(organizationId: number): Promise<CarrierAccount[]> {
+    return await db
+      .select()
+      .from(carrierAccounts)
+      .where(eq(carrierAccounts.organizationId, organizationId))
+      .orderBy(desc(carrierAccounts.createdAt));
+  }
+
+  async getCarrierAccount(id: number): Promise<CarrierAccount | undefined> {
+    const [account] = await db
+      .select()
+      .from(carrierAccounts)
+      .where(eq(carrierAccounts.id, id));
+    return account || undefined;
+  }
+
+  async createCarrierAccount(insertData: InsertCarrierAccount): Promise<CarrierAccount> {
+    const [account] = await db
+      .insert(carrierAccounts)
+      .values(insertData)
+      .returning();
+    return account;
+  }
+
+  async updateCarrierAccount(id: number, updateData: Partial<InsertCarrierAccount>): Promise<CarrierAccount | undefined> {
+    const [account] = await db
+      .update(carrierAccounts)
+      .set({ ...updateData, updatedAt: new Date() })
+      .where(eq(carrierAccounts.id, id))
+      .returning();
+    return account || undefined;
+  }
+
+  async deleteCarrierAccount(id: number): Promise<void> {
+    await db.delete(carrierAccounts).where(eq(carrierAccounts.id, id));
+  }
+
+  async getActiveCarrierAccount(organizationId: number, carrier: string): Promise<CarrierAccount | undefined> {
+    const [account] = await db
+      .select()
+      .from(carrierAccounts)
+      .where(
+        and(
+          eq(carrierAccounts.organizationId, organizationId),
+          eq(carrierAccounts.carrier, carrier),
+          eq(carrierAccounts.isActive, true)
+        )
+      );
+    return account || undefined;
   }
 }
 

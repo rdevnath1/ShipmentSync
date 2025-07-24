@@ -14,9 +14,11 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Settings, Key, Bell, Globe, Shield, Copy, Trash2, Edit, Plus, Eye, EyeOff, Lock } from "lucide-react";
+import { Settings, Key, Bell, Globe, Shield, Copy, Trash2, Edit, Plus, Eye, EyeOff, Lock, Truck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 const apiSettingsSchema = z.object({
   shipstationApiKey: z.string().min(1, "ShipStation API key is required"),
@@ -46,6 +48,15 @@ const passwordChangeSchema = z.object({
   path: ["confirmPassword"],
 });
 
+const carrierAccountSchema = z.object({
+  carrier: z.enum(["fedex", "dhl"]),
+  accountNumber: z.string().min(1, "Account number is required"),
+  meterNumber: z.string().optional(),
+  key: z.string().min(1, "API key is required"),
+  password: z.string().min(1, "Password is required"),
+  apiUrl: z.string().optional(),
+});
+
 export default function SettingsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -53,6 +64,9 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("general");
   const [showCreateApiKeyForm, setShowCreateApiKeyForm] = useState(false);
   const [newApiKey, setNewApiKey] = useState<any>(null);
+  const [showCarrierDialog, setShowCarrierDialog] = useState(false);
+  const [editingCarrierAccount, setEditingCarrierAccount] = useState<any>(null);
+  const [showPassword, setShowPassword] = useState<Record<string, boolean>>({});
   
   const isMasterAdmin = user?.role === 'master';
 
@@ -82,6 +96,18 @@ export default function SettingsPage() {
       smsNotifications: false,
       webhookUrl: "",
       notificationFrequency: "realtime" as const,
+    },
+  });
+
+  const carrierAccountForm = useForm({
+    resolver: zodResolver(carrierAccountSchema),
+    defaultValues: {
+      carrier: "fedex" as const,
+      accountNumber: "",
+      meterNumber: "",
+      key: "",
+      password: "",
+      apiUrl: "",
     },
   });
 
@@ -133,6 +159,11 @@ export default function SettingsPage() {
   // API Keys Query
   const { data: apiKeys, isLoading: isLoadingApiKeys } = useQuery({
     queryKey: ["/api/api-keys"],
+  });
+
+  // Carrier Accounts Query
+  const { data: carrierAccounts, isLoading: isLoadingCarrierAccounts } = useQuery({
+    queryKey: ["/api/carrier-accounts"],
   });
 
   // Create API Key Form
@@ -200,6 +231,102 @@ export default function SettingsPage() {
     }
   };
 
+  // Carrier Account Mutations
+  const createCarrierAccountMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await apiRequest("POST", "/api/carrier-accounts", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/carrier-accounts"] });
+      setShowCarrierDialog(false);
+      carrierAccountForm.reset();
+      toast({
+        title: "Carrier Account Added",
+        description: "Carrier account has been added successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add carrier account",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateCarrierAccountMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
+      const response = await apiRequest("PUT", `/api/carrier-accounts/${id}`, data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/carrier-accounts"] });
+      setShowCarrierDialog(false);
+      setEditingCarrierAccount(null);
+      carrierAccountForm.reset();
+      toast({
+        title: "Carrier Account Updated",
+        description: "Carrier account has been updated successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update carrier account",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteCarrierAccountMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiRequest("DELETE", `/api/carrier-accounts/${id}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/carrier-accounts"] });
+      toast({
+        title: "Carrier Account Deleted",
+        description: "Carrier account has been deleted successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete carrier account",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSaveCarrierAccount = (data: any) => {
+    if (editingCarrierAccount) {
+      updateCarrierAccountMutation.mutate({ id: editingCarrierAccount.id, data });
+    } else {
+      createCarrierAccountMutation.mutate(data);
+    }
+  };
+
+  const handleEditCarrierAccount = (account: any) => {
+    setEditingCarrierAccount(account);
+    carrierAccountForm.reset({
+      carrier: account.carrier,
+      accountNumber: account.accountNumber,
+      meterNumber: account.meterNumber || "",
+      key: account.key,
+      password: account.password,
+      apiUrl: account.apiUrl || "",
+    });
+    setShowCarrierDialog(true);
+  };
+
+  const handleDeleteCarrierAccount = (id: number, carrier: string) => {
+    if (window.confirm(`Are you sure you want to delete the ${carrier.toUpperCase()} account?`)) {
+      deleteCarrierAccountMutation.mutate(id);
+    }
+  };
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
@@ -240,10 +367,14 @@ export default function SettingsPage() {
       
       <div className="p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className={`grid w-full ${isMasterAdmin ? 'grid-cols-4' : 'grid-cols-3'}`}>
+          <TabsList className={`grid w-full ${isMasterAdmin ? 'grid-cols-5' : 'grid-cols-4'}`}>
             <TabsTrigger value="api" className="flex items-center space-x-2">
               <Key size={16} />
               <span>API Keys</span>
+            </TabsTrigger>
+            <TabsTrigger value="carriers" className="flex items-center space-x-2">
+              <Truck size={16} />
+              <span>Carriers</span>
             </TabsTrigger>
             {isMasterAdmin && (
               <TabsTrigger value="sharing" className="flex items-center space-x-2">
@@ -355,6 +486,84 @@ export default function SettingsPage() {
                     <Button type="submit">Save API Settings</Button>
                   </div>
                 </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="carriers" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Truck size={20} />
+                    <span>Carrier Accounts</span>
+                  </div>
+                  <Button 
+                    onClick={() => {
+                      setEditingCarrierAccount(null);
+                      carrierAccountForm.reset();
+                      setShowCarrierDialog(true);
+                    }}
+                  >
+                    <Plus size={16} className="mr-2" />
+                    Add Carrier Account
+                  </Button>
+                </CardTitle>
+                <p className="text-slate-600">Manage your FedEx and DHL account credentials for multi-carrier shipping</p>
+              </CardHeader>
+              <CardContent>
+                {isLoadingCarrierAccounts ? (
+                  <div className="space-y-4">
+                    <div className="h-20 bg-slate-100 rounded animate-pulse" />
+                    <div className="h-20 bg-slate-100 rounded animate-pulse" />
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {(!carrierAccounts || !Array.isArray(carrierAccounts) || carrierAccounts.length === 0) ? (
+                      <div className="text-center py-8 text-slate-500">
+                        <Truck size={48} className="mx-auto mb-4 opacity-30" />
+                        <p>No carrier accounts configured</p>
+                        <p className="text-sm mt-2">Add FedEx or DHL accounts to compare shipping rates</p>
+                      </div>
+                    ) : (
+                      (carrierAccounts as any[]).map((account: any) => (
+                        <div key={account.id} className="border rounded-lg p-4 flex items-center justify-between">
+                          <div className="flex items-center space-x-4">
+                            <div className={`p-2 rounded ${account.carrier === 'fedex' ? 'bg-purple-100' : 'bg-yellow-100'}`}>
+                              <Truck size={24} className={account.carrier === 'fedex' ? 'text-purple-600' : 'text-yellow-600'} />
+                            </div>
+                            <div>
+                              <h4 className="font-medium capitalize">{account.carrier}</h4>
+                              <p className="text-sm text-slate-600">Account: {account.accountNumber}</p>
+                              <p className="text-xs text-slate-500 mt-1">
+                                {account.isActive ? 
+                                  <span className="text-green-600">● Active</span> : 
+                                  <span className="text-red-600">● Inactive</span>
+                                }
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex space-x-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleEditCarrierAccount(account)}
+                            >
+                              <Edit size={14} />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDeleteCarrierAccount(account.id, account.carrier)}
+                            >
+                              <Trash2 size={14} />
+                            </Button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -481,9 +690,9 @@ export default function SettingsPage() {
                 {/* API Keys List */}
                 {isLoadingApiKeys ? (
                   <div className="text-center py-8">Loading API keys...</div>
-                ) : apiKeys && apiKeys.length > 0 ? (
+                ) : apiKeys && Array.isArray(apiKeys) && apiKeys.length > 0 ? (
                   <div className="space-y-4">
-                    {apiKeys.map((apiKey: any) => (
+                    {(apiKeys as any[]).map((apiKey: any) => (
                       <Card key={apiKey.id}>
                         <CardContent className="pt-6">
                           <div className="flex items-center justify-between">
@@ -799,6 +1008,166 @@ export default function SettingsPage() {
 
         </Tabs>
       </div>
+
+      {/* Carrier Account Dialog */}
+      <Dialog open={showCarrierDialog} onOpenChange={setShowCarrierDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>
+              {editingCarrierAccount ? 'Edit Carrier Account' : 'Add Carrier Account'}
+            </DialogTitle>
+            <DialogDescription>
+              {editingCarrierAccount ? 
+                'Update your carrier account credentials' : 
+                'Add FedEx or DHL account credentials to enable multi-carrier shipping'
+              }
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...carrierAccountForm}>
+            <form onSubmit={carrierAccountForm.handleSubmit(handleSaveCarrierAccount)} className="space-y-4">
+              <FormField
+                control={carrierAccountForm.control}
+                name="carrier"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Carrier</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                      disabled={!!editingCarrierAccount}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select carrier" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="fedex">FedEx</SelectItem>
+                        <SelectItem value="dhl">DHL</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={carrierAccountForm.control}
+                name="accountNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Account Number</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Enter account number" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {carrierAccountForm.watch("carrier") === "fedex" && (
+                <FormField
+                  control={carrierAccountForm.control}
+                  name="meterNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Meter Number (FedEx only)</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Enter meter number" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              <FormField
+                control={carrierAccountForm.control}
+                name="key"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>API Key</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input 
+                          {...field} 
+                          type={showPassword.key ? "text" : "password"}
+                          placeholder="Enter API key" 
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => setShowPassword(prev => ({ ...prev, key: !prev.key }))}
+                        >
+                          {showPassword.key ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </Button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={carrierAccountForm.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>API Password/Secret</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input 
+                          {...field} 
+                          type={showPassword.password ? "text" : "password"}
+                          placeholder="Enter API password" 
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => setShowPassword(prev => ({ ...prev, password: !prev.password }))}
+                        >
+                          {showPassword.password ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </Button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={carrierAccountForm.control}
+                name="apiUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>API URL (Optional)</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Custom API endpoint (leave blank for default)" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button type="button" variant="outline" onClick={() => setShowCarrierDialog(false)}>
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={createCarrierAccountMutation.isPending || updateCarrierAccountMutation.isPending}
+                >
+                  {editingCarrierAccount ? 'Update Account' : 'Add Account'}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
