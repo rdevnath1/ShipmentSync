@@ -1,11 +1,12 @@
 import { 
-  organizations, users, orders, trackingEvents, analytics, apiKeys, auditLogs, retryQueue, carrierLogs, enhancedTrackingEvents, carrierAccounts,
+  organizations, users, orders, trackingEvents, analytics, apiKeys, auditLogs, retryQueue, carrierLogs, enhancedTrackingEvents, carrierAccounts, wallets, walletTransactions,
   type Organization, type InsertOrganization, type User, type InsertUser, 
   type Order, type InsertOrder, type TrackingEvent, type InsertTrackingEvent, 
   type Analytics, type InsertAnalytics, type ApiKey, type InsertApiKey,
   type AuditLog, type InsertAuditLog, type RetryQueueItem, type InsertRetryQueueItem,
   type CarrierLog, type InsertCarrierLog, type EnhancedTrackingEvent, type InsertEnhancedTrackingEvent,
-  type CarrierAccount, type InsertCarrierAccount
+  type CarrierAccount, type InsertCarrierAccount, type Wallet, type InsertWallet,
+  type WalletTransaction, type InsertWalletTransaction
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, gte, lte, count } from "drizzle-orm";
@@ -82,6 +83,14 @@ export interface IStorage {
   updateCarrierAccount(id: number, data: Partial<InsertCarrierAccount>): Promise<CarrierAccount | undefined>;
   deleteCarrierAccount(id: number): Promise<void>;
   getActiveCarrierAccount(organizationId: number, carrier: string): Promise<CarrierAccount | undefined>;
+
+  // Wallet methods
+  getWallet(organizationId: number): Promise<Wallet | undefined>;
+  createWallet(organizationId: number): Promise<Wallet>;
+  getWalletBalance(organizationId: number): Promise<number>;
+  addCredit(organizationId: number, amount: number, description: string, addedBy: number, referenceId?: string): Promise<WalletTransaction>;
+  deductAmount(organizationId: number, amount: number, description: string, referenceId?: string): Promise<WalletTransaction>;
+  getWalletTransactions(organizationId: number, limit?: number): Promise<WalletTransaction[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -556,6 +565,133 @@ export class DatabaseStorage implements IStorage {
         )
       );
     return account || undefined;
+  }
+
+  // Wallet methods
+  async getWallet(organizationId: number): Promise<Wallet | undefined> {
+    const [wallet] = await db
+      .select()
+      .from(wallets)
+      .where(eq(wallets.organizationId, organizationId));
+    return wallet || undefined;
+  }
+
+  async createWallet(organizationId: number): Promise<Wallet> {
+    const [wallet] = await db
+      .insert(wallets)
+      .values({ organizationId })
+      .returning();
+    return wallet;
+  }
+
+  async getWalletBalance(organizationId: number): Promise<number> {
+    const wallet = await this.getWallet(organizationId);
+    if (!wallet) {
+      // Create wallet if it doesn't exist
+      const newWallet = await this.createWallet(organizationId);
+      return parseFloat(newWallet.balance);
+    }
+    return parseFloat(wallet.balance);
+  }
+
+  async addCredit(
+    organizationId: number, 
+    amount: number, 
+    description: string, 
+    addedBy: number, 
+    referenceId?: string
+  ): Promise<WalletTransaction> {
+    // Get or create wallet
+    let wallet = await this.getWallet(organizationId);
+    if (!wallet) {
+      wallet = await this.createWallet(organizationId);
+    }
+
+    const currentBalance = parseFloat(wallet.balance);
+    const newBalance = currentBalance + amount;
+
+    // Update wallet balance
+    await db
+      .update(wallets)
+      .set({ 
+        balance: newBalance.toFixed(2),
+        lastUpdated: new Date()
+      })
+      .where(eq(wallets.id, wallet.id));
+
+    // Create transaction record
+    const [transaction] = await db
+      .insert(walletTransactions)
+      .values({
+        walletId: wallet.id,
+        organizationId,
+        type: 'credit',
+        amount: amount.toFixed(2),
+        balanceBefore: currentBalance.toFixed(2),
+        balanceAfter: newBalance.toFixed(2),
+        description,
+        referenceId,
+        addedBy
+      })
+      .returning();
+
+    return transaction;
+  }
+
+  async deductAmount(
+    organizationId: number, 
+    amount: number, 
+    description: string, 
+    referenceId?: string
+  ): Promise<WalletTransaction> {
+    const wallet = await this.getWallet(organizationId);
+    if (!wallet) {
+      throw new Error('Wallet not found');
+    }
+
+    const currentBalance = parseFloat(wallet.balance);
+    if (currentBalance < amount) {
+      throw new Error('Insufficient balance');
+    }
+
+    const newBalance = currentBalance - amount;
+
+    // Update wallet balance
+    await db
+      .update(wallets)
+      .set({ 
+        balance: newBalance.toFixed(2),
+        lastUpdated: new Date()
+      })
+      .where(eq(wallets.id, wallet.id));
+
+    // Create transaction record
+    const [transaction] = await db
+      .insert(walletTransactions)
+      .values({
+        walletId: wallet.id,
+        organizationId,
+        type: 'debit',
+        amount: amount.toFixed(2),
+        balanceBefore: currentBalance.toFixed(2),
+        balanceAfter: newBalance.toFixed(2),
+        description,
+        referenceId
+      })
+      .returning();
+
+    return transaction;
+  }
+
+  async getWalletTransactions(organizationId: number, limit: number = 50): Promise<WalletTransaction[]> {
+    const transactions = await db
+      .select()
+      .from(walletTransactions)
+      .where(eq(walletTransactions.organizationId, organizationId))
+      .orderBy(desc(walletTransactions.createdAt))
+      .limit(limit);
+    
+    return transactions;
   }
 }
 

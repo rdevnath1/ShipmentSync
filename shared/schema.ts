@@ -225,12 +225,44 @@ export const carrierAccounts = pgTable("carrier_accounts", {
   index("idx_carrier_accounts_carrier").on(table.carrier),
 ]);
 
+// Wallet system tables
+export const wallets = pgTable("wallets", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").references(() => organizations.id, { onDelete: "cascade" }).unique().notNull(),
+  balance: decimal("balance", { precision: 10, scale: 2 }).default("0.00").notNull(),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_wallets_org").on(table.organizationId),
+]);
+
+export const walletTransactions = pgTable("wallet_transactions", {
+  id: serial("id").primaryKey(),
+  walletId: integer("wallet_id").references(() => wallets.id),
+  organizationId: integer("organization_id").references(() => organizations.id),
+  type: varchar("type", { length: 50 }).notNull(), // 'credit', 'debit'
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  balanceBefore: decimal("balance_before", { precision: 10, scale: 2 }).notNull(),
+  balanceAfter: decimal("balance_after", { precision: 10, scale: 2 }).notNull(),
+  description: varchar("description", { length: 255 }),
+  referenceId: varchar("reference_id", { length: 100 }), // shipment ID or payment reference
+  addedBy: integer("added_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_wallet_transactions_wallet").on(table.walletId),
+  index("idx_wallet_transactions_org").on(table.organizationId),
+  index("idx_wallet_transactions_type").on(table.type),
+  index("idx_wallet_transactions_created").on(table.createdAt),
+]);
+
 // Define all relations
-export const organizationsRelations = relations(organizations, ({ many }) => ({
+export const organizationsRelations = relations(organizations, ({ many, one }) => ({
   users: many(users),
   orders: many(orders),
   analytics: many(analytics),
   carrierAccounts: many(carrierAccounts),
+  wallet: one(wallets),
+  walletTransactions: many(walletTransactions),
 }));
 
 export const usersRelations = relations(users, ({ one }) => ({
@@ -305,6 +337,29 @@ export const carrierAccountsRelations = relations(carrierAccounts, ({ one }) => 
   }),
 }));
 
+export const walletsRelations = relations(wallets, ({ one, many }) => ({
+  organization: one(organizations, {
+    fields: [wallets.organizationId],
+    references: [organizations.id],
+  }),
+  transactions: many(walletTransactions),
+}));
+
+export const walletTransactionsRelations = relations(walletTransactions, ({ one }) => ({
+  wallet: one(wallets, {
+    fields: [walletTransactions.walletId],
+    references: [wallets.id],
+  }),
+  organization: one(organizations, {
+    fields: [walletTransactions.organizationId],
+    references: [organizations.id],
+  }),
+  addedByUser: one(users, {
+    fields: [walletTransactions.addedBy],
+    references: [users.id],
+  }),
+}));
+
 // Export types for TypeScript
 export type Organization = typeof organizations.$inferSelect;
 export type InsertOrganization = typeof organizations.$inferInsert;
@@ -328,6 +383,10 @@ export type EnhancedTrackingEvent = typeof enhancedTrackingEvents.$inferSelect;
 export type InsertEnhancedTrackingEvent = typeof enhancedTrackingEvents.$inferInsert;
 export type CarrierAccount = typeof carrierAccounts.$inferSelect;
 export type InsertCarrierAccount = typeof carrierAccounts.$inferInsert;
+export type Wallet = typeof wallets.$inferSelect;
+export type InsertWallet = typeof wallets.$inferInsert;
+export type WalletTransaction = typeof walletTransactions.$inferSelect;
+export type InsertWalletTransaction = typeof walletTransactions.$inferInsert;
 
 // Zod schemas for validation
 export const insertOrganizationSchema = createInsertSchema(organizations);

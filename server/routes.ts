@@ -537,7 +537,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create shipment with Jiayou
-  app.post("/api/shipments/create", async (req, res) => {
+  app.post("/api/shipments/create", requireAuth, async (req: any, res) => {
     try {
       const { orderId, weight, dimensions, carrier } = req.body;
       const { length = 10, width = 10, height = 2 } = dimensions ?? {};
@@ -563,6 +563,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Order not found" });
       }
 
+      // Get user organization
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+      
+      if (!user || !user.organizationId) {
+        return res.status(401).json({ error: "User organization not found" });
+      }
+      
       const shippingAddress = order.shippingAddress as any;
       const items = order.items as any[];
 
@@ -689,12 +697,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Prepare item list - use default item if no items in order
       const apiOrderItemList = items.length > 0 ? items.map(item => ({
-        ename: item.name,
-        sku: item.sku,
-        price: item.unitPrice,
-        quantity: item.quantity,
-        weight: convertOzToKg(item.weight?.value || 0.1),
+        ename: item.name || "General Item",
+        quantity: item.quantity || 1,
+        weight: convertOzToKg(0.1), // 0.1 oz per item
         unitCode: "PCE",
+        price: item.price || 10.00  // This is the critical field Jiayou needs
       })) : [
         {
           ename: "General Merchandise",
@@ -705,6 +712,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           unitCode: "PCE",
         }
       ];
+      
+      console.log("DEBUG: apiOrderItemList =", JSON.stringify(apiOrderItemList, null, 2));
+      
       const coverageCheck = await jiayouService.checkPostalCodeCoverage(
         defaultChannelCode, // Always use US001
         shippingAddress.postalCode || "",
@@ -727,6 +737,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ) {
         return res.status(400).json({
           error: `Channel ${defaultChannelCode} has no price sheet – ask Jiayou or switch to UP008.`
+        });
+      }
+
+      // Extract shipping cost from coverage check
+      let shippingCost = 0;
+      if (coverageCheck.code === 1 && coverageCheck.data && coverageCheck.data[0] && coverageCheck.data[0].totalFee) {
+        shippingCost = parseFloat(coverageCheck.data[0].totalFee);
+      }
+
+      // Check wallet balance
+      const organizationId = user.organizationId;
+      if (!organizationId) {
+        return res.status(401).json({ error: "User organization not found" });
+      }
+
+      const walletBalance = await storage.getWalletBalance(organizationId);
+      if (walletBalance < shippingCost) {
+        return res.status(400).json({ 
+          error: `Insufficient wallet balance. Required: $${shippingCost.toFixed(2)}, Available: $${walletBalance.toFixed(2)}. Please add funds to your wallet.`,
+          required: shippingCost,
+          available: walletBalance
         });
       }
 
@@ -774,9 +805,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: `Address verification failed: ${addressVerification.message}` });
       }
 
-      // Generate unique reference number
-      const uniqueReferenceNo = `${order.orderNumber}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      // Generate unique reference number (max 32 chars for Jiayou)
+      const timestamp = Date.now().toString().slice(-8); // Last 8 digits of timestamp
+      const randomStr = Math.random().toString(36).substr(2, 5); // 5 char random string
+      const uniqueReferenceNo = `${order.orderNumber}-${timestamp}-${randomStr}`; // Should be ~23 chars
 
+      // Debug apiOrderItemList right before using it
+      console.log("DEBUG: apiOrderItemList before jiayouOrderData =", JSON.stringify(apiOrderItemList, null, 2));
+      
       // Prepare Jiayou order data with fromAddressId for hub injection
       const jiayouOrderData = {
         channelCode: defaultChannelCode, // Always use US001
@@ -823,10 +859,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       while (attempts < maxAttempts) {
         attempts++;
         
-        // Make unique reference number for each attempt
+        // Make unique reference number for each attempt (max 32 chars)
+        const retryTimestamp = Date.now().toString().slice(-8);
+        const retryRandom = Math.random().toString(36).substr(2, 4);
         const currentOrderData = {
           ...jiayouOrderData,
-          referenceNo: `${order.orderNumber}-${Date.now()}-${attempts}-${Math.random().toString(36).substr(2, 9)}`
+          referenceNo: `${order.orderNumber}-${retryTimestamp}-${attempts}-${retryRandom}`,
+          // Ensure apiOrderItemList has price field
+          apiOrderItemList: jiayouOrderData.apiOrderItemList.map((item: any) => ({
+            ...item,
+            price: item.price || 10.00  // Ensure price field exists
+          }))
         };
         
         console.log(`Attempt ${attempts}: Sending to Jiayou API:`, JSON.stringify(currentOrderData, null, 2));
@@ -924,6 +967,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       const updatedOrder = await storage.updateOrder(order.id, shipmentUpdate);
+
+      // Deduct amount from wallet after successful shipment creation
+      try {
+        await storage.deductAmount(
+          organizationId,
+          shippingCost,
+          `Shipment for order #${order.orderNumber} - Tracking: ${jiayouResponse.data.trackingNo}`,
+          jiayouResponse.data.trackingNo
+        );
+        console.log(`✓ Deducted $${shippingCost.toFixed(2)} from wallet for organization ${organizationId}`);
+      } catch (walletError) {
+        console.error("Error deducting from wallet:", walletError);
+        // Log the error but don't fail the shipment since it's already created
+      }
 
       // Update ShipStation with tracking info and label data
       if (order.shipstationOrderId) {
@@ -1788,6 +1845,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching audit logs:", error);
       res.status(500).json({ error: "Failed to fetch audit logs" });
+    }
+  });
+
+  // Wallet Management Routes
+  
+  // Get wallet balance and bank details
+  app.get("/api/wallet", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const organizationId = req.user?.organizationId;
+      if (!organizationId) {
+        return res.status(401).json({ error: "User organization not found" });
+      }
+
+      const balance = await storage.getWalletBalance(organizationId);
+      const wallet = await storage.getWallet(organizationId);
+      
+      res.json({ 
+        balance,
+        wallet,
+        bankDetails: {
+          beneficiary: "Radius Platforms Inc.",
+          accountNumber: "8334837632",
+          achRoutingNumber: "026073150",
+          bankName: "Community Federal Savings Bank",
+          bankAddress: "5 Penn Plaza, 14th Floor, New York, NY 10001, US"
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching wallet:", error);
+      res.status(500).json({ error: "Failed to fetch wallet information" });
+    }
+  });
+
+  // Get wallet transactions
+  app.get("/api/wallet/transactions", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const organizationId = req.user?.organizationId;
+      if (!organizationId) {
+        return res.status(401).json({ error: "User organization not found" });
+      }
+
+      const limit = parseInt(req.query.limit as string) || 50;
+      const transactions = await storage.getWalletTransactions(organizationId, limit);
+      
+      res.json({ transactions });
+    } catch (error) {
+      console.error("Error fetching wallet transactions:", error);
+      res.status(500).json({ error: "Failed to fetch wallet transactions" });
+    }
+  });
+
+  // Master admin only - add credit
+  app.post("/api/wallet/add-credit", requireAuth, requireRole(['master']), async (req: AuthRequest, res) => {
+    try {
+      const { organizationId, amount, description, referenceId } = req.body;
+      
+      if (!organizationId || !amount || amount <= 0) {
+        return res.status(400).json({ error: "Invalid organization ID or amount" });
+      }
+
+      const addedBy = req.user?.id;
+      if (!addedBy) {
+        return res.status(401).json({ error: "User not found" });
+      }
+
+      const transaction = await storage.addCredit(
+        organizationId,
+        amount,
+        description || `Manual credit added by master admin`,
+        addedBy,
+        referenceId
+      );
+
+      res.json({ 
+        success: true, 
+        transaction,
+        newBalance: parseFloat(transaction.balanceAfter)
+      });
+    } catch (error) {
+      console.error("Error adding credit:", error);
+      res.status(500).json({ error: "Failed to add credit" });
     }
   });
 

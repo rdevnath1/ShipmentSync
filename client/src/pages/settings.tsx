@@ -14,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Settings, Key, Bell, Globe, Shield, Copy, Trash2, Edit, Plus, Eye, EyeOff, Lock, Truck } from "lucide-react";
+import { Settings, Key, Bell, Globe, Shield, Copy, Trash2, Edit, Plus, Eye, EyeOff, Lock, Truck, Wallet, DollarSign, CreditCard, Building2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -68,6 +68,12 @@ export default function SettingsPage() {
   const [showCarrierDialog, setShowCarrierDialog] = useState(false);
   const [editingCarrierAccount, setEditingCarrierAccount] = useState<any>(null);
   const [showPassword, setShowPassword] = useState<Record<string, boolean>>({});
+  const [creditForm, setCreditForm] = useState({
+    organizationId: '',
+    amount: '',
+    description: '',
+    referenceId: ''
+  });
   
   const isMasterAdmin = user?.role === 'master';
 
@@ -165,6 +171,26 @@ export default function SettingsPage() {
   // Carrier Accounts Query
   const { data: carrierAccounts, isLoading: isLoadingCarrierAccounts } = useQuery({
     queryKey: ["/api/carrier-accounts"],
+  });
+
+  // Wallet Query
+  const { data: walletData } = useQuery<{ balance: number; wallet: any; bankDetails: any }>({
+    queryKey: ["/api/wallet"],
+  });
+
+  const walletBalance = walletData?.balance || 0;
+
+  // Wallet Transactions Query
+  const { data: transactionsData, isLoading: isLoadingTransactions } = useQuery<{ transactions: any[] }>({
+    queryKey: ["/api/wallet/transactions"],
+  });
+
+  const transactions = transactionsData?.transactions || [];
+
+  // Organizations Query (master admin only)
+  const { data: organizations } = useQuery({
+    queryKey: ["/api/organizations"],
+    enabled: isMasterAdmin,
   });
 
   // Create API Key Form
@@ -328,6 +354,45 @@ export default function SettingsPage() {
     }
   };
 
+  // Add Credit Mutation (master admin only)
+  const addCreditMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await apiRequest("POST", "/api/wallet/add-credit", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/wallet"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/wallet/transactions"] });
+      setCreditForm({
+        organizationId: '',
+        amount: '',
+        description: '',
+        referenceId: ''
+      });
+      toast({
+        title: "Credit Added",
+        description: "Credit has been added successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add credit",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleAddCredit = (e: React.FormEvent) => {
+    e.preventDefault();
+    addCreditMutation.mutate({
+      organizationId: parseInt(creditForm.organizationId),
+      amount: parseFloat(creditForm.amount),
+      description: creditForm.description,
+      referenceId: creditForm.referenceId || null,
+    });
+  };
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
@@ -368,7 +433,7 @@ export default function SettingsPage() {
       
       <div className="p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className={`grid w-full ${isMasterAdmin ? 'grid-cols-4' : 'grid-cols-3'}`}>
+          <TabsList className={`grid w-full ${isMasterAdmin ? 'grid-cols-5' : 'grid-cols-4'}`}>
             <TabsTrigger value="api" className="flex items-center space-x-2">
               <Key size={16} />
               <span>API Keys</span>
@@ -376,6 +441,10 @@ export default function SettingsPage() {
             <TabsTrigger value="carriers" className="flex items-center space-x-2">
               <Truck size={16} />
               <span>Carriers</span>
+            </TabsTrigger>
+            <TabsTrigger value="wallet" className="flex items-center space-x-2">
+              <Wallet size={16} />
+              <span>Wallet</span>
             </TabsTrigger>
             {isMasterAdmin && (
               <TabsTrigger value="sharing" className="flex items-center space-x-2">
@@ -947,6 +1016,223 @@ export default function SettingsPage() {
           )}
 
 
+
+          <TabsContent value="wallet" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Wallet size={20} />
+                  <span>Wallet Management</span>
+                </CardTitle>
+                <p className="text-slate-600">Manage your prepaid wallet balance and transactions</p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Wallet Balance */}
+                <div className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 rounded-lg p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">Available Balance</p>
+                      <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+                        ${walletBalance?.toFixed(2) || '0.00'}
+                      </p>
+                    </div>
+                    <div className="bg-white dark:bg-slate-700 rounded-full p-4 shadow-sm">
+                      <DollarSign size={24} className="text-green-600" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bank Details for ACH Transfer */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Building2 size={18} />
+                      <span>Bank Transfer Information</span>
+                    </CardTitle>
+                    <p className="text-sm text-slate-600">Send ACH transfers to this account to add funds</p>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-sm text-slate-600">Beneficiary Name</Label>
+                        <p className="font-medium">Radius Platforms Inc.</p>
+                      </div>
+                      <div>
+                        <Label className="text-sm text-slate-600">Account Number</Label>
+                        <div className="flex items-center space-x-2">
+                          <p className="font-medium">8334837632</p>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => copyToClipboard('8334837632')}
+                          >
+                            <Copy size={14} />
+                          </Button>
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-sm text-slate-600">ACH Routing Number</Label>
+                        <div className="flex items-center space-x-2">
+                          <p className="font-medium">026073150</p>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => copyToClipboard('026073150')}
+                          >
+                            <Copy size={14} />
+                          </Button>
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-sm text-slate-600">Bank Name</Label>
+                        <p className="font-medium">Community Federal Savings Bank</p>
+                      </div>
+                      <div className="md:col-span-2">
+                        <Label className="text-sm text-slate-600">Bank Address</Label>
+                        <p className="font-medium">5 Penn Plaza, 14th Floor, New York, NY 10001, US</p>
+                      </div>
+                    </div>
+                    <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mt-4">
+                      <p className="text-sm text-blue-800 dark:text-blue-200">
+                        <strong>Note:</strong> Bank transfers typically take 2-3 hours to reflect in your wallet balance.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Transaction History */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <CreditCard size={18} />
+                      <span>Transaction History</span>
+                    </CardTitle>
+                    <p className="text-sm text-slate-600">Recent wallet activity</p>
+                  </CardHeader>
+                  <CardContent>
+                    {isLoadingTransactions ? (
+                      <div className="space-y-4">
+                        <div className="h-16 bg-slate-100 rounded animate-pulse" />
+                        <div className="h-16 bg-slate-100 rounded animate-pulse" />
+                        <div className="h-16 bg-slate-100 rounded animate-pulse" />
+                      </div>
+                    ) : transactions && transactions.length > 0 ? (
+                      <div className="space-y-2">
+                        {transactions.map((transaction: any) => (
+                          <div key={transaction.id} className="border rounded-lg p-4 flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <div className={`p-2 rounded-full ${
+                                transaction.type === 'credit' ? 'bg-green-100' : 'bg-red-100'
+                              }`}>
+                                {transaction.type === 'credit' ? (
+                                  <Plus size={16} className="text-green-600" />
+                                ) : (
+                                  <Truck size={16} className="text-red-600" />
+                                )}
+                              </div>
+                              <div>
+                                <p className="font-medium">{transaction.description}</p>
+                                <p className="text-sm text-slate-600">
+                                  {new Date(transaction.createdAt).toLocaleString()}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className={`font-medium ${
+                                transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'
+                              }`}>
+                                {transaction.type === 'credit' ? '+' : '-'}${Math.abs(transaction.amount).toFixed(2)}
+                              </p>
+                              <p className="text-sm text-slate-600">
+                                Balance: ${transaction.balanceAfter.toFixed(2)}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-slate-500">
+                        <CreditCard size={48} className="mx-auto mb-4 opacity-30" />
+                        <p>No transactions yet</p>
+                        <p className="text-sm mt-2">Your wallet activity will appear here</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Master Admin: Add Credit */}
+                {isMasterAdmin && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-2">
+                        <Plus size={18} />
+                        <span>Add Credit (Master Admin)</span>
+                      </CardTitle>
+                      <p className="text-sm text-slate-600">Manually add credits to any organization's wallet</p>
+                    </CardHeader>
+                    <CardContent>
+                      <form onSubmit={handleAddCredit} className="space-y-4">
+                        <div>
+                          <Label htmlFor="organizationId">Organization</Label>
+                          <Select
+                            value={creditForm.organizationId}
+                            onValueChange={(value) => setCreditForm({...creditForm, organizationId: value})}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select organization" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {organizations?.map((org: any) => (
+                                <SelectItem key={org.id} value={org.id.toString()}>
+                                  {org.name} (ID: {org.id})
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label htmlFor="amount">Amount ($)</Label>
+                          <Input
+                            id="amount"
+                            type="number"
+                            step="0.01"
+                            min="0.01"
+                            placeholder="0.00"
+                            value={creditForm.amount}
+                            onChange={(e) => setCreditForm({...creditForm, amount: e.target.value})}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="description">Description</Label>
+                          <Input
+                            id="description"
+                            placeholder="e.g., Bank transfer reference #12345"
+                            value={creditForm.description}
+                            onChange={(e) => setCreditForm({...creditForm, description: e.target.value})}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="referenceId">Reference ID (Optional)</Label>
+                          <Input
+                            id="referenceId"
+                            placeholder="e.g., ACH-12345"
+                            value={creditForm.referenceId}
+                            onChange={(e) => setCreditForm({...creditForm, referenceId: e.target.value})}
+                          />
+                        </div>
+                        <Button 
+                          type="submit"
+                          disabled={addCreditMutation.isPending || !creditForm.organizationId || !creditForm.amount}
+                        >
+                          {addCreditMutation.isPending ? "Adding..." : "Add Credit"}
+                        </Button>
+                      </form>
+                    </CardContent>
+                  </Card>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="general" className="space-y-6">
             <Card>
