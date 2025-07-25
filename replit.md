@@ -55,15 +55,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-### Enhanced Label Customization System (July 25, 2025)
-- **Top-Right Logo Removal**: Enhanced label customizer to specifically target the "uniunt" logo in the top-right corner of Jiayou labels
-- **Comprehensive Logo Coverage**: Added multiple logo removal zones covering top-right, top-left, and bottom-left corners with 200px coverage areas
-- **Precise GV→QP Replacement**: Improved tracking number replacement targeting two specific positions: under-barcode area (center) and bottom label area
-- **Batch Print Integration**: Successfully integrated label customization into batch printing workflow with error handling and fallback options
-- **Enhanced Font Sizing**: Increased QP replacement text to size 16 to match original label font sizing for professional appearance
-- **Multiple Position Coverage**: Added tracking number replacement in header areas and center positions to catch all GV occurrences
-- **Fallback Safety**: System gracefully handles customization failures by falling back to original labels with QP format conversion
-- **SUCCESSFUL RESULT**: Batch printed labels now automatically remove uniunt logo and replace GV tracking numbers with QP format in all locations
+### Precision Label Customization Update (July 25, 2025)
+- **Minimized Logo White Space**: Reduced logo removal area to precise 150x70 pixels in top-right corner, eliminating excess white space
+- **Direct GV Overlay**: QP tracking now overlays directly on top of GV tracking numbers instead of beside them
+- **Exact Position Targeting**: First GV occurrence at x=185, y=220 (under barcode), second at x=368, y=95 (bottom right)
+- **Precise Text Coverage**: White rectangles sized exactly to cover GV tracking numbers (230x20 pixels)
+- **Maintained Font Consistency**: QP text uses size 14 font to match original label formatting
+- **Batch Print Integration**: All improvements automatically applied during batch printing operations
+- **Professional Appearance**: Labels now show clean QP tracking with minimal visual disruption
+- **SUCCESSFUL RESULT**: Labels have precise logo removal with minimal white space and QP directly overlaying GV positions
 
 ### System Debugging & User Management Fixes (July 23, 2025)
 - **User Count Display Fix**: Fixed organization cards showing 0 users by adding proper JOIN queries and user count calculations
