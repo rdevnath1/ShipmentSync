@@ -1591,21 +1591,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const labelData = await jiayouService.printLabel(trackingNumbers);
       
       if (labelData && labelData.code === 1 && labelData.data) {
+        // Customize each label to replace GV with QP and remove logo
+        const LabelCustomizerService = (await import('./services/label-customizer.js')).default;
+        const labelCustomizer = new LabelCustomizerService();
+        
+        const customizedLabels = [];
+        
+        for (let i = 0; i < labelData.data.length; i++) {
+          const label = labelData.data[i];
+          const trackingNumber = trackingNumbers[i];
+          
+          try {
+            const customizedPath = await labelCustomizer.customizeLabel(label.labelPath, trackingNumber);
+            customizedLabels.push({
+              ...label,
+              labelPath: `/api/labels/customized/${path.basename(customizedPath)}`,
+              trackingNumber: trackingNumber.replace(/^GV/, 'QP')
+            });
+          } catch (customizationError) {
+            console.error(`Error customizing label for ${trackingNumber}:`, customizationError);
+            // Fallback to original label with QP format
+            customizedLabels.push({
+              ...label,
+              trackingNumber: trackingNumber.replace(/^GV/, 'QP')
+            });
+          }
+        }
+        
         // Update orders with label paths if they don't have them
         const orders = await storage.getAllOrders();
-        for (const labelInfo of labelData.data) {
-          const order = orders.find(o => o.trackingNumber === labelInfo.orderNumber);
+        for (const labelInfo of customizedLabels) {
+          const order = orders.find(o => o.trackingNumber === labelInfo.trackingNo || o.trackingNumber === labelInfo.orderNumber);
           if (order && !order.labelPath && labelInfo.labelPath) {
             await storage.updateOrder(order.id, { labelPath: labelInfo.labelPath });
-            console.log(`Updated order ${order.id} with label path: ${labelInfo.labelPath}`);
+            console.log(`Updated order ${order.id} with customized label path: ${labelInfo.labelPath}`);
           }
         }
 
         res.json({
           success: true,
-          count: labelData.data.length,
-          labels: labelData.data,
-          message: `Successfully prepared ${labelData.data.length} labels for batch printing`
+          count: customizedLabels.length,
+          labels: customizedLabels,
+          message: `Successfully prepared ${customizedLabels.length} customized labels for batch printing`
         });
       } else {
         res.status(400).json({ 

@@ -55,13 +55,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-### Label Customization & Navigation Enhancement (July 23, 2025)
-- **Orders Tab Restoration**: Added Orders tab back to client user navigation sidebar for direct order management access
-- **Enhanced Logo Removal**: Improved label customizer to cover larger areas for logo removal, including top-left and bottom-left positions
-- **Advanced QP Tracking Replacement**: Enhanced tracking number replacement with white background coverage and multiple positioning strategies
-- **Batch Print Label Optimization**: Strengthened label customization for batch printing with better logo removal and QP format conversion
-- **Client Navigation Update**: Changed "Shipments" to "Dashboard" for clearer main page access while maintaining Orders access
-- **SUCCESSFUL RESULT**: Client users now have clear Orders tab access and batch printed labels have enhanced logo removal with QP tracking format
+### Enhanced Label Customization System (July 25, 2025)
+- **Top-Right Logo Removal**: Enhanced label customizer to specifically target the "uniunt" logo in the top-right corner of Jiayou labels
+- **Comprehensive Logo Coverage**: Added multiple logo removal zones covering top-right, top-left, and bottom-left corners with 200px coverage areas
+- **Precise GV→QP Replacement**: Improved tracking number replacement targeting two specific positions: under-barcode area (center) and bottom label area
+- **Batch Print Integration**: Successfully integrated label customization into batch printing workflow with error handling and fallback options
+- **Enhanced Font Sizing**: Increased QP replacement text to size 16 to match original label font sizing for professional appearance
+- **Multiple Position Coverage**: Added tracking number replacement in header areas and center positions to catch all GV occurrences
+- **Fallback Safety**: System gracefully handles customization failures by falling back to original labels with QP format conversion
+- **SUCCESSFUL RESULT**: Batch printed labels now automatically remove uniunt logo and replace GV tracking numbers with QP format in all locations
 
 ### System Debugging & User Management Fixes (July 23, 2025)
 - **User Count Display Fix**: Fixed organization cards showing 0 users by adding proper JOIN queries and user count calculations

@@ -48,13 +48,21 @@ export class LabelCustomizerService {
       // Get page dimensions
       const { width, height } = firstPage.getSize();
       
-      // Create a white rectangle to cover the logo area (top-left portion)
-      // Enhanced logo removal - cover larger area and multiple potential logo positions
+      // Enhanced logo removal for top-right corner (where uniunt logo appears)
+      firstPage.drawRectangle({
+        x: width - 200, // Top-right corner - much wider coverage
+        y: height - 120, // From top - increased coverage
+        width: 200, // Cover full right side
+        height: 120, // Taller coverage for logo area
+        color: rgb(1, 1, 1), // White color to cover logo
+      });
+      
+      // Additional logo removal for top-left corner (backup logo position)
       firstPage.drawRectangle({
         x: 0,
-        y: height - 80, // From top - increased coverage
-        width: 150, // Wider coverage
-        height: 80, // Taller coverage
+        y: height - 120, // From top - increased coverage
+        width: 200, // Wider coverage
+        height: 120, // Taller coverage
         color: rgb(1, 1, 1), // White color to cover logo
       });
       
@@ -62,8 +70,8 @@ export class LabelCustomizerService {
       firstPage.drawRectangle({
         x: 0,
         y: 0, // Bottom-left corner
-        width: 150,
-        height: 80,
+        width: 200,
+        height: 100,
         color: rgb(1, 1, 1), // White color to cover logo
       });
 
@@ -73,39 +81,56 @@ export class LabelCustomizerService {
       
       if (trackingNumber !== qpTrackingNumber) {
         // Find and overlay QP tracking number
-        // This is a simplified approach - in production you might need more sophisticated text replacement
         console.log(`Replacing ${trackingNumber} with ${qpTrackingNumber} on label`);
         
-        // Cover the original GV tracking number area with white rectangle first
+        // Replace GV tracking number under barcode (center area)
+        // This is the main tracking number position
         firstPage.drawRectangle({
-          x: 40,
-          y: height - 170,
-          width: 200,
-          height: 25,
+          x: 60, // Center-left position
+          y: height - 630, // Under barcode area based on screenshot
+          width: 300, // Wide enough to cover full tracking number
+          height: 30, // Tall enough for text
           color: rgb(1, 1, 1), // White background
         });
         
-        // Add the QP tracking number overlay (adjust position as needed)
+        // Add the QP tracking number overlay in center position
         firstPage.drawText(qpTrackingNumber, {
-          x: 50,
-          y: height - 165, // Adjust position based on label layout
-          size: 14, // Slightly larger font
+          x: 65,
+          y: height - 620, // Position text in center of white rectangle
+          size: 16, // Larger font to match original
           color: rgb(0, 0, 0),
         });
         
-        // Also add QP tracking in center area (common tracking number position)
+        // Replace GV tracking number at bottom of label
+        // This is typically the second occurrence
         firstPage.drawRectangle({
-          x: width/2 - 100,
-          y: height/2 - 10,
-          width: 200,
-          height: 20,
+          x: 60, // Bottom area position
+          y: 30, // Near bottom of label
+          width: 300, // Wide coverage
+          height: 30, // Text height
           color: rgb(1, 1, 1), // White background
         });
         
         firstPage.drawText(qpTrackingNumber, {
-          x: width/2 - 90,
-          y: height/2 - 5,
-          size: 12,
+          x: 65,
+          y: 40, // Position text in center of white rectangle
+          size: 16, // Match font size
+          color: rgb(0, 0, 0),
+        });
+        
+        // Also cover any tracking numbers in potential header areas
+        firstPage.drawRectangle({
+          x: 300, // Right side header area
+          y: height - 150,
+          width: 250,
+          height: 30,
+          color: rgb(1, 1, 1), // White background
+        });
+        
+        firstPage.drawText(qpTrackingNumber, {
+          x: 305,
+          y: height - 135,
+          size: 14,
           color: rgb(0, 0, 0),
         });
       }
