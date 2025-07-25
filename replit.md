@@ -58,9 +58,9 @@ Preferred communication style: Simple, everyday language.
 ### Precision Label Customization Update (July 25, 2025)
 - **Minimized Logo White Space**: Reduced logo removal area to precise 150x70 pixels in top-right corner, eliminating excess white space
 - **Direct GV Overlay**: QP tracking now overlays directly on top of GV tracking numbers instead of beside them
-- **Exact Position Targeting**: First GV occurrence at x=185, y=220 (under barcode), second at x=368, y=95 (bottom right)
-- **Precise Text Coverage**: White rectangles sized exactly to cover GV tracking numbers (230x20 pixels)
-- **Maintained Font Consistency**: QP text uses size 14 font to match original label formatting
+- **Exact Position Targeting**: First GV occurrence at x=190, y=156 (under barcode), second at x=245, y=18 (bottom)
+- **Precise Text Coverage**: White rectangles sized exactly to cover GV tracking numbers (260x22 pixels)
+- **Maintained Font Consistency**: QP text uses size 16 font to match original label formatting
 - **Batch Print Integration**: All improvements automatically applied during batch printing operations
 - **Professional Appearance**: Labels now show clean QP tracking with minimal visual disruption
 - **SUCCESSFUL RESULT**: Labels have precise logo removal with minimal white space and QP directly overlaying GV positions

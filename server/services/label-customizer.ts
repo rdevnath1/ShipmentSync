@@ -66,36 +66,36 @@ export class LabelCustomizerService {
         console.log(`Replacing ${trackingNumber} with ${qpTrackingNumber} on label`);
         
         // First occurrence: Under the barcode (center of label)
-        // Based on screenshot, this is around y=220 from bottom
+        // Based on screenshot, GV tracking is centered below barcode
         firstPage.drawRectangle({
-          x: 185, // Center position where GV tracking appears
-          y: 220, // Under barcode position
-          width: 230, // Just enough to cover "GV25USA0U020875314"
-          height: 20, // Height of text line
+          x: 190, // Center position - adjusted based on screenshot
+          y: 156, // Below barcode - exact position from screenshot
+          width: 260, // Width to cover full "GV25USA0U020875314"
+          height: 22, // Height of text line
           color: rgb(1, 1, 1), // White background to cover GV
         });
         
-        // Add QP tracking number directly on top
+        // Add QP tracking number directly on top - centered
         firstPage.drawText(qpTrackingNumber, {
-          x: 185, // Same x position
-          y: 222, // Slightly adjusted for text baseline
-          size: 14, // Match original font size
+          x: 200, // Slightly right of rectangle start for centering
+          y: 160, // Baseline position for text
+          size: 16, // Slightly larger to match original
           color: rgb(0, 0, 0),
         });
         
         // Second occurrence: Bottom of label
-        // Based on screenshot, this is around y=95 from bottom
+        // Based on screenshot, bottom tracking number at very bottom
         firstPage.drawRectangle({
-          x: 368, // Right side position where second GV appears
-          y: 95, // Bottom area position
-          width: 230, // Just enough to cover tracking number
+          x: 245, // Center-right position from screenshot
+          y: 18, // Very bottom of label
+          width: 260, // Width to cover tracking number
           height: 20, // Height of text line
           color: rgb(1, 1, 1), // White background
         });
         
         firstPage.drawText(qpTrackingNumber, {
-          x: 368, // Same x position
-          y: 97, // Slightly adjusted for text baseline
+          x: 255, // Slightly right for alignment
+          y: 22, // Baseline for bottom text
           size: 14, // Match original font size
           color: rgb(0, 0, 0),
         });
