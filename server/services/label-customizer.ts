@@ -66,36 +66,36 @@ export class LabelCustomizerService {
         console.log(`Replacing ${trackingNumber} with ${qpTrackingNumber} on label`);
         
         // First occurrence: Under the barcode (center of label)
-        // Based on screenshot, GV tracking is centered below barcode
+        // GV tracking appears centered below the main barcode
         firstPage.drawRectangle({
-          x: 190, // Center position - adjusted based on screenshot
-          y: 156, // Below barcode - exact position from screenshot
-          width: 260, // Width to cover full "GV25USA0U020875314"
-          height: 22, // Height of text line
+          x: 192, // Center position for GV tracking
+          y: height - 460, // Position below barcode (from top)
+          width: 250, // Width to cover "GV25USA0U020875314"
+          height: 20, // Height of text line
           color: rgb(1, 1, 1), // White background to cover GV
         });
         
         // Add QP tracking number directly on top - centered
         firstPage.drawText(qpTrackingNumber, {
-          x: 200, // Slightly right of rectangle start for centering
-          y: 160, // Baseline position for text
-          size: 16, // Slightly larger to match original
+          x: 195, // Centered alignment
+          y: height - 455, // Text baseline position
+          size: 14, // Match original font size
           color: rgb(0, 0, 0),
         });
         
         // Second occurrence: Bottom of label
-        // Based on screenshot, bottom tracking number at very bottom
+        // GV tracking at the very bottom center-right
         firstPage.drawRectangle({
-          x: 245, // Center-right position from screenshot
-          y: 18, // Very bottom of label
-          width: 260, // Width to cover tracking number
+          x: 380, // Bottom right position
+          y: height - 770, // Near bottom (from top)
+          width: 250, // Width to cover tracking number
           height: 20, // Height of text line
           color: rgb(1, 1, 1), // White background
         });
         
         firstPage.drawText(qpTrackingNumber, {
-          x: 255, // Slightly right for alignment
-          y: 22, // Baseline for bottom text
+          x: 383, // Aligned with rectangle
+          y: height - 765, // Text baseline
           size: 14, // Match original font size
           color: rgb(0, 0, 0),
         });
