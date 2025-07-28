@@ -69,44 +69,45 @@ export class LabelCustomizerService {
         console.log(`Replacing ${trackingNumber} with ${qpTrackingNumber} on label`);
         
         // First occurrence: Under the barcode (centered)
-        // Make a larger rectangle to ensure we cover the GV text
+        // GV tracking appears around y=130 from bottom based on screenshot
         firstPage.drawRectangle({
-          x: 20, // Start from left
-          y: 170, // Position under barcode
-          width: 240, // Almost full width
-          height: 30, // Taller to ensure coverage
+          x: 30, // Start from left with margin
+          y: 125, // Lower position to match actual GV location
+          width: 225, // Cover the full tracking number
+          height: 25, // Height to cover text
           color: rgb(1, 1, 1), // White background to cover GV
         });
         
-        // Add QP tracking number - centered
+        // Add QP tracking number - centered under barcode
         const centerX = width / 2;
-        const fontSize = 18;
-        const textWidth = qpTrackingNumber.length * (fontSize * 0.5); // Better approximation
+        const fontSize = 16;
+        const textWidth = qpTrackingNumber.length * (fontSize * 0.45);
         const textStartX = centerX - (textWidth / 2);
         
         firstPage.drawText(qpTrackingNumber, {
           x: textStartX, // Center the text
-          y: 178, // Text baseline (middle of rectangle)
-          size: fontSize, // Larger for visibility
+          y: 133, // Align with covered GV position
+          size: fontSize,
           color: rgb(0, 0, 0),
         });
         
-        // Second occurrence: Bottom of label - make it wider
+        // Second occurrence: Bottom of label
+        // GV appears at very bottom, around y=10-15
         firstPage.drawRectangle({
-          x: 80, // Start earlier
-          y: 25, // Near bottom of page
-          width: 200, // Wider coverage
-          height: 25, // Taller rectangle
+          x: 100, // Match position in screenshot
+          y: 8, // Very bottom of page
+          width: 180, // Cover full tracking number
+          height: 20, // Height for text
           color: rgb(1, 1, 1), // White background
         });
         
-        // Center the bottom text better
-        const bottomTextStartX = 120;
+        // Bottom tracking number
+        const bottomTextStartX = centerX - (textWidth / 2) + 20; // Slightly right of center
         
         firstPage.drawText(qpTrackingNumber, {
-          x: bottomTextStartX, // Better positioned
-          y: 33, // Text baseline
-          size: 16, // Larger for visibility
+          x: bottomTextStartX,
+          y: 14, // Text baseline at bottom
+          size: 14, // Smaller font for bottom
           color: rgb(0, 0, 0),
         });
       }
