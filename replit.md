@@ -65,6 +65,14 @@ Preferred communication style: Simple, everyday language.
 - **Zero Database Changes**: Customization applied dynamically without modifying stored order data
 - **SUCCESSFUL RESULT**: Labels perfectly match user template with complete carrier logo removal and proper QP tracking placement
 
+### FedEx API Integration Planning (July 28, 2025)
+- **Certification Status**: Quikpik is not currently certified with FedEx - new integration requires test credentials first
+- **Multiple Account Support**: System will support rate shopping between multiple FedEx accounts at no additional cost
+- **Customer Accounts**: Main account (907222888) and Low weight focus account (204248491) for optimal rate comparison
+- **Implementation Plan**: Start with test credentials, complete certification, then move to production with both accounts
+- **Rate Shopping Design**: Automatic selection of best rate between both accounts for each shipment
+- **Grace Period**: FedEx representative willing to restart grace period discounts on both accounts when integration begins
+
 ### System Debugging & User Management Fixes (July 23, 2025)
 - **User Count Display Fix**: Fixed organization cards showing 0 users by adding proper JOIN queries and user count calculations
 - **Login Issue Resolution**: Fixed corrupted password for rc@trend36fashion.com after organization transfer, generated new bcrypt hash
