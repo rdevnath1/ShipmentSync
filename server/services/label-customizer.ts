@@ -49,6 +49,7 @@ export class LabelCustomizerService {
       
       // Get page dimensions
       const { width, height } = firstPage.getSize();
+      console.log(`Label dimensions: ${width}x${height}`);
       
       // Remove uniunt logo from top area (logo with company name)
       // Based on template, need to remove entire logo area
@@ -68,37 +69,44 @@ export class LabelCustomizerService {
         console.log(`Replacing ${trackingNumber} with ${qpTrackingNumber} on label`);
         
         // First occurrence: Under the barcode (centered)
-        // Based on template, this is the main tracking number
+        // Make a larger rectangle to ensure we cover the GV text
         firstPage.drawRectangle({
-          x: 170, // Center position
-          y: height - 440, // Below barcode position
-          width: 280, // Full width of tracking number
-          height: 25, // Height to cover text
+          x: 20, // Start from left
+          y: 170, // Position under barcode
+          width: 240, // Almost full width
+          height: 30, // Taller to ensure coverage
           color: rgb(1, 1, 1), // White background to cover GV
         });
         
-        // Add QP tracking number - centered and bold
+        // Add QP tracking number - centered
+        const centerX = width / 2;
+        const fontSize = 18;
+        const textWidth = qpTrackingNumber.length * (fontSize * 0.5); // Better approximation
+        const textStartX = centerX - (textWidth / 2);
+        
         firstPage.drawText(qpTrackingNumber, {
-          x: 195, // Centered
-          y: height - 435, // Text baseline
-          size: 18, // Larger size to match template
+          x: textStartX, // Center the text
+          y: 178, // Text baseline (middle of rectangle)
+          size: fontSize, // Larger for visibility
           color: rgb(0, 0, 0),
         });
         
-        // Second occurrence: Bottom of label
-        // Bottom tracking number in smaller font
+        // Second occurrence: Bottom of label - make it wider
         firstPage.drawRectangle({
-          x: 360, // Right side position
-          y: height - 775, // Near bottom
-          width: 280, // Width to cover tracking
-          height: 22, // Text height
+          x: 80, // Start earlier
+          y: 25, // Near bottom of page
+          width: 200, // Wider coverage
+          height: 25, // Taller rectangle
           color: rgb(1, 1, 1), // White background
         });
         
+        // Center the bottom text better
+        const bottomTextStartX = 120;
+        
         firstPage.drawText(qpTrackingNumber, {
-          x: 385, // Right aligned
-          y: height - 770, // Text baseline
-          size: 16, // Smaller than main tracking
+          x: bottomTextStartX, // Better positioned
+          y: 33, // Text baseline
+          size: 16, // Larger for visibility
           color: rgb(0, 0, 0),
         });
       }
