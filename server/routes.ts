@@ -1454,8 +1454,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const filePath = path.join(process.cwd(), 'temp-labels', filename);
       const buffer = await labelCustomizer.getLabelBuffer(filePath);
       
+      // Add cache-busting headers to prevent browser caching
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
       res.send(buffer);
     } catch (error) {
       console.error("Error serving customized label:", error);
