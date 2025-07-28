@@ -25,10 +25,12 @@ export class LabelCustomizerService {
     try {
       console.log(`Customizing label for tracking ${trackingNumber}...`);
       
-      // Download the original label PDF
+      // Download the original label PDF with increased timeout
       const response = await axios.get(originalLabelUrl, {
         responseType: 'arraybuffer',
-        timeout: 30000
+        timeout: 60000, // Increased to 60 seconds
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity
       });
 
       if (!response.data) {
@@ -115,6 +117,15 @@ export class LabelCustomizerService {
       
     } catch (error) {
       console.error('Error customizing label:', error);
+      if (axios.isAxiosError(error)) {
+        if (error.code === 'ECONNABORTED') {
+          throw new Error('Label download timed out - please try again');
+        }
+        if (error.response?.status === 404) {
+          throw new Error('Label not found - it may have expired or been deleted');
+        }
+        throw new Error(`Failed to download label: ${error.message}`);
+      }
       throw new Error('Failed to customize shipping label');
     }
   }
