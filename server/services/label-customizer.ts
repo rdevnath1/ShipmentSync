@@ -48,13 +48,13 @@ export class LabelCustomizerService {
       // Get page dimensions
       const { width, height } = firstPage.getSize();
       
-      // Precise logo removal for top-right corner (where uniunt logo appears)
-      // Based on the screenshot, logo is approximately 140x50 pixels in top-right
+      // Remove uniunt logo from top area (logo with company name)
+      // Based on template, need to remove entire logo area
       firstPage.drawRectangle({
-        x: width - 150, // Top-right corner - just logo area
-        y: height - 70, // From top - just logo height
-        width: 150, // Logo width
-        height: 70, // Logo height
+        x: 15, // Left side where logo starts
+        y: height - 85, // From top - covers full logo height
+        width: 310, // Wide enough to cover "uniunt" text and logo
+        height: 85, // Full height of logo area
         color: rgb(1, 1, 1), // White color to cover logo
       });
 
@@ -65,38 +65,38 @@ export class LabelCustomizerService {
       if (trackingNumber !== qpTrackingNumber) {
         console.log(`Replacing ${trackingNumber} with ${qpTrackingNumber} on label`);
         
-        // First occurrence: Under the barcode (center of label)
-        // GV tracking appears centered below the main barcode
+        // First occurrence: Under the barcode (centered)
+        // Based on template, this is the main tracking number
         firstPage.drawRectangle({
-          x: 192, // Center position for GV tracking
-          y: height - 460, // Position below barcode (from top)
-          width: 250, // Width to cover "GV25USA0U020875314"
-          height: 20, // Height of text line
+          x: 170, // Center position
+          y: height - 440, // Below barcode position
+          width: 280, // Full width of tracking number
+          height: 25, // Height to cover text
           color: rgb(1, 1, 1), // White background to cover GV
         });
         
-        // Add QP tracking number directly on top - centered
+        // Add QP tracking number - centered and bold
         firstPage.drawText(qpTrackingNumber, {
-          x: 195, // Centered alignment
-          y: height - 455, // Text baseline position
-          size: 14, // Match original font size
+          x: 195, // Centered
+          y: height - 435, // Text baseline
+          size: 18, // Larger size to match template
           color: rgb(0, 0, 0),
         });
         
         // Second occurrence: Bottom of label
-        // GV tracking at the very bottom center-right
+        // Bottom tracking number in smaller font
         firstPage.drawRectangle({
-          x: 380, // Bottom right position
-          y: height - 770, // Near bottom (from top)
-          width: 250, // Width to cover tracking number
-          height: 20, // Height of text line
+          x: 360, // Right side position
+          y: height - 775, // Near bottom
+          width: 280, // Width to cover tracking
+          height: 22, // Text height
           color: rgb(1, 1, 1), // White background
         });
         
         firstPage.drawText(qpTrackingNumber, {
-          x: 383, // Aligned with rectangle
-          y: height - 765, // Text baseline
-          size: 14, // Match original font size
+          x: 385, // Right aligned
+          y: height - 770, // Text baseline
+          size: 16, // Smaller than main tracking
           color: rgb(0, 0, 0),
         });
       }
