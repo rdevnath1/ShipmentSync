@@ -55,15 +55,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-### Precision Label Customization Update (July 25, 2025)
-- **Minimized Logo White Space**: Reduced logo removal area to precise 150x70 pixels in top-right corner, eliminating excess white space
-- **Direct GV Overlay**: QP tracking now overlays directly on top of GV tracking numbers instead of beside them
-- **Exact Position Targeting**: First GV occurrence at x=190, y=156 (under barcode), second at x=245, y=18 (bottom)
-- **Precise Text Coverage**: White rectangles sized exactly to cover GV tracking numbers (260x22 pixels)
-- **Maintained Font Consistency**: QP text uses size 16 font to match original label formatting
-- **Batch Print Integration**: All improvements automatically applied during batch printing operations
-- **Professional Appearance**: Labels now show clean QP tracking with minimal visual disruption
-- **SUCCESSFUL RESULT**: Labels have precise logo removal with minimal white space and QP directly overlaying GV positions
+### Template-Based Label Customization Implementation (July 28, 2025)
+- **Complete Logo Removal**: Removed entire "uniunt" logo area (x:15-325, y:top-85) eliminating all carrier branding
+- **Template-Based Design**: Implemented exact label appearance from user-provided template (123.pdf)
+- **Dual Tracking Replacement**: QP tracking numbers in both center (18pt font) and bottom (16pt font) positions
+- **Professional Font Sizing**: Main tracking uses size 18 under barcode, bottom tracking uses size 16
+- **Clean Label Output**: Labels now match template exactly with no carrier branding visible
+- **Automatic Application**: All existing orders receive template-based customization during batch printing
+- **Zero Database Changes**: Customization applied dynamically without modifying stored order data
+- **SUCCESSFUL RESULT**: Labels perfectly match user template with complete carrier logo removal and proper QP tracking placement
 
 ### System Debugging & User Management Fixes (July 23, 2025)
 - **User Count Display Fix**: Fixed organization cards showing 0 users by adding proper JOIN queries and user count calculations
