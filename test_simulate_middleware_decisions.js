@@ -20,7 +20,7 @@ function generateId() {
 async function simulateMiddlewareDecisions() {
   console.log('🚀 Simulating middleware routing decisions...\n');
   
-  const organizationId = 8; // Trend 36
+  const organizationId = 2; // Demo E-commerce Store (for demo client)
   const scenarios = [
     // Scenario 1: Quikpik is cheaper
     {
