@@ -1,0 +1,54 @@
+Below is a “quick-hit” playbook you can hand to your dev team.  It keeps the brand’s existing ShipStation workflow intact, lets you win the ~80 % of parcels Quikpik is best at, and avoids the full ShipStation carrier-certification slog.
+
+⸻
+
+1 ️⃣  “Side-car” middleware pattern  – recommended for Phase 1
+
+Step	What happens	ShipStation endpoint	Quikpik action
+1. Webhook fire	New order lands in the brand’s ShipStation account	Webhook → ORDER_NOTIFY payload  ￼	Your middleware receives the POST
+2. Pull incumbent rates	Create a draft shipment and call Rate Shopping	POST /v2/shipments …  → GET /v2/shipments/{id}/rates  ￼	Nothing yet
+3. Pull Quikpik rate	—	Call GET /rate on your internal API	Returns QP cost & SLA
+4. Decide	Compare cheapest ShipStation rate vs. QP rate (apply any business rules: buffer, cutoff weight, oversize, etc.)	—	—
+5a. If QP wins (~80 %)	• Create shipment in QP → receive PDF/ZPL label + tracking • Push results back to ShipStation so the merchant’s dashboard stays the single source of truth	POST /orders/markasshipped with trackingNumber, carrierCode:"quikpik", and labelData  ￼	Ship & inject tracking into your system
+5b. If FedEx/USPS wins (~20 %)	Call ShipStation’s Create Label; nothing leaves their ecosystem	POST /v2/shipments/{id}/label	None
+
+Why this works
+	•	Zero certification pain – you’re not a “carrier” inside ShipStation, just an external fulfiller marking orders as shipped.
+	•	One UI for the merchant – they still live in ShipStation; labels printed by your middleware show up exactly where they expect.
+	•	Fast to build – webhooks + three ShipStation endpoints + your own rate/label API.
+	•	Easy to turn off – a toggle in your middleware lets the merchant fall back to 100 % ShipStation if needed.
+
+⸻
+
+2 ️⃣  How to get FedEx & USPS rates without certifying them yourself
+
+Instead of integrating directly with FedEx/USPS (which would trigger carrier-cert requirements), call an aggregator that’s already certified:
+	•	ShipEngine (now branded “ShipStation API”) – same parent company, 200+ carriers, pay-as-you-go pricing.  ￼ ￼
+	•	EasyPost – similar model.
+
+Your middleware can hit ShipEngine for FedEx/USPS quotes and labels even if the merchant doesn’t have those accounts connected in ShipStation (you’d pass the cost through or bill it separately).
+
+⸻
+
+3 ️⃣  Pricing & plan gotchas for the merchant
+	•	ShipStation now charges “Your Carriers” add-on fees on Starter–Scale plans if they connect their own FedEx/UPS accounts.  ￼
+	•	Using your middleware bypasses that because FedEx/USPS labels originate from your aggregator, not their ShipStation account.
+	•	Each external “Mark as Shipped” call is free; you’re not printing a ShipStation label.
+
+⸻
+
+4 ️⃣  Future-proof roadmap (Phase 2+)
+
+Milestone	Value	Effort
+Add Quikpik as a ShipStation Fulfillment Partner (not full carrier)	Merchant can select “Ship with Quikpik” inside ShipStation UI	4-6 weeks partner onboarding
+Full Carrier Certification	QP rates visible in native Rate-Shop pane; no middleware required	3-4 months, test matrices, SLA monitoring
+Direct Shopify / Woo checkout rates via ShipStation Checkout Rates API	Show QP pickup or locker delivery at cart	1-2 sprints
+
+
+⸻
+
+Bottom line
+	•	Phase 1: build the webhook-driven middleware; you’re live in days and win 80 % of the volume without upsetting anyone’s workflow.
+	•	Phase 2 (once volume justifies): decide whether UI polish (Fulfillment Partner) or deep native integration (Certified Carrier) makes ROI sense.
+
+Let me know if you want sample code snippets, an AWS architecture sketch, or help benchmarking ShipEngine vs. EasyPost fees.
