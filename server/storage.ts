@@ -9,7 +9,7 @@ import {
   type WalletTransaction, type InsertWalletTransaction, type MiddlewareAnalytics, type InsertMiddlewareAnalytics
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, sql, and, gte, lte, count } from "drizzle-orm";
+import { eq, desc, sql, and, or, gte, lte, count } from "drizzle-orm";
 
 export interface IStorage {
   // Organization methods
@@ -757,8 +757,13 @@ export class DatabaseStorage implements IStorage {
     if (filters?.endDate) {
       query = query.where(lte(middlewareAnalytics.createdAt, filters.endDate));
     }
-    if (filters?.routedTo) {
+    if (filters?.routedTo && filters.routedTo !== 'traditional') {
       query = query.where(eq(middlewareAnalytics.routedTo, filters.routedTo));
+    } else if (filters?.routedTo === 'traditional') {
+      query = query.where(or(
+        eq(middlewareAnalytics.routedTo, 'fedex'),
+        eq(middlewareAnalytics.routedTo, 'usps')
+      ));
     }
     if (filters?.minSaved !== undefined) {
       query = query.where(gte(middlewareAnalytics.savedAmount, filters.minSaved.toString()));

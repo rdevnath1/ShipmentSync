@@ -9,7 +9,7 @@ const analyticsQuerySchema = z.object({
   endDate: z.string().optional(),
   dateFrom: z.string().optional(),
   dateTo: z.string().optional(),
-  routedTo: z.enum(['quikpik', 'traditional']).optional(),
+  routedTo: z.enum(['quikpik', 'fedex', 'usps', 'traditional']).optional(),
   minSaved: z.string().optional()
 });
 

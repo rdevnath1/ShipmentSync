@@ -24,7 +24,7 @@ interface RoutingDecision {
   id: number;
   orderId: string;
   shipstationOrderId?: string;
-  routedTo: 'quikpik' | 'traditional';
+  routedTo: 'quikpik' | 'fedex' | 'usps' | 'traditional';
   reason: string;
   saved: number;
   quikpikRate: number;
@@ -182,7 +182,9 @@ export function MiddlewareAnalytics() {
                     <div className="flex items-center space-x-2">
                       <span className="font-medium">Order #{decision.orderId}</span>
                       <Badge variant={decision.routedTo === 'quikpik' ? 'default' : 'secondary'}>
-                        {decision.routedTo === 'quikpik' ? 'Quikpik' : 'Traditional'}
+                        {decision.routedTo === 'quikpik' ? 'Quikpik' : 
+                         decision.routedTo === 'fedex' ? 'FedEx' :
+                         decision.routedTo === 'usps' ? 'USPS' : 'Traditional'}
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">{decision.reason}</p>
@@ -246,6 +248,8 @@ export function MiddlewareAnalytics() {
                   <SelectContent>
                     <SelectItem value="all">All</SelectItem>
                     <SelectItem value="quikpik">Quikpik</SelectItem>
+                    <SelectItem value="fedex">FedEx</SelectItem>
+                    <SelectItem value="usps">USPS</SelectItem>
                     <SelectItem value="traditional">Traditional</SelectItem>
                   </SelectContent>
                 </Select>
@@ -340,7 +344,9 @@ export function MiddlewareAnalytics() {
                               variant={decision.routedTo === 'quikpik' ? 'default' : 'secondary'}
                               className="text-xs"
                             >
-                              {decision.routedTo === 'quikpik' ? 'Quikpik' : 'Traditional'}
+                              {decision.routedTo === 'quikpik' ? 'Quikpik' : 
+                               decision.routedTo === 'fedex' ? 'FedEx' :
+                               decision.routedTo === 'usps' ? 'USPS' : 'Traditional'}
                             </Badge>
                           </td>
                           <td className="text-right py-2 px-3 font-medium">
