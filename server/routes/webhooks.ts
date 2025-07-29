@@ -62,7 +62,7 @@ router.post("/jiayou/tracking", async (req, res) => {
   }
 });
 
-// ShipStation webhook endpoint for order updates
+// ShipStation webhook endpoint for order updates - MIDDLEWARE ENGINE
 router.post("/shipstation/orders", async (req, res) => {
   try {
     const { resource_url, resource_type } = req.body;
@@ -71,15 +71,44 @@ router.post("/shipstation/orders", async (req, res) => {
       return res.json({ message: "Webhook type not handled" });
     }
 
-    console.log(`ShipStation webhook: ${resource_type} - ${resource_url}`);
+    console.log(`\n📨 ShipStation webhook: ${resource_type} - ${resource_url}`);
 
-    // ShipStation sends resource URL, we need to fetch the actual data
-    // This would require implementing ShipStation API call to get order details
+    // Extract order ID from resource URL
+    // URL format: https://ssapi.shipstation.com/orders/{orderId}
+    const orderIdMatch = resource_url.match(/\/orders\/(\d+)/);
+    if (!orderIdMatch) {
+      console.error('Could not extract order ID from resource URL:', resource_url);
+      return res.status(400).json({ error: "Invalid resource URL format" });
+    }
+
+    const orderId = parseInt(orderIdMatch[1]);
+    console.log(`🎯 Processing order ID: ${orderId}`);
+
+    // Import the middleware engine dynamically to avoid circular imports
+    const { middlewareEngine } = await import('../services/middleware-engine');
     
-    // For now, just log the webhook
-    console.log(`ShipStation webhook received: ${resource_type} - ${resource_url}`);
+    // Process the order through middleware (async, don't wait)
+    setImmediate(async () => {
+      try {
+        const result = await middlewareEngine.processOrder(orderId);
+        console.log(`\n✅ Middleware result for order ${orderId}:`, {
+          success: result.success,
+          decision: result.decision.reason,
+          useQuikpik: result.decision.useQuikpik,
+          trackingNumber: result.trackingNumber
+        });
+      } catch (error) {
+        console.error(`❌ Middleware failed for order ${orderId}:`, error);
+      }
+    });
 
-    res.json({ success: true, message: "ShipStation webhook received" });
+    // Respond immediately to ShipStation webhook
+    res.json({ 
+      success: true, 
+      message: "ShipStation webhook received and processing started",
+      orderId: orderId,
+      timestamp: new Date().toISOString()
+    });
 
   } catch (error) {
     console.error("ShipStation webhook error:", error);

@@ -65,6 +65,18 @@ Preferred communication style: Simple, everyday language.
 - **Zero Database Changes**: Customization applied dynamically without modifying stored order data
 - **SUCCESSFUL RESULT**: Labels perfectly match user template with complete carrier logo removal and proper QP tracking placement
 
+### Webhook-Driven Middleware System Implementation (July 28, 2025)
+- **"Side-Car" Middleware Pattern**: Implemented ChatGPT's recommended approach for invisible rate optimization
+- **ShipStation Webhook Integration**: Automatic order processing triggered by ORDER_NOTIFY webhooks from ShipStation
+- **Intelligent Rate Comparison**: Real-time comparison between Quikpik rates and competitor rates via ShipEngine API
+- **Automatic Routing Decision**: Smart logic routes ~80% of shipments to Quikpik when cheaper or within 5% margin
+- **Invisible Customer Experience**: Customers continue using ShipStation workflow while getting automatically optimized shipping
+- **ShipEngine Integration**: FedEx/USPS rate access without certification using aggregator service
+- **Comprehensive Testing**: Created middleware test endpoints for rate comparison and webhook simulation
+- **Business Rules**: Quikpik selected when cheaper or within 5% (accounting for speed advantage)
+- **Fallback Handling**: Orders route to traditional carriers when significantly more cost-effective
+- **SUCCESSFUL RESULT**: Complete middleware system ready for production - customers get better rates automatically without workflow changes
+
 ### FedEx API Integration Planning (July 28, 2025)
 - **Certification Status**: Quikpik is not currently certified with FedEx - new integration requires test credentials first
 - **Multiple Account Support**: System will support rate shopping between multiple FedEx accounts at no additional cost

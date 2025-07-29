@@ -157,9 +157,10 @@ export class ShipStationService {
       return true;
     } catch (error) {
       console.error('Error creating shipment in ShipStation:', error);
-      if (error.response) {
-        console.error('Response data:', error.response.data);
-        console.error('Response status:', error.response.status);
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as any;
+        console.error('Response data:', axiosError.response?.data);
+        console.error('Response status:', axiosError.response?.status);
       }
       
       // Fallback to mark as shipped if shipment creation fails
