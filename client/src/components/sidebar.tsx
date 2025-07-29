@@ -45,6 +45,7 @@ export default function Sidebar() {
         { path: "/app/orders", icon: Package, label: "All Orders" },
         { path: "/app/analytics", icon: BarChart3, label: "Analytics" },
         { path: "/app/audit-logs", icon: Shield, label: "Audit Logs" },
+        { path: "/app/carriers-rate-shopper", icon: Truck, label: "Carriers Rate Shopper" },
         { path: "/app/rate-calculator", icon: BarChart3, label: "Rate Calculator" },
         { path: "/tracking", icon: Route, label: "Tracking" },
         { path: "/app/settings", icon: Settings, label: "Settings" },
@@ -55,6 +56,7 @@ export default function Sidebar() {
         { path: "/app", icon: LayoutDashboard, label: "Dashboard" },
         { path: "/app/orders", icon: Package, label: "Orders" },
         { path: "/tracking", icon: Route, label: "Tracking" },
+        { path: "/app/carriers-rate-shopper", icon: Truck, label: "Carriers Rate Shopper" },
         { path: "/app/rate-calculator", icon: BarChart3, label: "Rate Calculator" },
         { path: "/app/settings", icon: Settings, label: "Settings" },
       ];

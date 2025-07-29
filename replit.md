@@ -55,6 +55,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Carriers Rate Shopper Page Implementation (July 29, 2025)
+- **Moved Middleware Analytics**: Relocated all middleware cost analysis components from dashboard to dedicated "Carriers Rate Shopper" page
+- **New Navigation Tab**: Added "Carriers Rate Shopper" to sidebar navigation for both master admin and client users
+- **Dedicated Page**: Created comprehensive page with title and description explaining carrier rate comparison functionality
+- **Decluttered Dashboard**: Dashboard now focuses on core order management without middleware analytics section
+- **Navigation Icon**: Used Truck icon to visually represent carrier services in navigation menu
+- **SUCCESSFUL RESULT**: Middleware analytics now has its own dedicated space for detailed carrier rate analysis and routing decisions
+
 ### Enhanced Middleware Analytics with Detailed Filtering (July 29, 2025)
 - **Detailed Analytics View**: Added "Show Details" toggle button that reveals comprehensive order-by-order routing decisions
 - **Advanced Filtering Options**: Implemented four filter types - Routed To (Quikpik/Traditional), Date Range (From/To), and Minimum Saved Amount

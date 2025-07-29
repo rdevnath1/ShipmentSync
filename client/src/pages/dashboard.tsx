@@ -11,7 +11,6 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { Download, Truck, Plus, FolderSync } from "lucide-react";
-import { MiddlewareAnalytics } from "@/components/MiddlewareAnalytics";
 
 export default function Dashboard() {
   const { toast } = useToast();
@@ -68,12 +67,6 @@ export default function Dashboard() {
         </div>
         
         <TrackingSection />
-        
-        {/* Middleware Analytics Section */}
-        <div className="mt-8">
-          <h2 className="text-xl font-semibold mb-4">Middleware Cost Analysis</h2>
-          <MiddlewareAnalytics />
-        </div>
         
         <div className="mt-8">
           <Card>
