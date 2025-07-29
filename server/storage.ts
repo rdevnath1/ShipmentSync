@@ -1,12 +1,12 @@
 import { 
-  organizations, users, orders, trackingEvents, analytics, apiKeys, auditLogs, retryQueue, carrierLogs, enhancedTrackingEvents, carrierAccounts, wallets, walletTransactions,
+  organizations, users, orders, trackingEvents, analytics, apiKeys, auditLogs, retryQueue, carrierLogs, enhancedTrackingEvents, carrierAccounts, wallets, walletTransactions, middlewareAnalytics,
   type Organization, type InsertOrganization, type User, type InsertUser, 
   type Order, type InsertOrder, type TrackingEvent, type InsertTrackingEvent, 
   type Analytics, type InsertAnalytics, type ApiKey, type InsertApiKey,
   type AuditLog, type InsertAuditLog, type RetryQueueItem, type InsertRetryQueueItem,
   type CarrierLog, type InsertCarrierLog, type EnhancedTrackingEvent, type InsertEnhancedTrackingEvent,
   type CarrierAccount, type InsertCarrierAccount, type Wallet, type InsertWallet,
-  type WalletTransaction, type InsertWalletTransaction
+  type WalletTransaction, type InsertWalletTransaction, type MiddlewareAnalytics, type InsertMiddlewareAnalytics
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, gte, lte, count } from "drizzle-orm";
@@ -91,6 +91,22 @@ export interface IStorage {
   addCredit(organizationId: number, amount: number, description: string, addedBy: number, referenceId?: string): Promise<WalletTransaction>;
   deductAmount(organizationId: number, amount: number, description: string, referenceId?: string): Promise<WalletTransaction>;
   getWalletTransactions(organizationId: number, limit?: number): Promise<WalletTransaction[]>;
+
+  // Middleware Analytics methods
+  createMiddlewareAnalytics(data: any): Promise<any>;
+  getMiddlewareAnalytics(organizationId: number, filters?: {
+    startDate?: Date;
+    endDate?: Date;
+    routedTo?: string;
+  }): Promise<any[]>;
+  getMiddlewareSummary(organizationId: number, startDate?: Date, endDate?: Date): Promise<{
+    totalOrders: number;
+    quikpikOrders: number;
+    traditionalOrders: number;
+    totalSaved: number;
+    averageSavings: number;
+    captureRate: number;
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -709,6 +725,88 @@ export class DatabaseStorage implements IStorage {
       .limit(limit);
     
     return transactions;
+  }
+
+  // Middleware Analytics methods
+  async createMiddlewareAnalytics(data: InsertMiddlewareAnalytics): Promise<MiddlewareAnalytics> {
+    const [analytics] = await db
+      .insert(middlewareAnalytics)
+      .values(data)
+      .returning();
+    return analytics;
+  }
+
+  async getMiddlewareAnalytics(
+    organizationId: number, 
+    filters?: {
+      startDate?: Date;
+      endDate?: Date;
+      routedTo?: string;
+    }
+  ): Promise<MiddlewareAnalytics[]> {
+    let query = db
+      .select()
+      .from(middlewareAnalytics)
+      .where(eq(middlewareAnalytics.organizationId, organizationId))
+      .$dynamic();
+
+    if (filters?.startDate) {
+      query = query.where(gte(middlewareAnalytics.createdAt, filters.startDate));
+    }
+    if (filters?.endDate) {
+      query = query.where(lte(middlewareAnalytics.createdAt, filters.endDate));
+    }
+    if (filters?.routedTo) {
+      query = query.where(eq(middlewareAnalytics.routedTo, filters.routedTo));
+    }
+
+    return await query.orderBy(desc(middlewareAnalytics.createdAt));
+  }
+
+  async getMiddlewareSummary(
+    organizationId: number, 
+    startDate?: Date, 
+    endDate?: Date
+  ): Promise<{
+    totalOrders: number;
+    quikpikOrders: number;
+    traditionalOrders: number;
+    totalSaved: number;
+    averageSavings: number;
+    captureRate: number;
+  }> {
+    const conditions = [eq(middlewareAnalytics.organizationId, organizationId)];
+    
+    if (startDate) {
+      conditions.push(gte(middlewareAnalytics.createdAt, startDate));
+    }
+    if (endDate) {
+      conditions.push(lte(middlewareAnalytics.createdAt, endDate));
+    }
+
+    const results = await db
+      .select({
+        totalOrders: count(),
+        quikpikOrders: sql<number>`COUNT(CASE WHEN ${middlewareAnalytics.routedTo} = 'quikpik' THEN 1 END)`,
+        traditionalOrders: sql<number>`COUNT(CASE WHEN ${middlewareAnalytics.routedTo} = 'traditional' THEN 1 END)`,
+        totalSaved: sql<number>`COALESCE(SUM(${middlewareAnalytics.savedAmount}), 0)`,
+        averageSavings: sql<number>`COALESCE(AVG(${middlewareAnalytics.savedAmount}), 0)`
+      })
+      .from(middlewareAnalytics)
+      .where(and(...conditions));
+
+    const result = results[0];
+    const totalOrders = Number(result.totalOrders) || 0;
+    const quikpikOrders = Number(result.quikpikOrders) || 0;
+    
+    return {
+      totalOrders,
+      quikpikOrders,
+      traditionalOrders: Number(result.traditionalOrders) || 0,
+      totalSaved: Number(result.totalSaved) || 0,
+      averageSavings: Number(result.averageSavings) || 0,
+      captureRate: totalOrders > 0 ? (quikpikOrders / totalOrders) * 100 : 0
+    };
   }
 }
 

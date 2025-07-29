@@ -8,6 +8,7 @@ import { StatusMapper, StandardTrackingStatus } from "./utils/status-mapper";
 import ratesRouter from "./routes/rates";
 import webhooksRouter from "./routes/webhooks";
 import middlewareTestRouter from "./routes/middleware-test";
+import { registerMiddlewareAnalyticsRoutes } from "./routes/middleware-analytics";
 import { insertOrderSchema } from "@shared/schema";
 import { z } from "zod";
 import { setupAuth, requireAuth, requireOrgAccess, requireRole } from "./auth";
@@ -2177,6 +2178,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/rates", ratesRouter);
   app.use("/api/webhooks", webhooksRouter);
   app.use("/api/middleware", middlewareTestRouter);
+  
+  // Register middleware analytics routes
+  registerMiddlewareAnalyticsRoutes(app);
 
   // Add error handler middleware at the end
   app.use(errorHandlerMiddleware());

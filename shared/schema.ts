@@ -260,6 +260,47 @@ export const walletTransactions = pgTable("wallet_transactions", {
   index("idx_wallet_transactions_created").on(table.createdAt),
 ]);
 
+// Middleware analytics table - tracks routing decisions and cost savings
+export const middlewareAnalytics = pgTable("middleware_analytics", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organization_id")
+    .references(() => organizations.id, { onDelete: "cascade" })
+    .notNull(),
+  orderId: integer("order_id")
+    .references(() => orders.id, { onDelete: "set null" }),
+  shipstationOrderId: varchar("shipstation_order_id", { length: 50 }),
+  
+  // Routing decision
+  routedTo: varchar("routed_to", { length: 20 }).notNull(), // 'quikpik' or 'traditional'
+  decisionReason: text("decision_reason"),
+  
+  // Rate comparison
+  quikpikRate: decimal("quikpik_rate", { precision: 10, scale: 2 }),
+  fedexRate: decimal("fedex_rate", { precision: 10, scale: 2 }),
+  uspsRate: decimal("usps_rate", { precision: 10, scale: 2 }),
+  cheapestTraditional: decimal("cheapest_traditional", { precision: 10, scale: 2 }),
+  
+  // Savings calculation
+  actualCost: decimal("actual_cost", { precision: 10, scale: 2 }).notNull(),
+  alternativeCost: decimal("alternative_cost", { precision: 10, scale: 2 }).notNull(),
+  savedAmount: decimal("saved_amount", { precision: 10, scale: 2 }).notNull(),
+  
+  // Shipment details
+  weight: decimal("weight", { precision: 10, scale: 2 }), // in oz
+  destinationZip: varchar("destination_zip", { length: 10 }),
+  shippingZone: integer("shipping_zone"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_middleware_analytics_org").on(table.organizationId),
+  index("idx_middleware_analytics_order").on(table.orderId),
+  index("idx_middleware_analytics_routed").on(table.routedTo),
+  index("idx_middleware_analytics_created").on(table.createdAt),
+]);
+
+export type MiddlewareAnalytics = typeof middlewareAnalytics.$inferSelect;
+export type InsertMiddlewareAnalytics = typeof middlewareAnalytics.$inferInsert;
+
 // Define all relations
 export const organizationsRelations = relations(organizations, ({ many, one }) => ({
   users: many(users),
@@ -268,6 +309,7 @@ export const organizationsRelations = relations(organizations, ({ many, one }) =
   carrierAccounts: many(carrierAccounts),
   wallet: one(wallets),
   walletTransactions: many(walletTransactions),
+  middlewareAnalytics: many(middlewareAnalytics),
 }));
 
 export const usersRelations = relations(users, ({ one }) => ({

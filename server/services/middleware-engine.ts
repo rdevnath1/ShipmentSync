@@ -69,6 +69,46 @@ export class MiddlewareEngine {
       const decision = this.makeRoutingDecision(quikpikRate, cheapestCompetitor, competitorRates);
       console.log(`🎯 Decision: ${decision.useQuikpik ? 'Use Quikpik' : 'Use competitor'} - ${decision.reason}`);
 
+      // Store analytics data for transparency
+      try {
+        const { storage } = await import('../storage');
+        const { postalZoneMapper } = await import('./postal-zone-mapper');
+        
+        const zone = order.shipTo?.postalCode ? postalZoneMapper.getZone(order.shipTo.postalCode) : null;
+        const totalWeight = order.items?.reduce((sum: number, item: any) => {
+          const itemWeight = item.weight?.value || 0;
+          const quantity = item.quantity || 1;
+          return sum + (itemWeight * quantity);
+        }, 0) || 8;
+
+        // Find specific carrier rates
+        const fedexRate = competitorRates.find(r => r.carrier_code === 'fedex')?.shipping_amount?.amount;
+        const uspsRate = competitorRates.find(r => r.carrier_code === 'usps')?.shipping_amount?.amount;
+        
+        const analyticsData = {
+          organizationId: order.organizationId || 8, // Default to Trend 36 for now
+          orderId: order.id || null,
+          shipstationOrderId: order.orderNumber || String(shipStationOrderId),
+          routedTo: decision.useQuikpik ? 'quikpik' : 'traditional',
+          decisionReason: decision.reason,
+          quikpikRate: quikpikRate ? quikpikRate.toFixed(2) : null,
+          fedexRate: fedexRate ? fedexRate.toFixed(2) : null,
+          uspsRate: uspsRate ? uspsRate.toFixed(2) : null,
+          cheapestTraditional: cheapestCompetitor ? cheapestCompetitor.toFixed(2) : null,
+          actualCost: (decision.useQuikpik ? quikpikRate : cheapestCompetitor)?.toFixed(2) || '0.00',
+          alternativeCost: (decision.useQuikpik ? cheapestCompetitor : quikpikRate)?.toFixed(2) || '0.00',
+          savedAmount: (decision.savings || 0).toFixed(2),
+          weight: totalWeight.toFixed(2),
+          destinationZip: order.shipTo?.postalCode || null,
+          shippingZone: zone
+        };
+        
+        await storage.createMiddlewareAnalytics(analyticsData);
+        console.log('✅ Analytics data stored for transparency');
+      } catch (error) {
+        console.error('Failed to store analytics:', error);
+      }
+
       // Step 5: Execute the decision
       if (decision.useQuikpik && quikpikRate) {
         return await this.executeQuikpikShipment(order, decision);
