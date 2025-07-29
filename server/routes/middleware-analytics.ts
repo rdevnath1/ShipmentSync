@@ -7,7 +7,10 @@ import { z } from "zod";
 const analyticsQuerySchema = z.object({
   startDate: z.string().optional(),
   endDate: z.string().optional(),
-  routedTo: z.enum(['quikpik', 'traditional']).optional()
+  dateFrom: z.string().optional(),
+  dateTo: z.string().optional(),
+  routedTo: z.enum(['quikpik', 'traditional']).optional(),
+  minSaved: z.string().optional()
 });
 
 export function registerMiddlewareAnalyticsRoutes(app: Express) {
@@ -28,13 +31,34 @@ export function registerMiddlewareAnalyticsRoutes(app: Express) {
       }
 
       const filters = {
-        startDate: queryResult.data.startDate ? new Date(queryResult.data.startDate) : undefined,
-        endDate: queryResult.data.endDate ? new Date(queryResult.data.endDate) : undefined,
-        routedTo: queryResult.data.routedTo
+        startDate: queryResult.data.dateFrom ? new Date(queryResult.data.dateFrom) : 
+                  queryResult.data.startDate ? new Date(queryResult.data.startDate) : undefined,
+        endDate: queryResult.data.dateTo ? new Date(queryResult.data.dateTo) : 
+                queryResult.data.endDate ? new Date(queryResult.data.endDate) : undefined,
+        routedTo: queryResult.data.routedTo,
+        minSaved: queryResult.data.minSaved ? parseFloat(queryResult.data.minSaved) : undefined
       };
 
       const analytics = await storage.getMiddlewareAnalytics(organizationId, filters);
-      res.json(analytics);
+      
+      // Map the data to include all needed fields for frontend
+      const enhancedAnalytics = analytics.map(record => ({
+        id: record.id,
+        orderId: record.orderId?.toString(),
+        shipstationOrderId: record.shipstationOrderId,
+        routedTo: record.routedTo,
+        reason: record.decisionReason,
+        saved: parseFloat(record.savedAmount || '0'),
+        quikpikRate: parseFloat(record.quikpikRate || '0'),
+        alternativeRate: parseFloat(record.alternativeCost || '0'),
+        timestamp: record.createdAt,
+        destinationZip: record.destinationZip,
+        weight: record.weight ? parseFloat(record.weight) : undefined,
+        fedexRate: record.fedexRate ? parseFloat(record.fedexRate) : undefined,
+        uspsRate: record.uspsRate ? parseFloat(record.uspsRate) : undefined
+      }));
+      
+      res.json(enhancedAnalytics);
     } catch (error) {
       console.error('Error fetching middleware analytics:', error);
       res.status(500).json({ error: "Failed to fetch analytics" });

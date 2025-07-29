@@ -55,6 +55,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Enhanced Middleware Analytics with Detailed Filtering (July 29, 2025)
+- **Detailed Analytics View**: Added "Show Details" toggle button that reveals comprehensive order-by-order routing decisions
+- **Advanced Filtering Options**: Implemented four filter types - Routed To (Quikpik/Traditional), Date Range (From/To), and Minimum Saved Amount
+- **Comprehensive Data Table**: Shows all routing decisions with Order ID, Date, Destination ZIP, Weight, all carrier rates comparison
+- **Clear Filter Button**: Added quick "Clear Filters" option to reset all filter selections at once
+- **Enhanced Backend Mapping**: Updated analytics endpoints to include full field mapping for weight, ZIP codes, and all carrier rates
+- **Responsive Design**: Detailed table includes hover states and proper overflow handling for mobile devices
+- **SUCCESSFUL RESULT**: Customers now have complete transparency with filterable, detailed views of every middleware routing decision
+
 ### Template-Based Label Customization Implementation (July 28, 2025)
 - **Complete Logo Removal**: Removed entire "uniunt" logo area (x:15-325, y:top-85) eliminating all carrier branding
 - **Template-Based Design**: Implemented exact label appearance from user-provided template (123.pdf)

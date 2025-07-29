@@ -1,9 +1,14 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowUpRight, Package, TrendingUp, DollarSign, Percent } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { ArrowUpRight, Package, TrendingUp, DollarSign, Percent, Filter, X } from "lucide-react";
 import { format } from "date-fns";
 
 interface MiddlewareSummary {
@@ -18,15 +23,35 @@ interface MiddlewareSummary {
 interface RoutingDecision {
   id: number;
   orderId: string;
+  shipstationOrderId?: string;
   routedTo: 'quikpik' | 'traditional';
   reason: string;
   saved: number;
   quikpikRate: number;
   alternativeRate: number;
   timestamp: string;
+  destinationZip?: string;
+  weight?: number;
+  fedexRate?: number;
+  uspsRate?: number;
 }
 
 export function MiddlewareAnalytics() {
+  const [filters, setFilters] = useState({
+    routedTo: 'all',
+    dateFrom: '',
+    dateTo: '',
+    minSaved: ''
+  });
+  const [showDetails, setShowDetails] = useState(false);
+
+  // Build query params
+  const queryParams = new URLSearchParams();
+  if (filters.routedTo !== 'all') queryParams.append('routedTo', filters.routedTo);
+  if (filters.dateFrom) queryParams.append('dateFrom', filters.dateFrom);
+  if (filters.dateTo) queryParams.append('dateTo', filters.dateTo);
+  if (filters.minSaved) queryParams.append('minSaved', filters.minSaved);
+
   // Fetch analytics summary
   const { data: summary, isLoading: summaryLoading } = useQuery<MiddlewareSummary>({
     queryKey: ['/api/middleware/analytics/summary'],
@@ -36,6 +61,12 @@ export function MiddlewareAnalytics() {
   // Fetch recent routing decisions
   const { data: recentDecisions, isLoading: decisionsLoading } = useQuery<RoutingDecision[]>({
     queryKey: ['/api/middleware/analytics/recent']
+  });
+
+  // Fetch all analytics with filters
+  const { data: allDecisions, isLoading: allDecisionsLoading } = useQuery<RoutingDecision[]>({
+    queryKey: ['/api/middleware/analytics', queryParams.toString()],
+    enabled: showDetails
   });
 
   if (summaryLoading || decisionsLoading) {
@@ -181,6 +212,163 @@ export function MiddlewareAnalytics() {
             )}
           </div>
         </CardContent>
+      </Card>
+
+      {/* Filter Controls */}
+      <Card className="mt-6">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg">Detailed Analytics</CardTitle>
+            <Button
+              variant={showDetails ? "default" : "outline"}
+              size="sm"
+              onClick={() => setShowDetails(!showDetails)}
+            >
+              <Filter className="h-4 w-4 mr-2" />
+              {showDetails ? "Hide Details" : "Show Details"}
+            </Button>
+          </div>
+        </CardHeader>
+        
+        {showDetails && (
+          <CardContent className="space-y-4">
+            {/* Filters */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <Label htmlFor="routedTo">Routed To</Label>
+                <Select
+                  value={filters.routedTo}
+                  onValueChange={(value) => setFilters({ ...filters, routedTo: value })}
+                >
+                  <SelectTrigger id="routedTo">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="quikpik">Quikpik</SelectItem>
+                    <SelectItem value="traditional">Traditional</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="dateFrom">From Date</Label>
+                <Input
+                  id="dateFrom"
+                  type="date"
+                  value={filters.dateFrom}
+                  onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="dateTo">To Date</Label>
+                <Input
+                  id="dateTo"
+                  type="date"
+                  value={filters.dateTo}
+                  onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="minSaved">Min Saved ($)</Label>
+                <Input
+                  id="minSaved"
+                  type="number"
+                  placeholder="0.00"
+                  value={filters.minSaved}
+                  onChange={(e) => setFilters({ ...filters, minSaved: e.target.value })}
+                />
+              </div>
+            </div>
+
+            {/* Clear Filters */}
+            {(filters.routedTo !== 'all' || filters.dateFrom || filters.dateTo || filters.minSaved) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setFilters({ routedTo: 'all', dateFrom: '', dateTo: '', minSaved: '' })}
+              >
+                <X className="h-4 w-4 mr-2" />
+                Clear Filters
+              </Button>
+            )}
+
+            {/* Detailed Table */}
+            <div className="mt-6">
+              {allDecisionsLoading ? (
+                <div className="space-y-2">
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+              ) : !allDecisions || allDecisions.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-8">
+                  No routing decisions match your filters.
+                </p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-2 px-3">Order ID</th>
+                        <th className="text-left py-2 px-3">Date</th>
+                        <th className="text-left py-2 px-3">Destination</th>
+                        <th className="text-right py-2 px-3">Weight (oz)</th>
+                        <th className="text-center py-2 px-3">Routed To</th>
+                        <th className="text-right py-2 px-3">Quikpik</th>
+                        <th className="text-right py-2 px-3">FedEx</th>
+                        <th className="text-right py-2 px-3">USPS</th>
+                        <th className="text-right py-2 px-3">Saved</th>
+                        <th className="text-left py-2 px-3">Reason</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {allDecisions.map((decision) => (
+                        <tr key={decision.id} className="border-b hover:bg-muted/50">
+                          <td className="py-2 px-3 font-medium">
+                            {decision.shipstationOrderId || `#${decision.orderId}`}
+                          </td>
+                          <td className="py-2 px-3">
+                            {format(new Date(decision.timestamp), 'MMM d, h:mm a')}
+                          </td>
+                          <td className="py-2 px-3">{decision.destinationZip || '-'}</td>
+                          <td className="text-right py-2 px-3">{decision.weight || '-'}</td>
+                          <td className="text-center py-2 px-3">
+                            <Badge 
+                              variant={decision.routedTo === 'quikpik' ? 'default' : 'secondary'}
+                              className="text-xs"
+                            >
+                              {decision.routedTo === 'quikpik' ? 'Quikpik' : 'Traditional'}
+                            </Badge>
+                          </td>
+                          <td className="text-right py-2 px-3 font-medium">
+                            ${decision.quikpikRate.toFixed(2)}
+                          </td>
+                          <td className="text-right py-2 px-3">
+                            ${decision.fedexRate?.toFixed(2) || '-'}
+                          </td>
+                          <td className="text-right py-2 px-3">
+                            ${decision.uspsRate?.toFixed(2) || '-'}
+                          </td>
+                          <td className="text-right py-2 px-3">
+                            <span className={decision.saved > 0 ? 'text-green-600 font-medium' : 'text-muted-foreground'}>
+                              ${decision.saved.toFixed(2)}
+                            </span>
+                          </td>
+                          <td className="py-2 px-3 text-xs text-muted-foreground max-w-xs truncate">
+                            {decision.reason}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        )}
       </Card>
     </div>
   );

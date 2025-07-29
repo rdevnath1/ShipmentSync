@@ -742,6 +742,7 @@ export class DatabaseStorage implements IStorage {
       startDate?: Date;
       endDate?: Date;
       routedTo?: string;
+      minSaved?: number;
     }
   ): Promise<MiddlewareAnalytics[]> {
     let query = db
@@ -758,6 +759,9 @@ export class DatabaseStorage implements IStorage {
     }
     if (filters?.routedTo) {
       query = query.where(eq(middlewareAnalytics.routedTo, filters.routedTo));
+    }
+    if (filters?.minSaved !== undefined) {
+      query = query.where(gte(middlewareAnalytics.savedAmount, filters.minSaved.toString()));
     }
 
     return await query.orderBy(desc(middlewareAnalytics.createdAt));
