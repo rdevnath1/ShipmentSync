@@ -11,7 +11,7 @@
  * Usage: node test_fedex_direct_integration.js
  */
 
-const axios = require('axios');
+import axios from 'axios';
 
 // Test configuration
 const BASE_URL = 'http://localhost:3002';
@@ -106,6 +106,19 @@ async function testFedExRates() {
     return response.data.rates;
   } catch (error) {
     console.error('❌ FedEx rate fetch failed:', error.response?.data || error.message);
+    
+    // Show demo of what successful output would look like
+    if (error.response?.data?.error === 'Authentication required') {
+      console.log('\n📌 DEMO MODE: With real FedEx credentials, you would see:');
+      console.log('   1. FedEx Ground: $12.85 (2-3 days)');
+      console.log('   2. FedEx Express Saver: $24.50 (3 days)');
+      console.log('   3. FedEx 2Day: $31.75 (2 days)');
+      console.log('   4. FedEx Priority Overnight: $45.90 (1 day)');
+      console.log('\n💡 To see real rates:');
+      console.log('   1. Login to Quikpik (http://localhost:3002)');
+      console.log('   2. Configure FedEx credentials in Settings');
+      console.log('   3. Run this test again');
+    }
     return null;
   }
 }

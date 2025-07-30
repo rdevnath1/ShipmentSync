@@ -2,34 +2,42 @@ Using local PostgreSQL database connection
 Storage selection: NODE_ENV=development, DATABASE_URL=set
 Using DatabaseStorage
 Using memory store for sessions in development mode
-Demo data initialized successfully
-5:20:51 PM [express] serving on port 3002
+Error initializing demo data: AggregateError [ECONNREFUSED]: 
+    at /workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async <anonymous> (/workspace/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getOrganizationBySlug (/workspace/server/storage.ts:113:19)
+    at async initializeDemoData (/workspace/server/routes.ts:81:21)
+    at async registerRoutes (/workspace/server/routes.ts:151:5)
+    at async <anonymous> (/workspace/server/index.ts:42:18) {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:5432
+        at createConnectionError (node:net:1677:14)
+        at afterConnectMultiple (node:net:1707:16) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 5432
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:5432
+        at createConnectionError (node:net:1677:14)
+        at afterConnectMultiple (node:net:1707:16) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 5432
+    }
+  ]
+}
+9:33:41 PM [express] serving on port 3002
 ✅ Server successfully listening on port 3002
 ✅ Frontend should be accessible at http://localhost:3002
 ✅ API should be accessible at http://localhost:3002/api
-5:20:52 PM [express] GET /api/health 200 in 1ms :: {"status":"ok","timestamp":"2025-07-30T21:20:52.9…
+9:33:42 PM [express] GET /api/health 200 in 1ms :: {"status":"ok","timestamp":"2025-07-30T21:33:42.3…
 ✅ Server self-test successful: 200
-5:20:54 PM [express] GET /api/health 200 in 0ms :: {"status":"ok","timestamp":"2025-07-30T21:20:54.4…
-5:22:42 PM [express] GET /api/auth/user 401 in 5ms :: {"error":"Authentication required"}
-Development login successful for: rajan@quikpik.io
-5:22:45 PM [express] POST /api/auth/login 200 in 2ms :: {"success":true,"user":{"id":1,"email":"raja…
-5:22:45 PM [express] GET /api/auth/user 304 in 1ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
-5:22:45 PM [express] GET /api/wallet 401 in 2ms :: {"error":"User organization not found"}
-5:22:45 PM [express] GET /api/orders 304 in 18ms :: {"orders":[{"id":11,"organizationId":1,"shipstat…
-5:22:45 PM [express] GET /api/orders/all 304 in 20ms :: {"orders":[{"id":11,"organizationId":1,"ship…
-5:22:45 PM [express] GET /api/organizations 304 in 20ms :: [{"id":2,"name":"Demo E-commerce Store","…
-5:22:45 PM [express] GET /api/auth/user 304 in 0ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
-5:22:45 PM [express] GET /api/wallet 401 in 1ms :: {"error":"User organization not found"}
-5:22:45 PM [express] GET /api/orders 304 in 2ms :: {"orders":[{"id":11,"organizationId":1,"shipstati…
-5:22:45 PM [express] GET /api/orders/all 304 in 2ms :: {"orders":[{"id":11,"organizationId":1,"ships…
-5:22:45 PM [express] GET /api/organizations 304 in 3ms :: [{"id":2,"name":"Demo E-commerce Store","s…
-5:22:48 PM [express] GET /api/auth/user 304 in 1ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
-5:22:48 PM [express] GET /api/wallet 401 in 3ms :: {"error":"User organization not found"}
-5:22:48 PM [express] GET /api/orders 304 in 5ms :: {"orders":[{"id":11,"organizationId":1,"shipstati…
-5:22:48 PM [express] GET /api/orders/all 304 in 3ms :: {"orders":[{"id":11,"organizationId":1,"ships…
-5:22:48 PM [express] GET /api/organizations 304 in 9ms :: [{"id":2,"name":"Demo E-commerce Store","s…
-5:23:46 PM [express] GET /api/auth/user 304 in 2ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
-5:23:46 PM [express] GET /api/wallet 401 in 1ms :: {"error":"User organization not found"}
-5:23:46 PM [express] GET /api/orders 304 in 13ms :: {"orders":[{"id":11,"organizationId":1,"shipstat…
-5:23:46 PM [express] GET /api/orders/all 304 in 13ms :: {"orders":[{"id":11,"organizationId":1,"ship…
-5:23:46 PM [express] GET /api/organizations 304 in 14ms :: [{"id":2,"name":"Demo E-commerce Store","…
+9:33:45 PM [express] GET /api/health 200 in 1ms :: {"status":"ok","timestamp":"2025-07-30T21:33:45.2…
+9:33:50 PM [express] POST /api/fedex/rates 401 in 2ms :: {"error":"Authentication required"}
+9:34:17 PM [express] POST /api/fedex/rates 401 in 1ms :: {"error":"Authentication required"}
