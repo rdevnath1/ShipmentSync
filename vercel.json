@@ -4,10 +4,6 @@
     {
       "src": "server/index.ts",
       "use": "@vercel/node"
-    },
-    {
-      "src": "dist/public/**",
-      "use": "@vercel/static"
     }
   ],
   "routes": [
@@ -16,16 +12,8 @@
       "dest": "server/index.ts"
     },
     {
-      "src": "/assets/(.*)",
-      "dest": "dist/public/assets/$1"
-    },
-    {
-      "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot))",
-      "dest": "dist/public/$1"
-    },
-    {
       "src": "/(.*)",
-      "dest": "dist/public/index.html"
+      "dest": "server/index.ts"
     }
   ],
   "env": {
@@ -35,6 +23,5 @@
     "server/index.ts": {
       "maxDuration": 30
     }
-  },
-  "buildCommand": "npm run build"
+  }
 } 

@@ -63,10 +63,17 @@ app.use((req, res, next) => {
     if (fs.existsSync(distPath)) {
       console.log("Serving static files from:", distPath);
       app.use(express.static(distPath));
-      // fall through to index.html if the file doesn't exist
+      
+      // Serve index.html for all non-API routes
       app.use("*", (req, res) => {
-        console.log("Serving index.html for path:", req.path);
-        res.sendFile(path.resolve(distPath, "index.html"));
+        console.log("Request for:", req.path);
+        if (req.path.startsWith("/api")) {
+          res.status(404).json({ error: "API endpoint not found" });
+        } else {
+          console.log("Serving index.html for path:", req.path);
+          res.setHeader('Content-Type', 'text/html');
+          res.sendFile(path.resolve(distPath, "index.html"));
+        }
       });
     } else {
       // If no build exists, serve a simple HTML page
