@@ -57,16 +57,31 @@ app.use((req, res, next) => {
   } else {
     // In production, serve static files from the built client
     const distPath = path.resolve(import.meta.dirname, "..", "dist", "public");
+    console.log("Looking for dist path:", distPath);
+    console.log("Dist path exists:", fs.existsSync(distPath));
+    
     if (fs.existsSync(distPath)) {
+      console.log("Serving static files from:", distPath);
       app.use(express.static(distPath));
       // fall through to index.html if the file doesn't exist
-      app.use("*", (_req, res) => {
+      app.use("*", (req, res) => {
+        console.log("Serving index.html for path:", req.path);
         res.sendFile(path.resolve(distPath, "index.html"));
       });
     } else {
       // If no build exists, serve a simple message
-      app.use("*", (_req, res) => {
-        res.status(404).json({ error: "Client not built. Run 'npm run build' first." });
+      console.log("No dist directory found, serving error message");
+      app.use("*", (req, res) => {
+        console.log("Request for:", req.path);
+        if (req.path.startsWith("/api")) {
+          res.status(404).json({ error: "API endpoint not found" });
+        } else {
+          res.status(404).json({ 
+            error: "Client not built. Run 'npm run build' first.",
+            path: req.path,
+            distPath: distPath
+          });
+        }
       });
     }
   }
