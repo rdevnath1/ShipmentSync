@@ -321,7 +321,7 @@ export class ShipStationService {
     }
   }
 
-  async getRates(params: {
+  async getRatesWithParams(params: {
     carrierCode?: string | null;
     fromPostalCode: string;
     toPostalCode: string;
