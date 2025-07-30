@@ -30,7 +30,7 @@ echo "Waiting for server to start..."
 
 # Wait for server to be ready
 for i in {1..30}; do
-    if curl -f http://:3002 >/dev/null 2>&1; then
+    if curl -f http://localhost:3002 >/dev/null 2>&1; then
         echo "✅ Server is ready at http://localhost:3002"
         exit 0
     fi
@@ -39,4 +39,4 @@ for i in {1..30}; do
 done
 
 echo "❌ Server failed to start"
-exit 1
+exit 1how m

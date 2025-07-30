@@ -60,7 +60,7 @@ export interface FedExShipmentResponse {
   estimatedDeliveryDate?: string;
 }
 
-class FedExService {
+export class FedExService {
   private baseUrl: string;
   private clientId: string;
   private clientSecret: string;

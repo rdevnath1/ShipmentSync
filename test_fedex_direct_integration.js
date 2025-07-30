@@ -16,12 +16,12 @@ const axios = require('axios');
 // Test configuration
 const BASE_URL = 'http://localhost:3002';
 const TEST_CONFIG = {
-  // Customer should replace these with their actual FedEx credentials
+  // Demo credentials for testing (replace with real credentials for production)
   fedexCredentials: {
-    apiUrl: 'https://apis-sandbox.fedex.com', // Use sandbox for testing
-    clientId: 'YOUR_FEDEX_CLIENT_ID',
-    clientSecret: 'YOUR_FEDEX_CLIENT_SECRET',
-    accountNumber: 'YOUR_FEDEX_ACCOUNT_NUMBER'
+    apiUrl: process.env.FEDEX_API_URL || 'https://apis-sandbox.fedex.com',
+    clientId: process.env.FEDEX_CLIENT_ID || 'demo_client_id_12345',
+    clientSecret: process.env.FEDEX_CLIENT_SECRET || 'demo_client_secret_67890',
+    accountNumber: process.env.FEDEX_ACCOUNT_NUMBER || '123456789'
   },
   testShipment: {
     fromAddress: {
