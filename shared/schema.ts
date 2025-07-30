@@ -365,6 +365,20 @@ export const walletTransactionsRelations = relations(walletTransactions, ({ one 
   }),
 }));
 
+export const rateComparisons = pgTable("rate_comparisons", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").references(() => organizations.id).notNull(),
+  orderId: text("order_id").notNull(),
+  quikpikCost: decimal("quikpik_cost", { precision: 10, scale: 2 }).notNull(),
+  competitorCosts: jsonb("competitor_costs").notNull(), // Array of {carrier, cost, service}
+  winningCarrier: text("winning_carrier").notNull(),
+  winningCost: decimal("winning_cost", { precision: 10, scale: 2 }).notNull(),
+  savings: decimal("savings", { precision: 10, scale: 2 }).notNull(),
+  savingsPercentage: decimal("savings_percentage", { precision: 5, scale: 2 }).notNull(),
+  timestamp: timestamp("timestamp").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Export types for TypeScript
 export type Organization = typeof organizations.$inferSelect;
 export type InsertOrganization = typeof organizations.$inferInsert;
@@ -392,6 +406,8 @@ export type Wallet = typeof wallets.$inferSelect;
 export type InsertWallet = typeof wallets.$inferInsert;
 export type WalletTransaction = typeof walletTransactions.$inferSelect;
 export type InsertWalletTransaction = typeof walletTransactions.$inferInsert;
+export type RateComparison = typeof rateComparisons.$inferSelect;
+export type InsertRateComparison = typeof rateComparisons.$inferInsert;
 
 // Zod schemas for validation
 export const insertOrganizationSchema = createInsertSchema(organizations);

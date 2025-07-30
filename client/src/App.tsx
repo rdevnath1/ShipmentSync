@@ -17,6 +17,7 @@ import Login from "@/pages/login";
 import NotFound from "@/pages/not-found";
 import RateCalculatorPage from "@/pages/rate-calculator";
 import LandingPage from "@/pages/landing";
+import Reports from "@/pages/reports";
 import Sidebar from "@/components/sidebar";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -50,10 +51,15 @@ function Router() {
     return user?.role === 'master' ? MasterDashboard : Dashboard;
   };
 
-  // Authenticated routes
+  // Authenticated routes with sidebar only
   return (
     <div className="min-h-screen flex">
-      <Sidebar />
+      {/* Sidebar */}
+      <div className="hidden lg:block">
+        <Sidebar />
+      </div>
+      
+      {/* Main Content */}
       <main className="flex-1 lg:ml-64">
         <Switch>
           <Route path="/app" component={getDashboardComponent()} />
@@ -62,6 +68,7 @@ function Router() {
           <Route path="/app/analytics" component={Analytics} />
           <Route path="/app/audit-logs" component={AuditLogs} />
           <Route path="/app/rate-calculator" component={RateCalculatorPage} />
+          <Route path="/app/reports" component={Reports} />
           <Route path="/app/settings" component={Settings} />
           <Route path="/tracking" component={Tracking} />
           <Route path="/" component={getDashboardComponent()} />

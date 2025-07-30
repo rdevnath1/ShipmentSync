@@ -14,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Settings, Key, Bell, Globe, Shield, Copy, Trash2, Edit, Plus, Eye, EyeOff, Lock, Truck, Wallet, DollarSign, CreditCard, Building2 } from "lucide-react";
+import { Settings, Key, Bell, Globe, Shield, Copy, Trash2, Edit, Plus, Eye, EyeOff, Lock, Truck, Wallet, DollarSign, CreditCard, Building2, Zap, Clock, AlertCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -56,6 +56,17 @@ const carrierAccountSchema = z.object({
   userId: z.string().optional(),
   apiUrl: z.string().optional(),
   enabled: z.boolean().default(false),
+});
+
+const automationRulesSchema = z.object({
+  autoSelectCheapestCarrier: z.boolean(),
+  autoCreateLabels: z.boolean(),
+  batchProcessingEnabled: z.boolean(),
+  batchProcessingSchedule: z.enum(["immediate", "hourly", "daily"]),
+  lowBalanceThreshold: z.number().min(0),
+  lowBalanceAlerts: z.boolean(),
+  preferredCarrier: z.enum(["none", "quikpik", "fedex", "usps"]),
+  maxRetryAttempts: z.number().min(1).max(5),
 });
 
 export default function SettingsPage() {
@@ -118,6 +129,20 @@ export default function SettingsPage() {
     },
   });
 
+  const automationForm = useForm({
+    resolver: zodResolver(automationRulesSchema),
+    defaultValues: {
+      autoSelectCheapestCarrier: false,
+      autoCreateLabels: false,
+      batchProcessingEnabled: false,
+      batchProcessingSchedule: "hourly" as const,
+      lowBalanceThreshold: 50,
+      lowBalanceAlerts: true,
+      preferredCarrier: "none" as const,
+      maxRetryAttempts: 3,
+    },
+  });
+
   const handleApiSettingsSave = (data: any) => {
     // In a real app, this would save to backend
     console.log("API Settings:", data);
@@ -160,6 +185,15 @@ export default function SettingsPage() {
     toast({
       title: "Success",
       description: "Notification settings saved successfully",
+    });
+  };
+
+  const handleAutomationRulesSave = (data: any) => {
+    // In a real app, this would save to backend
+    console.log("Automation Rules:", data);
+    toast({
+      title: "Success",
+      description: "Automation rules saved successfully",
     });
   };
 
@@ -433,7 +467,7 @@ export default function SettingsPage() {
       
       <div className="p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className={`grid w-full ${isMasterAdmin ? 'grid-cols-5' : 'grid-cols-4'}`}>
+          <TabsList className={`grid w-full ${isMasterAdmin ? 'grid-cols-6' : 'grid-cols-5'}`}>
             <TabsTrigger value="api" className="flex items-center space-x-2">
               <Key size={16} />
               <span>API Keys</span>
@@ -441,6 +475,10 @@ export default function SettingsPage() {
             <TabsTrigger value="carriers" className="flex items-center space-x-2">
               <Truck size={16} />
               <span>Carriers</span>
+            </TabsTrigger>
+            <TabsTrigger value="automation" className="flex items-center space-x-2">
+              <Zap size={16} />
+              <span>Automation</span>
             </TabsTrigger>
             <TabsTrigger value="wallet" className="flex items-center space-x-2">
               <Wallet size={16} />
@@ -776,6 +814,201 @@ export default function SettingsPage() {
                     )}
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="automation" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Zap size={20} />
+                  <span>Automation Rules</span>
+                </CardTitle>
+                <p className="text-slate-600">Configure automated shipping workflows and rules</p>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={automationForm.handleSubmit(handleAutomationRulesSave)} className="space-y-6">
+                  {/* Carrier Selection Rules */}
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-slate-900 flex items-center">
+                      <Truck size={16} className="mr-2" />
+                      Carrier Selection
+                    </h4>
+                    
+                    <div className="space-y-4 pl-6 border-l-2 border-muted">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label htmlFor="auto-cheapest">Auto-select cheapest carrier</Label>
+                          <p className="text-sm text-muted-foreground">Automatically choose the lowest cost shipping option</p>
+                        </div>
+                        <Switch
+                          id="auto-cheapest"
+                          checked={automationForm.watch("autoSelectCheapestCarrier")}
+                          onCheckedChange={(checked) => automationForm.setValue("autoSelectCheapestCarrier", checked)}
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="preferred-carrier">Preferred carrier (fallback)</Label>
+                        <Select
+                          value={automationForm.watch("preferredCarrier")}
+                          onValueChange={(value: any) => automationForm.setValue("preferredCarrier", value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select preferred carrier" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">No preference</SelectItem>
+                            <SelectItem value="quikpik">Quikpik</SelectItem>
+                            <SelectItem value="fedex">FedEx</SelectItem>
+                            <SelectItem value="usps">USPS</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Used when auto-selection fails or rates are unavailable
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Label Creation */}
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-slate-900 flex items-center">
+                      <Plus size={16} className="mr-2" />
+                      Label Creation
+                    </h4>
+                    
+                    <div className="space-y-4 pl-6 border-l-2 border-muted">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label htmlFor="auto-labels">Auto-create shipping labels</Label>
+                          <p className="text-sm text-muted-foreground">Automatically generate labels after carrier selection</p>
+                        </div>
+                        <Switch
+                          id="auto-labels"
+                          checked={automationForm.watch("autoCreateLabels")}
+                          onCheckedChange={(checked) => automationForm.setValue("autoCreateLabels", checked)}
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="retry-attempts">Max retry attempts</Label>
+                        <Select
+                          value={automationForm.watch("maxRetryAttempts").toString()}
+                          onValueChange={(value) => automationForm.setValue("maxRetryAttempts", parseInt(value))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1">1 attempt</SelectItem>
+                            <SelectItem value="2">2 attempts</SelectItem>
+                            <SelectItem value="3">3 attempts</SelectItem>
+                            <SelectItem value="4">4 attempts</SelectItem>
+                            <SelectItem value="5">5 attempts</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Number of times to retry failed label creation
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Batch Processing */}
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-slate-900 flex items-center">
+                      <Clock size={16} className="mr-2" />
+                      Batch Processing
+                    </h4>
+                    
+                    <div className="space-y-4 pl-6 border-l-2 border-muted">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label htmlFor="batch-processing">Enable batch processing</Label>
+                          <p className="text-sm text-muted-foreground">Process multiple orders automatically</p>
+                        </div>
+                        <Switch
+                          id="batch-processing"
+                          checked={automationForm.watch("batchProcessingEnabled")}
+                          onCheckedChange={(checked) => automationForm.setValue("batchProcessingEnabled", checked)}
+                        />
+                      </div>
+
+                      {automationForm.watch("batchProcessingEnabled") && (
+                        <div>
+                          <Label htmlFor="batch-schedule">Processing schedule</Label>
+                          <Select
+                            value={automationForm.watch("batchProcessingSchedule")}
+                            onValueChange={(value: any) => automationForm.setValue("batchProcessingSchedule", value)}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="immediate">Process immediately</SelectItem>
+                              <SelectItem value="hourly">Every hour</SelectItem>
+                              <SelectItem value="daily">Daily at 9 AM</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            When to automatically process pending orders
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Low Balance Alerts */}
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-slate-900 flex items-center">
+                      <AlertCircle size={16} className="mr-2" />
+                      Wallet Alerts
+                    </h4>
+                    
+                    <div className="space-y-4 pl-6 border-l-2 border-muted">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label htmlFor="low-balance-alerts">Low balance notifications</Label>
+                          <p className="text-sm text-muted-foreground">Get notified when wallet balance is low</p>
+                        </div>
+                        <Switch
+                          id="low-balance-alerts"
+                          checked={automationForm.watch("lowBalanceAlerts")}
+                          onCheckedChange={(checked) => automationForm.setValue("lowBalanceAlerts", checked)}
+                        />
+                      </div>
+
+                      {automationForm.watch("lowBalanceAlerts") && (
+                        <div>
+                          <Label htmlFor="threshold">Alert threshold ($)</Label>
+                          <Input
+                            id="threshold"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={automationForm.watch("lowBalanceThreshold")}
+                            onChange={(e) => automationForm.setValue("lowBalanceThreshold", parseFloat(e.target.value) || 0)}
+                          />
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Send alert when balance falls below this amount
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end pt-4">
+                    <Button type="submit">Save Automation Rules</Button>
+                  </div>
+                </form>
               </CardContent>
             </Card>
           </TabsContent>
@@ -1336,6 +1569,15 @@ export default function SettingsPage() {
                         {...notificationForm.register("webhookUrl")}
                       />
                       <p className="text-sm text-slate-500 mt-1">Optional: Send notifications to your webhook endpoint</p>
+                      <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <p className="text-sm text-blue-800 dark:text-blue-200 font-medium">Webhook Events:</p>
+                        <ul className="text-xs text-blue-700 dark:text-blue-300 mt-1 space-y-1">
+                          <li>• Low wallet balance alerts</li>
+                          <li>• Shipment status updates</li>
+                          <li>• Failed shipment notifications</li>
+                          <li>• Order import completion</li>
+                        </ul>
+                      </div>
                     </div>
 
                     <div>

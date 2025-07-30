@@ -302,4 +302,119 @@ export class ShipStationService {
       return false;
     }
   }
+
+  // Methods needed by rate shopper
+  async getOrderFromResource(resourceUrl: string): Promise<ShipStationOrder | null> {
+    try {
+      // Extract order ID from resource URL
+      const orderIdMatch = resourceUrl.match(/orders\/(\d+)/);
+      if (!orderIdMatch) {
+        console.error('Could not extract order ID from resource URL:', resourceUrl);
+        return null;
+      }
+
+      const orderId = parseInt(orderIdMatch[1]);
+      return await this.getOrder(orderId);
+    } catch (error) {
+      console.error('Error fetching order from resource URL:', error);
+      return null;
+    }
+  }
+
+  async getRates(params: {
+    carrierCode?: string | null;
+    fromPostalCode: string;
+    toPostalCode: string;
+    toCountry: string;
+    weight: { value: number; units: string };
+    dimensions: { length: number; width: number; height: number; units: string };
+  }): Promise<any[]> {
+    try {
+      const rateRequest = {
+        carrierCode: params.carrierCode,
+        fromPostalCode: params.fromPostalCode,
+        toPostalCode: params.toPostalCode,
+        toCountry: params.toCountry,
+        weight: params.weight,
+        dimensions: params.dimensions
+      };
+
+      const response = await axios.post(
+        `${this.baseUrl}/shipments/getrates`,
+        rateRequest,
+        { headers: this.getAuthHeaders() }
+      );
+
+      return response.data || [];
+    } catch (error) {
+      console.error('Error getting rates from ShipStation:', error);
+      return [];
+    }
+  }
+
+  async createLabel(params: {
+    orderId: number;
+    carrierCode: string;
+    serviceCode: string;
+    packageCode: string;
+    confirmation: string;
+    shipDate: string;
+  }): Promise<{ trackingNumber: string; labelData: string }> {
+    try {
+      const labelRequest = {
+        orderId: params.orderId,
+        carrierCode: params.carrierCode,
+        serviceCode: params.serviceCode,
+        packageCode: params.packageCode,
+        confirmation: params.confirmation,
+        shipDate: params.shipDate
+      };
+
+      const response = await axios.post(
+        `${this.baseUrl}/orders/createlabelfororder`,
+        labelRequest,
+        { headers: this.getAuthHeaders() }
+      );
+
+      return {
+        trackingNumber: response.data.trackingNumber,
+        labelData: response.data.labelData
+      };
+    } catch (error) {
+      console.error('Error creating label in ShipStation:', error);
+      throw error;
+    }
+  }
+
+  async markOrderAsShipped(params: {
+    orderId: number;
+    carrierCode: string;
+    trackingNumber: string;
+    shipDate: string;
+    notifyCustomer: boolean;
+    notifyThirdParty: boolean;
+  }): Promise<boolean> {
+    try {
+      const shipmentData = {
+        orderId: params.orderId,
+        carrierCode: params.carrierCode,
+        trackingNumber: params.trackingNumber,
+        shipDate: params.shipDate,
+        notifyCustomer: params.notifyCustomer,
+        notifySalesChannel: params.notifyThirdParty
+      };
+
+      const response = await axios.post(
+        `${this.baseUrl}/orders/markasshipped`,
+        shipmentData,
+        { headers: this.getAuthHeaders() }
+      );
+
+      console.log('Order marked as shipped successfully:', response.data);
+      return true;
+    } catch (error) {
+      console.error('Error marking order as shipped:', error);
+      return false;
+    }
+  }
 }

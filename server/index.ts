@@ -56,15 +56,30 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 5000
+  // serve the app on the specified port (default 5000)
   // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
+  const port = parseInt(process.env.PORT || "5000");
+  const serverInstance = server.listen(port, '127.0.0.1', () => {
     log(`serving on port ${port}`);
+    console.log(`✅ Server successfully listening on port ${port}`);
+    console.log(`✅ Frontend should be accessible at http://localhost:${port}`);
+    console.log(`✅ API should be accessible at http://localhost:${port}/api`);
+    
+    // Test the server immediately after startup
+    setTimeout(async () => {
+      try {
+        const response = await fetch(`http://localhost:${port}/api/health`);
+        if (response.ok) {
+          console.log(`✅ Server self-test successful: ${response.status}`);
+        } else {
+          console.log(`❌ Server self-test failed: ${response.status}`);
+        }
+      } catch (err: any) {
+        console.log(`❌ Server self-test failed: ${err.message}`);
+      }
+    }, 1000);
+  }).on('error', (err) => {
+    console.error('❌ Server failed to start:', err);
+    process.exit(1);
   });
 })();

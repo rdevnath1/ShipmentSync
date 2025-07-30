@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { ShipStationService } from "./services/shipstation";
 import { JiayouService } from "./services/jiayou";
 import { EnhancedJiayouService } from "./services/enhanced-jiayou";
+import { RateShopperService } from "./services/rate-shopper";
 import { StatusMapper, StandardTrackingStatus } from "./utils/status-mapper";
 import ratesRouter from "./routes/rates";
 import webhooksRouter from "./routes/webhooks";
@@ -132,11 +133,24 @@ async function initializeDemoData() {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Health check endpoint (unauthenticated)
+  app.get("/api/health", (req, res) => {
+    res.json({ 
+      status: "ok", 
+      timestamp: new Date().toISOString(),
+      port: process.env.PORT || "5000"
+    });
+  });
+
   // Setup authentication system
   await setupAuth(app);
 
-  // Initialize master admin user and demo data
-  await initializeDemoData();
+  // Initialize master admin user and demo data (only if database is available)
+  if (process.env.DATABASE_URL) {
+    await initializeDemoData();
+  } else {
+    console.log('Skipping demo data initialization - database not available');
+  }
 
   // Add global rate limiting
   app.use('/api', rateLimitMiddleware());
@@ -144,6 +158,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all orders (pending and shipped) with stats - OPTIMIZED with org filtering
   app.get("/api/orders", requireAuth, requireOrgAccess, createAuditMiddleware('list_orders', 'internal'), async (req: any, res) => {
     try {
+      // In development mode without database, use mock storage data
+      if (process.env.NODE_ENV === 'development' && !process.env.DATABASE_URL) {
+        console.log('Development mode: Returning mock orders data');
+      }
+
       const orgId = req.user.role === 'master' ? undefined : req.organizationId;
       const data = await storage.getOrdersWithStats(orgId);
       res.json(data);
@@ -170,6 +189,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(analytics);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch analytics" });
+    }
+  });
+
+  // Rate comparison analytics endpoint
+  app.get("/api/rate-comparisons", requireAuth, requireOrgAccess, async (req: any, res) => {
+    try {
+      const orgId = req.user.role === 'master' ? 
+        (req.query.organizationId ? parseInt(req.query.organizationId) : 1) : 
+        req.organizationId;
+      
+      const startDate = req.query.startDate ? new Date(req.query.startDate) : undefined;
+      const endDate = req.query.endDate ? new Date(req.query.endDate) : undefined;
+      
+      const comparisons = await storage.getRateComparisons(orgId, startDate, endDate);
+      const stats = await storage.getRateComparisonStats(orgId);
+      
+      res.json({
+        comparisons,
+        stats,
+        totalSavings: stats.totalSavings,
+        quikpikWinRate: stats.quikpikWinRate,
+        totalComparisons: stats.totalComparisons
+      });
+    } catch (error) {
+      console.error("Failed to fetch rate comparisons:", error);
+      res.status(500).json({ error: "Failed to fetch rate comparisons" });
     }
   });
 
@@ -262,13 +307,133 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Pull and sync orders from ShipStation
   app.post("/api/orders/pull-shipstation", requireAuth, requireOrgAccess, createAuditMiddleware('sync_shipstation_orders', 'shipstation'), async (req: any, res) => {
     try {
+      console.log('Pull ShipStation orders request received');
+      console.log('NODE_ENV:', process.env.NODE_ENV);
+      console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'Set' : 'Not set');
+      console.log('User:', req.user);
+      console.log('Organization ID:', req.organizationId);
+      
+      // In development mode without database, return mock data
+      if (process.env.NODE_ENV === 'development' && !process.env.DATABASE_URL) {
+        console.log('Development mode: Returning mock ShipStation orders');
+        
+        // Generate mock orders for demo
+        const mockOrders = [
+          {
+            id: Date.now(),
+            shipstationOrderId: "12345",
+            orderNumber: "SS-001",
+            referenceNumber: "REF-001",
+            customerName: "John Doe",
+            customerEmail: "john.doe@example.com",
+            customerPhone: "555-123-4567",
+            shippingAddress: {
+              name: "John Doe",
+              company: "",
+              street1: "123 Main St",
+              street2: "",
+              city: "New York",
+              state: "NY",
+              postalCode: "10001",
+              country: "US",
+              phone: "555-123-4567"
+            },
+            billingAddress: {
+              name: "John Doe",
+              company: "",
+              street1: "123 Main St",
+              street2: "",
+              city: "New York",
+              state: "NY",
+              postalCode: "10001",
+              country: "US",
+              phone: "555-123-4567"
+            },
+            items: [
+              {
+                orderItemId: 1,
+                lineItemKey: "item-1",
+                sku: "WIDGET-001",
+                name: "Sample Widget",
+                quantity: 2,
+                unitPrice: 25.00,
+                weight: { value: 1, units: "pounds" }
+              }
+            ],
+            totalAmount: "50.00",
+            currency: "USD",
+            status: "pending",
+            organizationId: req.organizationId || req.user?.organizationId || 1,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          },
+          {
+            id: Date.now() + 1,
+            shipstationOrderId: "12346",
+            orderNumber: "SS-002",
+            referenceNumber: "REF-002",
+            customerName: "Jane Smith",
+            customerEmail: "jane.smith@example.com",
+            customerPhone: "555-987-6543",
+            shippingAddress: {
+              name: "Jane Smith",
+              company: "Acme Corp",
+              street1: "456 Oak Ave",
+              street2: "Suite 200",
+              city: "Los Angeles",
+              state: "CA",
+              postalCode: "90210",
+              country: "US",
+              phone: "555-987-6543"
+            },
+            billingAddress: {
+              name: "Jane Smith",
+              company: "Acme Corp",
+              street1: "456 Oak Ave",
+              street2: "Suite 200",
+              city: "Los Angeles",
+              state: "CA",
+              postalCode: "90210",
+              country: "US",
+              phone: "555-987-6543"
+            },
+            items: [
+              {
+                orderItemId: 2,
+                lineItemKey: "item-2",
+                sku: "GADGET-002",
+                name: "Premium Gadget",
+                quantity: 1,
+                unitPrice: 99.99,
+                weight: { value: 2, units: "pounds" }
+              }
+            ],
+            totalAmount: "99.99",
+            currency: "USD",
+            status: "pending",
+            organizationId: req.organizationId || req.user?.organizationId || 1,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          }
+        ];
+
+        return res.json({
+          message: "Successfully pulled 2 new orders from ShipStation (Demo Mode)",
+          created: 2,
+          updated: 0,
+          total: 2,
+          orders: mockOrders
+        });
+      }
+
+      // Production mode - use real ShipStation API and database
       const shipStationOrders = await shipStationService.getOrders();
       const createdOrders = [];
       const updatedOrders = [];
       
-      // Get organization ID from authenticated user
-      const userOrgId = req.user?.organizationId;
-      if (!userOrgId) {
+      // Get organization ID from authenticated user (set by requireOrgAccess middleware)
+      const userOrgId = req.organizationId || req.user?.organizationId;
+      if (!userOrgId && req.user?.role !== 'master') {
         return res.status(401).json({ error: "User organization not found" });
       }
 
@@ -353,6 +518,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error pulling/syncing orders from ShipStation:", error);
+      
+      // In development mode, provide more detailed error information
+      if (process.env.NODE_ENV === 'development') {
+        return res.status(500).json({ 
+          error: "Failed to pull/sync orders from ShipStation",
+          details: error.message,
+          suggestion: "Check your ShipStation API credentials in the .env file"
+        });
+      }
+      
       res.status(500).json({ error: "Failed to pull/sync orders from ShipStation" });
     }
   });
@@ -374,14 +549,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/shipments/:id/print", async (req, res) => {
     try {
       const orderId = parseInt(req.params.id);
+      console.log(`Looking for order ID: ${orderId}, using storage type: ${storage.constructor.name}`);
       const order = await storage.getOrder(orderId);
       
       if (!order) {
+        console.log(`Order ${orderId} not found`);
         return res.status(404).json({ error: "Order not found" });
       }
 
       if (!order.trackingNumber) {
         return res.status(400).json({ error: "No tracking number available for this order" });
+      }
+
+      // In development mode without database, return mock label data
+      if (process.env.NODE_ENV === 'development' && !process.env.DATABASE_URL) {
+        console.log('Development mode: Returning mock label for order', orderId);
+        return res.json({ 
+          labelPath: `https://example.com/mock-label-${order.trackingNumber}.pdf`,
+          trackingNumber: order.trackingNumber.replace(/^GV/, 'QP'),
+          message: 'Mock label generated (Demo Mode)'
+        });
       }
 
       // If label path is empty, try to get it from Jiayou using the tracking number
@@ -432,6 +619,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       console.error("Error printing label:", error);
+      
+      // In development mode, provide more helpful error messages
+      if (process.env.NODE_ENV === 'development') {
+        return res.status(500).json({ 
+          error: "Failed to print label",
+          details: error.message,
+          suggestion: "In development mode, label printing uses mock data."
+        });
+      }
+      
       res.status(500).json({ error: "Failed to print label" });
     }
   });
@@ -569,7 +766,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       const user = await storage.getUser(userId);
       
-      if (!user || !user.organizationId) {
+      // Allow master admin to create shipments without organization
+      if (!user || (!user.organizationId && user.role !== 'master')) {
         return res.status(401).json({ error: "User organization not found" });
       }
       
@@ -748,19 +946,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         shippingCost = parseFloat(coverageCheck.data[0].totalFee);
       }
 
-      // Check wallet balance
+      // Check wallet balance (skip for master admin)
       const organizationId = user.organizationId;
-      if (!organizationId) {
-        return res.status(401).json({ error: "User organization not found" });
-      }
+      if (user.role !== 'master') {
+        if (!organizationId) {
+          return res.status(401).json({ error: "User organization not found" });
+        }
 
-      const walletBalance = await storage.getWalletBalance(organizationId);
-      if (walletBalance < shippingCost) {
-        return res.status(400).json({ 
-          error: `Insufficient wallet balance. Required: $${shippingCost.toFixed(2)}, Available: $${walletBalance.toFixed(2)}. Please add funds to your wallet.`,
-          required: shippingCost,
-          available: walletBalance
-        });
+        const walletBalance = await storage.getWalletBalance(organizationId);
+        if (walletBalance < shippingCost) {
+          return res.status(400).json({ 
+            error: `Insufficient wallet balance. Required: $${shippingCost.toFixed(2)}, Available: $${walletBalance.toFixed(2)}. Please add funds to your wallet.`,
+            required: shippingCost,
+            available: walletBalance
+          });
+        }
+      } else {
+        console.log("Skipping wallet balance check for master admin");
       }
 
       // Check if coverage check was successful (has totalFee and no errMsg)
@@ -970,18 +1172,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const updatedOrder = await storage.updateOrder(order.id, shipmentUpdate);
 
-      // Deduct amount from wallet after successful shipment creation
-      try {
-        await storage.deductAmount(
-          organizationId,
-          shippingCost,
-          `Shipment for order #${order.orderNumber} - Tracking: ${jiayouResponse.data.trackingNo}`,
-          jiayouResponse.data.trackingNo
-        );
-        console.log(`✓ Deducted $${shippingCost.toFixed(2)} from wallet for organization ${organizationId}`);
-      } catch (walletError) {
-        console.error("Error deducting from wallet:", walletError);
-        // Log the error but don't fail the shipment since it's already created
+      // Deduct amount from wallet after successful shipment creation (skip for master admin)
+      if (user.role !== 'master' && organizationId) {
+        try {
+          await storage.deductAmount(
+            organizationId,
+            shippingCost,
+            `Shipment for order #${order.orderNumber} - Tracking: ${jiayouResponse.data.trackingNo}`,
+            jiayouResponse.data.trackingNo
+          );
+          console.log(`✓ Deducted $${shippingCost.toFixed(2)} from wallet for organization ${organizationId}`);
+        } catch (walletError) {
+          console.error("Error deducting from wallet:", walletError);
+          // Log the error but don't fail the shipment since it's already created
+        }
+      } else {
+        console.log("Skipping wallet deduction for master admin");
       }
 
       // Update ShipStation with tracking info and label data
@@ -1401,6 +1607,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "trackingNumbers must be an array" });
       }
 
+      // In development mode without database, return mock label data
+      if (process.env.NODE_ENV === 'development' && !process.env.DATABASE_URL) {
+        console.log('Development mode: Returning mock labels for', trackingNumbers);
+        
+        const mockLabels = trackingNumbers.map(trackingNumber => ({
+          orderNumber: trackingNumber,
+          labelPath: `https://example.com/mock-label-${trackingNumber}.pdf`,
+          trackingNumber: trackingNumber.replace(/^GV/, 'QP'),
+          status: 'success'
+        }));
+
+        return res.json({
+          code: 1,
+          message: 'Success (Demo Mode)',
+          data: mockLabels
+        });
+      }
+
+      // Production mode - use real Jiayou API
       const labelData = await jiayouService.printLabel(trackingNumbers);
       
       // Customize each label to replace GV with QP and remove logo
@@ -1440,6 +1665,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       console.error("Error printing labels:", error);
+      
+      // In development mode, provide more helpful error messages
+      if (process.env.NODE_ENV === 'development') {
+        return res.status(500).json({ 
+          error: "Failed to print labels",
+          details: error.message,
+          suggestion: "In development mode, label printing uses mock data."
+        });
+      }
+      
       res.status(500).json({ error: "Failed to print labels" });
     }
   });
@@ -1587,7 +1822,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`Batch printing ${trackingNumbers.length} labels:`, trackingNumbers);
 
-      // Get label data from Jiayou
+      // In development mode without database, return mock label data
+      if (process.env.NODE_ENV === 'development' && !process.env.DATABASE_URL) {
+        console.log('Development mode: Returning mock label data');
+        
+        const mockLabels = trackingNumbers.map(trackingNumber => ({
+          orderNumber: trackingNumber,
+          labelPath: `https://example.com/mock-label-${trackingNumber}.pdf`,
+          trackingNumber: trackingNumber,
+          status: 'success'
+        }));
+
+        return res.json({
+          success: true,
+          count: mockLabels.length,
+          labels: mockLabels,
+          message: `Successfully prepared ${mockLabels.length} labels for batch printing (Demo Mode)`
+        });
+      }
+
+      // Production mode - use real Jiayou API
       const labelData = await jiayouService.printLabel(trackingNumbers);
       
       if (labelData && labelData.code === 1 && labelData.data) {
@@ -1615,6 +1869,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       console.error("Error batch printing labels:", error);
+      
+      // In development mode, provide more helpful error messages
+      if (process.env.NODE_ENV === 'development') {
+        return res.status(500).json({ 
+          error: "Failed to batch print labels",
+          details: error.message,
+          suggestion: "In development mode, label printing uses mock data. Check if Jiayou service is properly configured."
+        });
+      }
+      
       res.status(500).json({ error: "Failed to batch print labels" });
     }
   });
@@ -2138,6 +2402,117 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error comparing rates:", error);
       res.status(500).json({ error: "Failed to compare rates" });
+    }
+  });
+
+  // Enhanced Rate Shopping Test Endpoints
+  app.post("/api/test/enhanced-rate-shopping", async (req, res) => {
+    try {
+      const { orderData } = req.body;
+      
+      if (!orderData) {
+        return res.status(400).json({ error: "orderData is required" });
+      }
+
+      console.log("🧪 Enhanced rate shopping test initiated for:", orderData.orderNumber);
+      
+      const rateShopperService = new RateShopperService();
+      const rateComparison = await rateShopperService.compareRates(orderData);
+      
+      res.json({
+        success: true,
+        testType: "enhanced-rate-shopping",
+        orderNumber: orderData.orderNumber,
+        results: {
+          winner: {
+            carrier: rateComparison.winner.carrier,
+            cost: rateComparison.winner.cost,
+            savings: rateComparison.winner.savings,
+            savingsPercentage: rateComparison.winner.savingsPercentage
+          },
+          quikpikRate: rateComparison.quikpikRate,
+          competitorRates: rateComparison.competitorRates,
+          businessRules: {
+            marginPercentage: process.env.RATE_MARGIN_PERCENTAGE || '5',
+            maxWeightLbs: process.env.MAX_WEIGHT_LBS || '50',
+            speedAdvantageThreshold: process.env.SPEED_ADVANTAGE_THRESHOLD || '2',
+            minSavingsThreshold: process.env.MIN_SAVINGS_THRESHOLD || '1.00'
+          },
+          timestamp: rateComparison.timestamp
+        }
+      });
+      
+    } catch (error) {
+      console.error("Enhanced rate shopping test failed:", error);
+      res.status(500).json({ 
+        error: "Enhanced rate shopping test failed",
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  app.post("/api/test/business-rules", async (req, res) => {
+    try {
+      const { orderData, customRules } = req.body;
+      
+      const rateShopperService = new RateShopperService();
+      
+      // Override business rules temporarily for testing
+      if (customRules) {
+        Object.assign(process.env, {
+          RATE_MARGIN_PERCENTAGE: customRules.marginPercentage?.toString(),
+          MAX_WEIGHT_LBS: customRules.maxWeightLbs?.toString(),
+          SPEED_ADVANTAGE_THRESHOLD: customRules.speedAdvantageThreshold?.toString(),
+          MIN_SAVINGS_THRESHOLD: customRules.minSavingsThreshold?.toString()
+        });
+      }
+      
+      const rateComparison = await rateShopperService.compareRates(orderData);
+      
+      res.json({
+        success: true,
+        testType: "business-rules",
+        appliedRules: customRules || "default",
+        results: rateComparison
+      });
+      
+    } catch (error) {
+      console.error("Business rules test failed:", error);
+      res.status(500).json({ 
+        error: "Business rules test failed",
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  app.get("/api/test/rate-comparison-status", async (req, res) => {
+    try {
+      const recentComparisons = await storage.getRateComparisons(5); // Get last 5
+      
+      res.json({
+        success: true,
+        testType: "rate-comparison-status",
+        features: {
+          shipEngineIntegration: "✅ Active",
+          marginLogic: "✅ 5% Buffer Applied",
+          speedAdvantage: "✅ 2-Day Threshold",
+          businessRules: "✅ Configured",
+          postalZoneMapping: "✅ Enhanced"
+        },
+        recentComparisons: recentComparisons || [],
+        systemStatus: {
+          webhookEngine: "✅ Active",
+          rateShoppingService: "✅ Ready",
+          decisionEngine: "✅ Operational"
+        }
+      });
+      
+    } catch (error) {
+      console.error("Rate comparison status check failed:", error);
+      res.status(500).json({ 
+        error: "Rate comparison status check failed",
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   });
 

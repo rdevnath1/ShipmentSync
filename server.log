@@ -1,0 +1,2550 @@
+Using local PostgreSQL database connection
+Storage selection: NODE_ENV=development, DATABASE_URL=set
+Using DatabaseStorage
+Using memory store for sessions in development mode
+Demo data initialized successfully
+9:10:24 PM [express] serving on port 3002
+✅ Server successfully listening on port 3002
+✅ Frontend should be accessible at http://localhost:3002
+✅ API should be accessible at http://localhost:3002/api
+9:10:25 PM [express] GET /api/health 200 in 3ms :: {"status":"ok","timestamp":"2025-07-30T01:10:25.9…
+✅ Server self-test successful: 200
+Browserslist: browsers data (caniuse-lite) is 9 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+9:10:45 PM [express] GET /api/auth/user 401 in 1ms :: {"error":"Authentication required"}
+Development login successful for: rajan@quikpik.io
+9:10:47 PM [express] POST /api/auth/login 200 in 2ms :: {"success":true,"user":{"id":1,"email":"raja…
+9:10:47 PM [express] GET /api/auth/user 304 in 1ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+9:10:47 PM [express] GET /api/auth/user 304 in 4ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+9:10:47 PM [express] GET /api/wallet 401 in 0ms :: {"error":"User organization not found"}
+9:10:47 PM [express] GET /api/orders/all 304 in 11ms :: {"orders":[{"id":11,"organizationId":1,"ship…
+9:10:47 PM [express] GET /api/orders 304 in 16ms :: {"orders":[{"id":11,"organizationId":1,"shipstat…
+9:10:47 PM [express] GET /api/organizations 304 in 16ms :: [{"id":2,"name":"Demo E-commerce Store","…
+9:11:00 PM [express] GET /api/health 200 in 0ms :: {"status":"ok","timestamp":"2025-07-30T01:11:00.4…
+9:11:28 PM [express] GET /api/auth/user 304 in 1ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+9:11:28 PM [express] GET /api/wallet 401 in 0ms :: {"error":"User organization not found"}
+9:11:28 PM [express] GET /api/orders 304 in 24ms :: {"orders":[{"id":11,"organizationId":1,"shipstat…
+9:11:28 PM [express] GET /api/orders/all 304 in 16ms :: {"orders":[{"id":11,"organizationId":1,"ship…
+9:11:28 PM [express] GET /api/organizations 304 in 22ms :: [{"id":2,"name":"Demo E-commerce Store","…
+9:13:16 PM [express] GET /api/wallet 401 in 2ms :: {"error":"User organization not found"}
+9:13:16 PM [express] GET /api/rate-comparisons/30d 200 in 4ms
+9:13:18 PM [express] GET /api/wallet 401 in 2ms :: {"error":"User organization not found"}
+9:13:21 PM [express] GET /api/wallet 401 in 1ms :: {"error":"User organization not found"}
+9:13:21 PM [express] GET /api/orders 304 in 23ms :: {"orders":[{"id":11,"organizationId":1,"shipstat…
+9:19:08 PM [express] GET /api/auth/user 304 in 2ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+9:19:08 PM [express] GET /api/auth/user 304 in 73ms :: {"user":{"id":1,"email":"rajan@quikpik.io","f…
+9:19:08 PM [express] GET /api/wallet 401 in 69ms :: {"error":"User organization not found"}
+9:19:09 PM [express] GET /api/wallet 401 in 3ms :: {"error":"User organization not found"}
+9:19:09 PM [express] GET /api/orders 304 in 206ms :: {"orders":[{"id":11,"organizationId":1,"shipsta…
+9:19:09 PM [express] GET /api/orders/all 304 in 157ms :: {"orders":[{"id":11,"organizationId":1,"shi…
+9:19:09 PM [express] GET /api/orders 304 in 5ms :: {"orders":[{"id":11,"organizationId":1,"shipstati…
+9:19:09 PM [express] GET /api/organizations 304 in 165ms :: [{"id":2,"name":"Demo E-commerce Store",…
+9:25:48 PM [express] GET /api/wallet 401 in 4ms :: {"error":"User organization not found"}
+9:25:48 PM [express] GET /api/auth/user 304 in 1ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+9:25:48 PM [express] GET /api/rate-comparisons/30d 200 in 10ms
+9:25:49 PM [express] GET /api/wallet 401 in 1ms :: {"error":"User organization not found"}
+9:25:49 PM [express] GET /api/orders 304 in 15ms :: {"orders":[{"id":11,"organizationId":1,"shipstat…
+9:26:19 PM [express] GET /api/wallet 401 in 1ms :: {"error":"User organization not found"}
+9:35:17 PM [express] GET /api/wallet 401 in 1ms :: {"error":"User organization not found"}
+9:39:56 PM [express] GET /api/health 200 in 0ms :: {"status":"ok","timestamp":"2025-07-30T01:39:56.8…
+ShipStation webhook: ORDER_NOTIFY - https://ssapi.shipstation.com/orders/123456789
+Processing ShipStation order from: https://ssapi.shipstation.com/orders/123456789
+9:39:56 PM [express] POST /api/webhooks/shipstation/orders 200 in 18ms :: {"success":true,"message":…
+9:39:56 PM [express] POST /api/test/rate-comparison 200 in 3ms
+Error fetching order from ShipStation: AxiosError: Request failed with status code 404
+    at settle (file:///Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/axios/lib/core/settle.js:19:12)
+    at IncomingMessage.handleStreamEnd (file:///Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/axios/lib/adapters/http.js:599:11)
+    at IncomingMessage.emit (node:events:530:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+    at Axios.request (file:///Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/axios/lib/core/Axios.js:45:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async ShipStationService.getOrder (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/server/services/shipstation.ts:94:24)
+    at async ShipStationService.getOrderFromResource (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/server/services/shipstation.ts:317:14)
+    at async processShipStationOrder (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/server/routes/webhooks.ts:187:23) {
+  code: 'ERR_BAD_REQUEST',
+  config: {
+    transitional: {
+      silentJSONParsing: true,
+      forcedJSONParsing: true,
+      clarifyTimeoutError: false
+    },
+    adapter: [ 'xhr', 'http', 'fetch' ],
+    transformRequest: [ [Function: transformRequest] ],
+    transformResponse: [ [Function: transformResponse] ],
+    timeout: 0,
+    xsrfCookieName: 'XSRF-TOKEN',
+    xsrfHeaderName: 'X-XSRF-TOKEN',
+    maxContentLength: -1,
+    maxBodyLength: -1,
+    env: { FormData: [Function [FormData]], Blob: [class Blob] },
+    validateStatus: [Function: validateStatus],
+    headers: Object [AxiosHeaders] {
+      Accept: 'application/json, text/plain, */*',
+      'Content-Type': 'application/json',
+      Authorization: 'Basic NTg0MjJiMTYxOTY3NDFkN2JiM2MzMmQ3ZTZlNDM4Mjc6NGNkNThkNWYxZTkwNDY3YWE4NzI2OGFiYmI1ZWViM2I=',
+      'User-Agent': 'axios/1.10.0',
+      'Accept-Encoding': 'gzip, compress, deflate, br'
+    },
+    method: 'get',
+    url: 'https://ssapi.shipstation.com/orders/123456789',
+    allowAbsoluteUrls: true,
+    data: undefined
+  },
+  request: <ref *1> ClientRequest {
+    _events: [Object: null prototype] {
+      abort: [Function (anonymous)],
+      aborted: [Function (anonymous)],
+      connect: [Function (anonymous)],
+      error: [Function (anonymous)],
+      socket: [Function (anonymous)],
+      timeout: [Function (anonymous)],
+      finish: [Function: requestOnFinish]
+    },
+    _eventsCount: 7,
+    _maxListeners: undefined,
+    outputData: [],
+    outputSize: 0,
+    writable: true,
+    destroyed: true,
+    _last: true,
+    chunkedEncoding: false,
+    shouldKeepAlive: true,
+    maxRequestsOnConnectionReached: false,
+    _defaultKeepAlive: true,
+    useChunkedEncodingByDefault: false,
+    sendDate: false,
+    _removedConnection: false,
+    _removedContLen: false,
+    _removedTE: false,
+    strictContentLength: false,
+    _contentLength: 0,
+    _hasBody: true,
+    _trailer: '',
+    finished: true,
+    _headerSent: true,
+    _closed: true,
+    _header: 'GET /orders/123456789 HTTP/1.1\r\n' +
+      'Accept: application/json, text/plain, */*\r\n' +
+      'Content-Type: application/json\r\n' +
+      'Authorization: Basic NTg0MjJiMTYxOTY3NDFkN2JiM2MzMmQ3ZTZlNDM4Mjc6NGNkNThkNWYxZTkwNDY3YWE4NzI2OGFiYmI1ZWViM2I=\r\n' +
+      'User-Agent: axios/1.10.0\r\n' +
+      'Accept-Encoding: gzip, compress, deflate, br\r\n' +
+      'Host: ssapi.shipstation.com\r\n' +
+      'Connection: keep-alive\r\n' +
+      '\r\n',
+    _keepAliveTimeout: 0,
+    _onPendingData: [Function: nop],
+    agent: Agent {
+      _events: [Object: null prototype],
+      _eventsCount: 2,
+      _maxListeners: undefined,
+      defaultPort: 443,
+      protocol: 'https:',
+      options: [Object: null prototype],
+      requests: [Object: null prototype] {},
+      sockets: [Object: null prototype] {},
+      freeSockets: [Object: null prototype],
+      keepAliveMsecs: 1000,
+      keepAlive: true,
+      maxSockets: Infinity,
+      maxFreeSockets: 256,
+      scheduling: 'lifo',
+      maxTotalSockets: Infinity,
+      totalSocketCount: 1,
+      maxCachedSessions: 100,
+      _sessionCache: [Object],
+      [Symbol(shapeMode)]: false,
+      [Symbol(kCapture)]: false
+    },
+    socketPath: undefined,
+    method: 'GET',
+    maxHeaderSize: undefined,
+    insecureHTTPParser: undefined,
+    joinDuplicateHeaders: undefined,
+    path: '/orders/123456789',
+    _ended: true,
+    res: IncomingMessage {
+      _events: [Object],
+      _readableState: [ReadableState],
+      _maxListeners: undefined,
+      socket: null,
+      httpVersionMajor: 1,
+      httpVersionMinor: 1,
+      httpVersion: '1.1',
+      complete: true,
+      rawHeaders: [Array],
+      rawTrailers: [],
+      joinDuplicateHeaders: undefined,
+      aborted: false,
+      upgrade: false,
+      url: '',
+      method: null,
+      statusCode: 404,
+      statusMessage: 'Not Found',
+      client: [TLSSocket],
+      _consuming: false,
+      _dumped: false,
+      req: [Circular *1],
+      _eventsCount: 4,
+      responseUrl: 'https://ssapi.shipstation.com/orders/123456789',
+      redirects: [],
+      [Symbol(shapeMode)]: true,
+      [Symbol(kCapture)]: false,
+      [Symbol(kHeaders)]: [Object],
+      [Symbol(kHeadersCount)]: 24,
+      [Symbol(kTrailers)]: null,
+      [Symbol(kTrailersCount)]: 0
+    },
+    aborted: false,
+    timeoutCb: null,
+    upgradeOrConnect: false,
+    parser: null,
+    maxHeadersCount: null,
+    reusedSocket: false,
+    host: 'ssapi.shipstation.com',
+    protocol: 'https:',
+    _redirectable: Writable {
+      _events: [Object],
+      _writableState: [WritableState],
+      _maxListeners: undefined,
+      _options: [Object],
+      _ended: true,
+      _ending: true,
+      _redirectCount: 0,
+      _redirects: [],
+      _requestBodyLength: 0,
+      _requestBodyBuffers: [],
+      _eventsCount: 3,
+      _onNativeResponse: [Function (anonymous)],
+      _currentRequest: [Circular *1],
+      _currentUrl: 'https://ssapi.shipstation.com/orders/123456789',
+      [Symbol(shapeMode)]: true,
+      [Symbol(kCapture)]: false
+    },
+    [Symbol(shapeMode)]: false,
+    [Symbol(kCapture)]: false,
+    [Symbol(kBytesWritten)]: 0,
+    [Symbol(kNeedDrain)]: false,
+    [Symbol(corked)]: 0,
+    [Symbol(kChunkedBuffer)]: [],
+    [Symbol(kChunkedLength)]: 0,
+    [Symbol(kSocket)]: TLSSocket {
+      _tlsOptions: [Object],
+      _secureEstablished: true,
+      _securePending: false,
+      _newSessionPending: false,
+      _controlReleased: true,
+      secureConnecting: false,
+      _SNICallback: null,
+      servername: 'ssapi.shipstation.com',
+      alpnProtocol: false,
+      authorized: true,
+      authorizationError: null,
+      encrypted: true,
+      _events: [Object: null prototype],
+      _eventsCount: 9,
+      connecting: false,
+      _hadError: false,
+      _parent: null,
+      _host: 'ssapi.shipstation.com',
+      _closeAfterHandlingError: false,
+      _readableState: [ReadableState],
+      _writableState: [WritableState],
+      allowHalfOpen: false,
+      _maxListeners: undefined,
+      _sockname: null,
+      _pendingData: null,
+      _pendingEncoding: '',
+      server: undefined,
+      _server: null,
+      ssl: [TLSWrap],
+      _requestCert: true,
+      _rejectUnauthorized: true,
+      timeout: 5000,
+      parser: null,
+      _httpMessage: null,
+      autoSelectFamilyAttemptedAddresses: [Array],
+      [Symbol(alpncallback)]: null,
+      [Symbol(res)]: [TLSWrap],
+      [Symbol(verified)]: true,
+      [Symbol(pendingSession)]: null,
+      [Symbol(async_id_symbol)]: -1,
+      [Symbol(kHandle)]: [TLSWrap],
+      [Symbol(lastWriteQueueSize)]: 0,
+      [Symbol(timeout)]: Timeout {
+        _idleTimeout: 5000,
+        _idlePrev: [TimersList],
+        _idleNext: [TimersList],
+        _idleStart: 1773213,
+        _onTimeout: [Function: bound ],
+        _timerArgs: undefined,
+        _repeat: null,
+        _destroyed: false,
+        [Symbol(refed)]: false,
+        [Symbol(kHasPrimitive)]: false,
+        [Symbol(asyncId)]: 13597,
+        [Symbol(triggerId)]: 13595,
+        [Symbol(kAsyncContextFrame)]: undefined
+      },
+      [Symbol(kBuffer)]: null,
+      [Symbol(kBufferCb)]: null,
+      [Symbol(kBufferGen)]: null,
+      [Symbol(shapeMode)]: true,
+      [Symbol(kCapture)]: false,
+      [Symbol(kSetNoDelay)]: false,
+      [Symbol(kSetKeepAlive)]: true,
+      [Symbol(kSetKeepAliveInitialDelay)]: 1,
+      [Symbol(kBytesRead)]: 0,
+      [Symbol(kBytesWritten)]: 0,
+      [Symbol(connect-options)]: [Object]
+    },
+    [Symbol(kOutHeaders)]: [Object: null prototype] {
+      accept: [Array],
+      'content-type': [Array],
+      authorization: [Array],
+      'user-agent': [Array],
+      'accept-encoding': [Array],
+      host: [Array]
+    },
+    [Symbol(errored)]: null,
+    [Symbol(kHighWaterMark)]: 65536,
+    [Symbol(kRejectNonStandardBodyWrites)]: false,
+    [Symbol(kUniqueHeaders)]: null
+  },
+  response: {
+    status: 404,
+    statusText: 'Not Found',
+    headers: Object [AxiosHeaders] {
+      date: 'Wed, 30 Jul 2025 01:39:57 GMT',
+      'content-length': '0',
+      connection: 'keep-alive',
+      'x-rate-limit-limit': '40',
+      'x-rate-limit-reset': '3',
+      'x-rate-limit-remaining': '40',
+      'cache-control': 'no-cache',
+      pragma: 'no-cache',
+      expires: '-1',
+      server: 'Microsoft-IIS/10.0',
+      'x-aspnet-version': '4.0.30319',
+      'x-powered-by': 'ASP.NET'
+    },
+    config: {
+      transitional: [Object],
+      adapter: [Array],
+      transformRequest: [Array],
+      transformResponse: [Array],
+      timeout: 0,
+      xsrfCookieName: 'XSRF-TOKEN',
+      xsrfHeaderName: 'X-XSRF-TOKEN',
+      maxContentLength: -1,
+      maxBodyLength: -1,
+      env: [Object],
+      validateStatus: [Function: validateStatus],
+      headers: [Object [AxiosHeaders]],
+      method: 'get',
+      url: 'https://ssapi.shipstation.com/orders/123456789',
+      allowAbsoluteUrls: true,
+      data: undefined
+    },
+    request: <ref *1> ClientRequest {
+      _events: [Object: null prototype],
+      _eventsCount: 7,
+      _maxListeners: undefined,
+      outputData: [],
+      outputSize: 0,
+      writable: true,
+      destroyed: true,
+      _last: true,
+      chunkedEncoding: false,
+      shouldKeepAlive: true,
+      maxRequestsOnConnectionReached: false,
+      _defaultKeepAlive: true,
+      useChunkedEncodingByDefault: false,
+      sendDate: false,
+      _removedConnection: false,
+      _removedContLen: false,
+      _removedTE: false,
+      strictContentLength: false,
+      _contentLength: 0,
+      _hasBody: true,
+      _trailer: '',
+      finished: true,
+      _headerSent: true,
+      _closed: true,
+      _header: 'GET /orders/123456789 HTTP/1.1\r\n' +
+        'Accept: application/json, text/plain, */*\r\n' +
+        'Content-Type: application/json\r\n' +
+        'Authorization: Basic NTg0MjJiMTYxOTY3NDFkN2JiM2MzMmQ3ZTZlNDM4Mjc6NGNkNThkNWYxZTkwNDY3YWE4NzI2OGFiYmI1ZWViM2I=\r\n' +
+        'User-Agent: axios/1.10.0\r\n' +
+        'Accept-Encoding: gzip, compress, deflate, br\r\n' +
+        'Host: ssapi.shipstation.com\r\n' +
+        'Connection: keep-alive\r\n' +
+        '\r\n',
+      _keepAliveTimeout: 0,
+      _onPendingData: [Function: nop],
+      agent: [Agent],
+      socketPath: undefined,
+      method: 'GET',
+      maxHeaderSize: undefined,
+      insecureHTTPParser: undefined,
+      joinDuplicateHeaders: undefined,
+      path: '/orders/123456789',
+      _ended: true,
+      res: [IncomingMessage],
+      aborted: false,
+      timeoutCb: null,
+      upgradeOrConnect: false,
+      parser: null,
+      maxHeadersCount: null,
+      reusedSocket: false,
+      host: 'ssapi.shipstation.com',
+      protocol: 'https:',
+      _redirectable: [Writable],
+      [Symbol(shapeMode)]: false,
+      [Symbol(kCapture)]: false,
+      [Symbol(kBytesWritten)]: 0,
+      [Symbol(kNeedDrain)]: false,
+      [Symbol(corked)]: 0,
+      [Symbol(kChunkedBuffer)]: [],
+      [Symbol(kChunkedLength)]: 0,
+      [Symbol(kSocket)]: [TLSSocket],
+      [Symbol(kOutHeaders)]: [Object: null prototype],
+      [Symbol(errored)]: null,
+      [Symbol(kHighWaterMark)]: 65536,
+      [Symbol(kRejectNonStandardBodyWrites)]: false,
+      [Symbol(kUniqueHeaders)]: null
+    },
+    data: ''
+  },
+  status: 404
+}
+Failed to fetch order data from ShipStation
+9:39:59 PM [express] GET /api/orders 401 in 1ms :: {"error":"Authentication required"}
+9:39:59 PM [express] GET /api/rate-comparisons/recent 200 in 4ms
+9:40:29 PM [express] POST /api/test/mock-rate-shopping 200 in 1ms
+9:41:28 PM [express] GET /api/health 200 in 0ms :: {"status":"ok","timestamp":"2025-07-30T01:41:28.0…
+ShipStation webhook: ORDER_NOTIFY - https://ssapi.shipstation.com/orders/123456789
+Processing ShipStation order from: https://ssapi.shipstation.com/orders/123456789
+9:41:28 PM [express] POST /api/webhooks/shipstation/orders 200 in 1ms :: {"success":true,"message":"…
+9:41:28 PM [express] POST /api/test/rate-comparison 200 in 2ms
+Error fetching order from ShipStation: AxiosError: Request failed with status code 404
+    at settle (file:///Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/axios/lib/core/settle.js:19:12)
+    at IncomingMessage.handleStreamEnd (file:///Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/axios/lib/adapters/http.js:599:11)
+    at IncomingMessage.emit (node:events:530:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+    at Axios.request (file:///Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/axios/lib/core/Axios.js:45:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async ShipStationService.getOrder (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/server/services/shipstation.ts:94:24)
+    at async ShipStationService.getOrderFromResource (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/server/services/shipstation.ts:317:14)
+    at async processShipStationOrder (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/server/routes/webhooks.ts:187:23) {
+  code: 'ERR_BAD_REQUEST',
+  config: {
+    transitional: {
+      silentJSONParsing: true,
+      forcedJSONParsing: true,
+      clarifyTimeoutError: false
+    },
+    adapter: [ 'xhr', 'http', 'fetch' ],
+    transformRequest: [ [Function: transformRequest] ],
+    transformResponse: [ [Function: transformResponse] ],
+    timeout: 0,
+    xsrfCookieName: 'XSRF-TOKEN',
+    xsrfHeaderName: 'X-XSRF-TOKEN',
+    maxContentLength: -1,
+    maxBodyLength: -1,
+    env: { FormData: [Function [FormData]], Blob: [class Blob] },
+    validateStatus: [Function: validateStatus],
+    headers: Object [AxiosHeaders] {
+      Accept: 'application/json, text/plain, */*',
+      'Content-Type': 'application/json',
+      Authorization: 'Basic NTg0MjJiMTYxOTY3NDFkN2JiM2MzMmQ3ZTZlNDM4Mjc6NGNkNThkNWYxZTkwNDY3YWE4NzI2OGFiYmI1ZWViM2I=',
+      'User-Agent': 'axios/1.10.0',
+      'Accept-Encoding': 'gzip, compress, deflate, br'
+    },
+    method: 'get',
+    url: 'https://ssapi.shipstation.com/orders/123456789',
+    allowAbsoluteUrls: true,
+    data: undefined
+  },
+  request: <ref *1> ClientRequest {
+    _events: [Object: null prototype] {
+      abort: [Function (anonymous)],
+      aborted: [Function (anonymous)],
+      connect: [Function (anonymous)],
+      error: [Function (anonymous)],
+      socket: [Function (anonymous)],
+      timeout: [Function (anonymous)],
+      finish: [Function: requestOnFinish]
+    },
+    _eventsCount: 7,
+    _maxListeners: undefined,
+    outputData: [],
+    outputSize: 0,
+    writable: true,
+    destroyed: true,
+    _last: true,
+    chunkedEncoding: false,
+    shouldKeepAlive: true,
+    maxRequestsOnConnectionReached: false,
+    _defaultKeepAlive: true,
+    useChunkedEncodingByDefault: false,
+    sendDate: false,
+    _removedConnection: false,
+    _removedContLen: false,
+    _removedTE: false,
+    strictContentLength: false,
+    _contentLength: 0,
+    _hasBody: true,
+    _trailer: '',
+    finished: true,
+    _headerSent: true,
+    _closed: true,
+    _header: 'GET /orders/123456789 HTTP/1.1\r\n' +
+      'Accept: application/json, text/plain, */*\r\n' +
+      'Content-Type: application/json\r\n' +
+      'Authorization: Basic NTg0MjJiMTYxOTY3NDFkN2JiM2MzMmQ3ZTZlNDM4Mjc6NGNkNThkNWYxZTkwNDY3YWE4NzI2OGFiYmI1ZWViM2I=\r\n' +
+      'User-Agent: axios/1.10.0\r\n' +
+      'Accept-Encoding: gzip, compress, deflate, br\r\n' +
+      'Host: ssapi.shipstation.com\r\n' +
+      'Connection: keep-alive\r\n' +
+      '\r\n',
+    _keepAliveTimeout: 0,
+    _onPendingData: [Function: nop],
+    agent: Agent {
+      _events: [Object: null prototype],
+      _eventsCount: 2,
+      _maxListeners: undefined,
+      defaultPort: 443,
+      protocol: 'https:',
+      options: [Object: null prototype],
+      requests: [Object: null prototype] {},
+      sockets: [Object: null prototype] {},
+      freeSockets: [Object: null prototype],
+      keepAliveMsecs: 1000,
+      keepAlive: true,
+      maxSockets: Infinity,
+      maxFreeSockets: 256,
+      scheduling: 'lifo',
+      maxTotalSockets: Infinity,
+      totalSocketCount: 1,
+      maxCachedSessions: 100,
+      _sessionCache: [Object],
+      [Symbol(shapeMode)]: false,
+      [Symbol(kCapture)]: false
+    },
+    socketPath: undefined,
+    method: 'GET',
+    maxHeaderSize: undefined,
+    insecureHTTPParser: undefined,
+    joinDuplicateHeaders: undefined,
+    path: '/orders/123456789',
+    _ended: true,
+    res: IncomingMessage {
+      _events: [Object],
+      _readableState: [ReadableState],
+      _maxListeners: undefined,
+      socket: null,
+      httpVersionMajor: 1,
+      httpVersionMinor: 1,
+      httpVersion: '1.1',
+      complete: true,
+      rawHeaders: [Array],
+      rawTrailers: [],
+      joinDuplicateHeaders: undefined,
+      aborted: false,
+      upgrade: false,
+      url: '',
+      method: null,
+      statusCode: 404,
+      statusMessage: 'Not Found',
+      client: [TLSSocket],
+      _consuming: false,
+      _dumped: false,
+      req: [Circular *1],
+      _eventsCount: 4,
+      responseUrl: 'https://ssapi.shipstation.com/orders/123456789',
+      redirects: [],
+      [Symbol(shapeMode)]: true,
+      [Symbol(kCapture)]: false,
+      [Symbol(kHeaders)]: [Object],
+      [Symbol(kHeadersCount)]: 24,
+      [Symbol(kTrailers)]: null,
+      [Symbol(kTrailersCount)]: 0
+    },
+    aborted: false,
+    timeoutCb: null,
+    upgradeOrConnect: false,
+    parser: null,
+    maxHeadersCount: null,
+    reusedSocket: false,
+    host: 'ssapi.shipstation.com',
+    protocol: 'https:',
+    _redirectable: Writable {
+      _events: [Object],
+      _writableState: [WritableState],
+      _maxListeners: undefined,
+      _options: [Object],
+      _ended: true,
+      _ending: true,
+      _redirectCount: 0,
+      _redirects: [],
+      _requestBodyLength: 0,
+      _requestBodyBuffers: [],
+      _eventsCount: 3,
+      _onNativeResponse: [Function (anonymous)],
+      _currentRequest: [Circular *1],
+      _currentUrl: 'https://ssapi.shipstation.com/orders/123456789',
+      [Symbol(shapeMode)]: true,
+      [Symbol(kCapture)]: false
+    },
+    [Symbol(shapeMode)]: false,
+    [Symbol(kCapture)]: false,
+    [Symbol(kBytesWritten)]: 0,
+    [Symbol(kNeedDrain)]: false,
+    [Symbol(corked)]: 0,
+    [Symbol(kChunkedBuffer)]: [],
+    [Symbol(kChunkedLength)]: 0,
+    [Symbol(kSocket)]: TLSSocket {
+      _tlsOptions: [Object],
+      _secureEstablished: true,
+      _securePending: false,
+      _newSessionPending: false,
+      _controlReleased: true,
+      secureConnecting: false,
+      _SNICallback: null,
+      servername: 'ssapi.shipstation.com',
+      alpnProtocol: false,
+      authorized: true,
+      authorizationError: null,
+      encrypted: true,
+      _events: [Object: null prototype],
+      _eventsCount: 9,
+      connecting: false,
+      _hadError: false,
+      _parent: null,
+      _host: 'ssapi.shipstation.com',
+      _closeAfterHandlingError: false,
+      _readableState: [ReadableState],
+      _writableState: [WritableState],
+      allowHalfOpen: false,
+      _maxListeners: undefined,
+      _sockname: null,
+      _pendingData: null,
+      _pendingEncoding: '',
+      server: undefined,
+      _server: null,
+      ssl: [TLSWrap],
+      _requestCert: true,
+      _rejectUnauthorized: true,
+      timeout: 5000,
+      parser: null,
+      _httpMessage: null,
+      autoSelectFamilyAttemptedAddresses: [Array],
+      [Symbol(alpncallback)]: null,
+      [Symbol(res)]: [TLSWrap],
+      [Symbol(verified)]: true,
+      [Symbol(pendingSession)]: null,
+      [Symbol(async_id_symbol)]: -1,
+      [Symbol(kHandle)]: [TLSWrap],
+      [Symbol(lastWriteQueueSize)]: 0,
+      [Symbol(timeout)]: Timeout {
+        _idleTimeout: 5000,
+        _idlePrev: [TimersList],
+        _idleNext: [TimersList],
+        _idleStart: 1863995,
+        _onTimeout: [Function: bound ],
+        _timerArgs: undefined,
+        _repeat: null,
+        _destroyed: false,
+        [Symbol(refed)]: false,
+        [Symbol(kHasPrimitive)]: false,
+        [Symbol(asyncId)]: 13986,
+        [Symbol(triggerId)]: 13984,
+        [Symbol(kAsyncContextFrame)]: undefined
+      },
+      [Symbol(kBuffer)]: null,
+      [Symbol(kBufferCb)]: null,
+      [Symbol(kBufferGen)]: null,
+      [Symbol(shapeMode)]: true,
+      [Symbol(kCapture)]: false,
+      [Symbol(kSetNoDelay)]: false,
+      [Symbol(kSetKeepAlive)]: true,
+      [Symbol(kSetKeepAliveInitialDelay)]: 1,
+      [Symbol(kBytesRead)]: 0,
+      [Symbol(kBytesWritten)]: 0,
+      [Symbol(connect-options)]: [Object]
+    },
+    [Symbol(kOutHeaders)]: [Object: null prototype] {
+      accept: [Array],
+      'content-type': [Array],
+      authorization: [Array],
+      'user-agent': [Array],
+      'accept-encoding': [Array],
+      host: [Array]
+    },
+    [Symbol(errored)]: null,
+    [Symbol(kHighWaterMark)]: 65536,
+    [Symbol(kRejectNonStandardBodyWrites)]: false,
+    [Symbol(kUniqueHeaders)]: null
+  },
+  response: {
+    status: 404,
+    statusText: 'Not Found',
+    headers: Object [AxiosHeaders] {
+      date: 'Wed, 30 Jul 2025 01:41:28 GMT',
+      'content-length': '0',
+      connection: 'keep-alive',
+      'x-rate-limit-limit': '40',
+      'x-rate-limit-reset': '32',
+      'x-rate-limit-remaining': '39',
+      'cache-control': 'no-cache',
+      pragma: 'no-cache',
+      expires: '-1',
+      server: 'Microsoft-IIS/10.0',
+      'x-aspnet-version': '4.0.30319',
+      'x-powered-by': 'ASP.NET'
+    },
+    config: {
+      transitional: [Object],
+      adapter: [Array],
+      transformRequest: [Array],
+      transformResponse: [Array],
+      timeout: 0,
+      xsrfCookieName: 'XSRF-TOKEN',
+      xsrfHeaderName: 'X-XSRF-TOKEN',
+      maxContentLength: -1,
+      maxBodyLength: -1,
+      env: [Object],
+      validateStatus: [Function: validateStatus],
+      headers: [Object [AxiosHeaders]],
+      method: 'get',
+      url: 'https://ssapi.shipstation.com/orders/123456789',
+      allowAbsoluteUrls: true,
+      data: undefined
+    },
+    request: <ref *1> ClientRequest {
+      _events: [Object: null prototype],
+      _eventsCount: 7,
+      _maxListeners: undefined,
+      outputData: [],
+      outputSize: 0,
+      writable: true,
+      destroyed: true,
+      _last: true,
+      chunkedEncoding: false,
+      shouldKeepAlive: true,
+      maxRequestsOnConnectionReached: false,
+      _defaultKeepAlive: true,
+      useChunkedEncodingByDefault: false,
+      sendDate: false,
+      _removedConnection: false,
+      _removedContLen: false,
+      _removedTE: false,
+      strictContentLength: false,
+      _contentLength: 0,
+      _hasBody: true,
+      _trailer: '',
+      finished: true,
+      _headerSent: true,
+      _closed: true,
+      _header: 'GET /orders/123456789 HTTP/1.1\r\n' +
+        'Accept: application/json, text/plain, */*\r\n' +
+        'Content-Type: application/json\r\n' +
+        'Authorization: Basic NTg0MjJiMTYxOTY3NDFkN2JiM2MzMmQ3ZTZlNDM4Mjc6NGNkNThkNWYxZTkwNDY3YWE4NzI2OGFiYmI1ZWViM2I=\r\n' +
+        'User-Agent: axios/1.10.0\r\n' +
+        'Accept-Encoding: gzip, compress, deflate, br\r\n' +
+        'Host: ssapi.shipstation.com\r\n' +
+        'Connection: keep-alive\r\n' +
+        '\r\n',
+      _keepAliveTimeout: 0,
+      _onPendingData: [Function: nop],
+      agent: [Agent],
+      socketPath: undefined,
+      method: 'GET',
+      maxHeaderSize: undefined,
+      insecureHTTPParser: undefined,
+      joinDuplicateHeaders: undefined,
+      path: '/orders/123456789',
+      _ended: true,
+      res: [IncomingMessage],
+      aborted: false,
+      timeoutCb: null,
+      upgradeOrConnect: false,
+      parser: null,
+      maxHeadersCount: null,
+      reusedSocket: false,
+      host: 'ssapi.shipstation.com',
+      protocol: 'https:',
+      _redirectable: [Writable],
+      [Symbol(shapeMode)]: false,
+      [Symbol(kCapture)]: false,
+      [Symbol(kBytesWritten)]: 0,
+      [Symbol(kNeedDrain)]: false,
+      [Symbol(corked)]: 0,
+      [Symbol(kChunkedBuffer)]: [],
+      [Symbol(kChunkedLength)]: 0,
+      [Symbol(kSocket)]: [TLSSocket],
+      [Symbol(kOutHeaders)]: [Object: null prototype],
+      [Symbol(errored)]: null,
+      [Symbol(kHighWaterMark)]: 65536,
+      [Symbol(kRejectNonStandardBodyWrites)]: false,
+      [Symbol(kUniqueHeaders)]: null
+    },
+    data: ''
+  },
+  status: 404
+}
+Failed to fetch order data from ShipStation
+9:41:31 PM [express] GET /api/orders 401 in 1ms :: {"error":"Authentication required"}
+9:41:31 PM [express] GET /api/rate-comparisons/recent 200 in 4ms
+9:41:35 PM [express] GET /api/wallet 401 in 1ms :: {"error":"User organization not found"}
+9:41:35 PM [express] GET /api/auth/user 304 in 1ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+9:41:35 PM [express] GET /api/rate-comparisons/30d 200 in 4ms
+9:41:52 PM [express] GET /api/wallet 401 in 1ms :: {"error":"User organization not found"}
+9:41:52 PM [express] GET /api/orders 304 in 14ms :: {"orders":[{"id":11,"organizationId":1,"shipstat…
+9:42:22 PM [express] GET /api/wallet 401 in 2ms :: {"error":"User organization not found"}
+Database not available, rejecting non-demo credentials
+9:42:53 PM [express] POST /api/auth/login 401 in 1ms :: {"error":"Use demo credentials: demo@client.…
+Development login successful for: rajan@quikpik.io
+9:42:56 PM [express] POST /api/auth/login 200 in 0ms :: {"success":true,"user":{"id":1,"email":"raja…
+9:42:59 PM [express] GET /api/rate-comparisons/30d 200 in 1ms
+9:43:02 PM [express] GET /api/rate-comparisons/30d 200 in 2ms
+9:44:51 PM [express] GET /api/wallet 401 in 1ms :: {"error":"User organization not found"}
+9:44:53 PM [express] GET /api/organizations/2/users 304 in 9ms :: [{"id":2,"email":"demo@client.com"…
+9:45:08 PM [vite] (client) hmr update /src/components/app-tabs.tsx, /src/index.css?v=m6A10K_FVpg9lZ30pFQmf
+9:45:11 PM [vite] (client) hmr update /src/components/app-tabs.tsx, /src/index.css?v=m6A10K_FVpg9lZ30pFQmf
+9:45:15 PM [vite] (client) hmr update /src/components/app-tabs.tsx, /src/index.css?v=m6A10K_FVpg9lZ30pFQmf
+9:45:18 PM [vite] (client) hmr update /src/components/app-tabs.tsx, /src/index.css?v=m6A10K_FVpg9lZ30pFQmf
+9:45:25 PM [vite] (client) hmr update /src/components/app-tabs.tsx, /src/index.css?v=m6A10K_FVpg9lZ30pFQmf
+9:45:29 PM [vite] (client) hmr update /src/components/app-tabs.tsx, /src/index.css?v=m6A10K_FVpg9lZ30pFQmf
+9:46:13 PM [express] GET /api/wallet 401 in 4ms :: {"error":"User organization not found"}
+9:46:13 PM [express] GET /api/orders 304 in 208ms :: {"orders":[{"id":11,"organizationId":1,"shipsta…
+9:46:14 PM [express] GET /api/wallet 401 in 3ms :: {"error":"User organization not found"}
+9:46:39 PM [vite] (client) hmr update /src/components/app-tabs.tsx, /src/index.css?v=m6A10K_FVpg9lZ30pFQmf
+9:46:59 PM [vite] (client) hmr update /src/components/app-tabs.tsx, /src/index.css?v=m6A10K_FVpg9lZ30pFQmf
+9:47:25 PM [vite] (client) hmr update /src/components/app-tabs.tsx, /src/index.css?v=m6A10K_FVpg9lZ30pFQmf
+9:47:25 PM [express] GET /api/wallet 401 in 3ms :: {"error":"User organization not found"}
+9:47:25 PM [express] GET /api/auth/user 304 in 2ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+9:47:44 PM [express] GET /api/auth/user 304 in 1ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+9:47:44 PM [express] GET /api/wallet 401 in 1ms :: {"error":"User organization not found"}
+9:47:44 PM [express] GET /api/orders 304 in 9ms :: {"orders":[{"id":11,"organizationId":1,"shipstati…
+9:47:44 PM [express] GET /api/organizations 304 in 10ms :: [{"id":2,"name":"Demo E-commerce Store","…
+9:47:45 PM [express] GET /api/wallet 401 in 1ms :: {"error":"User organization not found"}
+9:47:45 PM [express] GET /api/wallet/transactions 401 in 2ms :: {"error":"User organization not foun…
+9:47:46 PM [express] GET /api/carrier-accounts 304 in 5ms :: []
+9:47:46 PM [express] GET /api/api-keys 304 in 6ms :: []
+9:47:47 PM [express] GET /api/auth/user 304 in 1ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+9:47:47 PM [express] GET /api/wallet 401 in 0ms :: {"error":"User organization not found"}
+9:47:47 PM [express] GET /api/orders 304 in 2ms :: {"orders":[{"id":11,"organizationId":1,"shipstati…
+9:47:47 PM [express] GET /api/api-keys 304 in 2ms :: []
+9:47:47 PM [express] GET /api/wallet/transactions 401 in 1ms :: {"error":"User organization not foun…
+9:47:47 PM [express] GET /api/carrier-accounts 304 in 2ms :: []
+9:47:47 PM [express] GET /api/organizations 304 in 9ms :: [{"id":2,"name":"Demo E-commerce Store","s…
+9:47:48 PM [express] GET /api/wallet 401 in 1ms :: {"error":"User organization not found"}
+9:47:48 PM [express] GET /api/orders/all 304 in 2ms :: {"orders":[{"id":11,"organizationId":1,"ships…
+9:47:54 PM [express] GET /api/wallet 401 in 1ms :: {"error":"User organization not found"}
+9:47:54 PM [express] GET /api/wallet/transactions 401 in 1ms :: {"error":"User organization not foun…
+9:47:56 PM [express] GET /api/auth/user 304 in 1ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+9:47:56 PM [express] GET /api/wallet 401 in 0ms :: {"error":"User organization not found"}
+9:47:56 PM [express] GET /api/orders 304 in 2ms :: {"orders":[{"id":11,"organizationId":1,"shipstati…
+9:47:56 PM [express] GET /api/wallet/transactions 401 in 2ms :: {"error":"User organization not foun…
+9:47:56 PM [express] GET /api/api-keys 304 in 3ms :: []
+9:47:56 PM [express] GET /api/organizations 304 in 3ms :: [{"id":2,"name":"Demo E-commerce Store","s…
+9:47:56 PM [express] GET /api/carrier-accounts 304 in 4ms :: []
+9:47:58 PM [express] GET /api/wallet 401 in 2ms :: {"error":"User organization not found"}
+9:47:58 PM [express] GET /api/orders/all 304 in 5ms :: {"orders":[{"id":11,"organizationId":1,"ships…
+9:48:38 PM [vite] (client) hmr update /src/App.tsx?v=m6A10K_FVpg9lZ30pFQmf, /src/index.css?v=m6A10K_FVpg9lZ30pFQmf
+9:48:39 PM [express] GET /api/wallet 401 in 0ms :: {"error":"User organization not found"}
+9:48:41 PM [vite] (client) hmr update /src/App.tsx?v=m6A10K_FVpg9lZ30pFQmf, /src/index.css?v=m6A10K_FVpg9lZ30pFQmf
+9:48:46 PM [express] GET /api/wallet 401 in 6ms :: {"error":"User organization not found"}
+9:48:51 PM [express] GET /api/wallet 401 in 1ms :: {"error":"User organization not found"}
+9:48:51 PM [express] GET /api/rate-comparisons/30d 200 in 7ms
+9:48:53 PM [express] GET /api/wallet 401 in 2ms :: {"error":"User organization not found"}
+9:48:53 PM [express] GET /api/wallet/transactions 401 in 1ms :: {"error":"User organization not foun…
+9:48:55 PM [express] GET /api/wallet 401 in 2ms :: {"error":"User organization not found"}
+9:48:55 PM [express] GET /api/rate-comparisons/30d 200 in 6ms
+9:51:36 PM [express] GET /api/wallet 401 in 3ms :: {"error":"User organization not found"}
+9:51:36 PM [express] GET /api/wallet 401 in 1ms :: {"error":"User organization not found"}
+9:58:07 PM [express] GET /api/health 200 in 1ms :: {"status":"ok","timestamp":"2025-07-30T01:58:07.2…
+ShipStation webhook: ORDER_NOTIFY - https://ssapi.shipstation.com/orders/100001
+Processing ShipStation order from: https://ssapi.shipstation.com/orders/100001
+9:58:07 PM [express] POST /api/webhooks/shipstation/orders 200 in 5ms :: {"success":true,"message":"…
+Error fetching order from ShipStation: AxiosError: Request failed with status code 404
+    at settle (file:///Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/axios/lib/core/settle.js:19:12)
+    at IncomingMessage.handleStreamEnd (file:///Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/axios/lib/adapters/http.js:599:11)
+    at IncomingMessage.emit (node:events:530:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+    at Axios.request (file:///Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/axios/lib/core/Axios.js:45:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async ShipStationService.getOrder (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/server/services/shipstation.ts:94:24)
+    at async ShipStationService.getOrderFromResource (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/server/services/shipstation.ts:317:14)
+    at async processShipStationOrder (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/server/routes/webhooks.ts:187:23) {
+  code: 'ERR_BAD_REQUEST',
+  config: {
+    transitional: {
+      silentJSONParsing: true,
+      forcedJSONParsing: true,
+      clarifyTimeoutError: false
+    },
+    adapter: [ 'xhr', 'http', 'fetch' ],
+    transformRequest: [ [Function: transformRequest] ],
+    transformResponse: [ [Function: transformResponse] ],
+    timeout: 0,
+    xsrfCookieName: 'XSRF-TOKEN',
+    xsrfHeaderName: 'X-XSRF-TOKEN',
+    maxContentLength: -1,
+    maxBodyLength: -1,
+    env: { FormData: [Function [FormData]], Blob: [class Blob] },
+    validateStatus: [Function: validateStatus],
+    headers: Object [AxiosHeaders] {
+      Accept: 'application/json, text/plain, */*',
+      'Content-Type': 'application/json',
+      Authorization: 'Basic NTg0MjJiMTYxOTY3NDFkN2JiM2MzMmQ3ZTZlNDM4Mjc6NGNkNThkNWYxZTkwNDY3YWE4NzI2OGFiYmI1ZWViM2I=',
+      'User-Agent': 'axios/1.10.0',
+      'Accept-Encoding': 'gzip, compress, deflate, br'
+    },
+    method: 'get',
+    url: 'https://ssapi.shipstation.com/orders/100001',
+    allowAbsoluteUrls: true,
+    data: undefined
+  },
+  request: <ref *1> ClientRequest {
+    _events: [Object: null prototype] {
+      abort: [Function (anonymous)],
+      aborted: [Function (anonymous)],
+      connect: [Function (anonymous)],
+      error: [Function (anonymous)],
+      socket: [Function (anonymous)],
+      timeout: [Function (anonymous)],
+      finish: [Function: requestOnFinish]
+    },
+    _eventsCount: 7,
+    _maxListeners: undefined,
+    outputData: [],
+    outputSize: 0,
+    writable: true,
+    destroyed: true,
+    _last: true,
+    chunkedEncoding: false,
+    shouldKeepAlive: true,
+    maxRequestsOnConnectionReached: false,
+    _defaultKeepAlive: true,
+    useChunkedEncodingByDefault: false,
+    sendDate: false,
+    _removedConnection: false,
+    _removedContLen: false,
+    _removedTE: false,
+    strictContentLength: false,
+    _contentLength: 0,
+    _hasBody: true,
+    _trailer: '',
+    finished: true,
+    _headerSent: true,
+    _closed: true,
+    _header: 'GET /orders/100001 HTTP/1.1\r\n' +
+      'Accept: application/json, text/plain, */*\r\n' +
+      'Content-Type: application/json\r\n' +
+      'Authorization: Basic NTg0MjJiMTYxOTY3NDFkN2JiM2MzMmQ3ZTZlNDM4Mjc6NGNkNThkNWYxZTkwNDY3YWE4NzI2OGFiYmI1ZWViM2I=\r\n' +
+      'User-Agent: axios/1.10.0\r\n' +
+      'Accept-Encoding: gzip, compress, deflate, br\r\n' +
+      'Host: ssapi.shipstation.com\r\n' +
+      'Connection: keep-alive\r\n' +
+      '\r\n',
+    _keepAliveTimeout: 0,
+    _onPendingData: [Function: nop],
+    agent: Agent {
+      _events: [Object: null prototype],
+      _eventsCount: 2,
+      _maxListeners: undefined,
+      defaultPort: 443,
+      protocol: 'https:',
+      options: [Object: null prototype],
+      requests: [Object: null prototype] {},
+      sockets: [Object: null prototype] {},
+      freeSockets: [Object: null prototype],
+      keepAliveMsecs: 1000,
+      keepAlive: true,
+      maxSockets: Infinity,
+      maxFreeSockets: 256,
+      scheduling: 'lifo',
+      maxTotalSockets: Infinity,
+      totalSocketCount: 1,
+      maxCachedSessions: 100,
+      _sessionCache: [Object],
+      [Symbol(shapeMode)]: false,
+      [Symbol(kCapture)]: false
+    },
+    socketPath: undefined,
+    method: 'GET',
+    maxHeaderSize: undefined,
+    insecureHTTPParser: undefined,
+    joinDuplicateHeaders: undefined,
+    path: '/orders/100001',
+    _ended: true,
+    res: IncomingMessage {
+      _events: [Object],
+      _readableState: [ReadableState],
+      _maxListeners: undefined,
+      socket: null,
+      httpVersionMajor: 1,
+      httpVersionMinor: 1,
+      httpVersion: '1.1',
+      complete: true,
+      rawHeaders: [Array],
+      rawTrailers: [],
+      joinDuplicateHeaders: undefined,
+      aborted: false,
+      upgrade: false,
+      url: '',
+      method: null,
+      statusCode: 404,
+      statusMessage: 'Not Found',
+      client: [TLSSocket],
+      _consuming: false,
+      _dumped: false,
+      req: [Circular *1],
+      _eventsCount: 4,
+      responseUrl: 'https://ssapi.shipstation.com/orders/100001',
+      redirects: [],
+      [Symbol(shapeMode)]: true,
+      [Symbol(kCapture)]: false,
+      [Symbol(kHeaders)]: [Object],
+      [Symbol(kHeadersCount)]: 24,
+      [Symbol(kTrailers)]: null,
+      [Symbol(kTrailersCount)]: 0
+    },
+    aborted: false,
+    timeoutCb: null,
+    upgradeOrConnect: false,
+    parser: null,
+    maxHeadersCount: null,
+    reusedSocket: false,
+    host: 'ssapi.shipstation.com',
+    protocol: 'https:',
+    _redirectable: Writable {
+      _events: [Object],
+      _writableState: [WritableState],
+      _maxListeners: undefined,
+      _options: [Object],
+      _ended: true,
+      _ending: true,
+      _redirectCount: 0,
+      _redirects: [],
+      _requestBodyLength: 0,
+      _requestBodyBuffers: [],
+      _eventsCount: 3,
+      _onNativeResponse: [Function (anonymous)],
+      _currentRequest: [Circular *1],
+      _currentUrl: 'https://ssapi.shipstation.com/orders/100001',
+      [Symbol(shapeMode)]: true,
+      [Symbol(kCapture)]: false
+    },
+    [Symbol(shapeMode)]: false,
+    [Symbol(kCapture)]: false,
+    [Symbol(kBytesWritten)]: 0,
+    [Symbol(kNeedDrain)]: false,
+    [Symbol(corked)]: 0,
+    [Symbol(kChunkedBuffer)]: [],
+    [Symbol(kChunkedLength)]: 0,
+    [Symbol(kSocket)]: TLSSocket {
+      _tlsOptions: [Object],
+      _secureEstablished: true,
+      _securePending: false,
+      _newSessionPending: false,
+      _controlReleased: true,
+      secureConnecting: false,
+      _SNICallback: null,
+      servername: 'ssapi.shipstation.com',
+      alpnProtocol: false,
+      authorized: true,
+      authorizationError: null,
+      encrypted: true,
+      _events: [Object: null prototype],
+      _eventsCount: 9,
+      connecting: false,
+      _hadError: false,
+      _parent: null,
+      _host: 'ssapi.shipstation.com',
+      _closeAfterHandlingError: false,
+      _readableState: [ReadableState],
+      _writableState: [WritableState],
+      allowHalfOpen: false,
+      _maxListeners: undefined,
+      _sockname: null,
+      _pendingData: null,
+      _pendingEncoding: '',
+      server: undefined,
+      _server: null,
+      ssl: [TLSWrap],
+      _requestCert: true,
+      _rejectUnauthorized: true,
+      timeout: 5000,
+      parser: null,
+      _httpMessage: null,
+      autoSelectFamilyAttemptedAddresses: [Array],
+      [Symbol(alpncallback)]: null,
+      [Symbol(res)]: [TLSWrap],
+      [Symbol(verified)]: true,
+      [Symbol(pendingSession)]: null,
+      [Symbol(async_id_symbol)]: -1,
+      [Symbol(kHandle)]: [TLSWrap],
+      [Symbol(lastWriteQueueSize)]: 0,
+      [Symbol(timeout)]: Timeout {
+        _idleTimeout: 5000,
+        _idlePrev: [TimersList],
+        _idleNext: [TimersList],
+        _idleStart: 2863294,
+        _onTimeout: [Function: bound ],
+        _timerArgs: undefined,
+        _repeat: null,
+        _destroyed: false,
+        [Symbol(refed)]: false,
+        [Symbol(kHasPrimitive)]: false,
+        [Symbol(asyncId)]: 21598,
+        [Symbol(triggerId)]: 21596,
+        [Symbol(kAsyncContextFrame)]: undefined
+      },
+      [Symbol(kBuffer)]: null,
+      [Symbol(kBufferCb)]: null,
+      [Symbol(kBufferGen)]: null,
+      [Symbol(shapeMode)]: true,
+      [Symbol(kCapture)]: false,
+      [Symbol(kSetNoDelay)]: false,
+      [Symbol(kSetKeepAlive)]: true,
+      [Symbol(kSetKeepAliveInitialDelay)]: 1,
+      [Symbol(kBytesRead)]: 0,
+      [Symbol(kBytesWritten)]: 0,
+      [Symbol(connect-options)]: [Object]
+    },
+    [Symbol(kOutHeaders)]: [Object: null prototype] {
+      accept: [Array],
+      'content-type': [Array],
+      authorization: [Array],
+      'user-agent': [Array],
+      'accept-encoding': [Array],
+      host: [Array]
+    },
+    [Symbol(errored)]: null,
+    [Symbol(kHighWaterMark)]: 65536,
+    [Symbol(kRejectNonStandardBodyWrites)]: false,
+    [Symbol(kUniqueHeaders)]: null
+  },
+  response: {
+    status: 404,
+    statusText: 'Not Found',
+    headers: Object [AxiosHeaders] {
+      date: 'Wed, 30 Jul 2025 01:58:07 GMT',
+      'content-length': '0',
+      connection: 'keep-alive',
+      'x-rate-limit-limit': '40',
+      'x-rate-limit-reset': '53',
+      'x-rate-limit-remaining': '40',
+      'cache-control': 'no-cache',
+      pragma: 'no-cache',
+      expires: '-1',
+      server: 'Microsoft-IIS/10.0',
+      'x-aspnet-version': '4.0.30319',
+      'x-powered-by': 'ASP.NET'
+    },
+    config: {
+      transitional: [Object],
+      adapter: [Array],
+      transformRequest: [Array],
+      transformResponse: [Array],
+      timeout: 0,
+      xsrfCookieName: 'XSRF-TOKEN',
+      xsrfHeaderName: 'X-XSRF-TOKEN',
+      maxContentLength: -1,
+      maxBodyLength: -1,
+      env: [Object],
+      validateStatus: [Function: validateStatus],
+      headers: [Object [AxiosHeaders]],
+      method: 'get',
+      url: 'https://ssapi.shipstation.com/orders/100001',
+      allowAbsoluteUrls: true,
+      data: undefined
+    },
+    request: <ref *1> ClientRequest {
+      _events: [Object: null prototype],
+      _eventsCount: 7,
+      _maxListeners: undefined,
+      outputData: [],
+      outputSize: 0,
+      writable: true,
+      destroyed: true,
+      _last: true,
+      chunkedEncoding: false,
+      shouldKeepAlive: true,
+      maxRequestsOnConnectionReached: false,
+      _defaultKeepAlive: true,
+      useChunkedEncodingByDefault: false,
+      sendDate: false,
+      _removedConnection: false,
+      _removedContLen: false,
+      _removedTE: false,
+      strictContentLength: false,
+      _contentLength: 0,
+      _hasBody: true,
+      _trailer: '',
+      finished: true,
+      _headerSent: true,
+      _closed: true,
+      _header: 'GET /orders/100001 HTTP/1.1\r\n' +
+        'Accept: application/json, text/plain, */*\r\n' +
+        'Content-Type: application/json\r\n' +
+        'Authorization: Basic NTg0MjJiMTYxOTY3NDFkN2JiM2MzMmQ3ZTZlNDM4Mjc6NGNkNThkNWYxZTkwNDY3YWE4NzI2OGFiYmI1ZWViM2I=\r\n' +
+        'User-Agent: axios/1.10.0\r\n' +
+        'Accept-Encoding: gzip, compress, deflate, br\r\n' +
+        'Host: ssapi.shipstation.com\r\n' +
+        'Connection: keep-alive\r\n' +
+        '\r\n',
+      _keepAliveTimeout: 0,
+      _onPendingData: [Function: nop],
+      agent: [Agent],
+      socketPath: undefined,
+      method: 'GET',
+      maxHeaderSize: undefined,
+      insecureHTTPParser: undefined,
+      joinDuplicateHeaders: undefined,
+      path: '/orders/100001',
+      _ended: true,
+      res: [IncomingMessage],
+      aborted: false,
+      timeoutCb: null,
+      upgradeOrConnect: false,
+      parser: null,
+      maxHeadersCount: null,
+      reusedSocket: false,
+      host: 'ssapi.shipstation.com',
+      protocol: 'https:',
+      _redirectable: [Writable],
+      [Symbol(shapeMode)]: false,
+      [Symbol(kCapture)]: false,
+      [Symbol(kBytesWritten)]: 0,
+      [Symbol(kNeedDrain)]: false,
+      [Symbol(corked)]: 0,
+      [Symbol(kChunkedBuffer)]: [],
+      [Symbol(kChunkedLength)]: 0,
+      [Symbol(kSocket)]: [TLSSocket],
+      [Symbol(kOutHeaders)]: [Object: null prototype],
+      [Symbol(errored)]: null,
+      [Symbol(kHighWaterMark)]: 65536,
+      [Symbol(kRejectNonStandardBodyWrites)]: false,
+      [Symbol(kUniqueHeaders)]: null
+    },
+    data: ''
+  },
+  status: 404
+}
+Failed to fetch order data from ShipStation
+ShipStation webhook: ORDER_NOTIFY - https://ssapi.shipstation.com/orders/100002
+Processing ShipStation order from: https://ssapi.shipstation.com/orders/100002
+9:58:09 PM [express] POST /api/webhooks/shipstation/orders 200 in 1ms :: {"success":true,"message":"…
+Error fetching order from ShipStation: AxiosError: Request failed with status code 404
+    at settle (file:///Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/axios/lib/core/settle.js:19:12)
+    at IncomingMessage.handleStreamEnd (file:///Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/axios/lib/adapters/http.js:599:11)
+    at IncomingMessage.emit (node:events:530:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+    at Axios.request (file:///Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/axios/lib/core/Axios.js:45:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async ShipStationService.getOrder (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/server/services/shipstation.ts:94:24)
+    at async ShipStationService.getOrderFromResource (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/server/services/shipstation.ts:317:14)
+    at async processShipStationOrder (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/server/routes/webhooks.ts:187:23) {
+  code: 'ERR_BAD_REQUEST',
+  config: {
+    transitional: {
+      silentJSONParsing: true,
+      forcedJSONParsing: true,
+      clarifyTimeoutError: false
+    },
+    adapter: [ 'xhr', 'http', 'fetch' ],
+    transformRequest: [ [Function: transformRequest] ],
+    transformResponse: [ [Function: transformResponse] ],
+    timeout: 0,
+    xsrfCookieName: 'XSRF-TOKEN',
+    xsrfHeaderName: 'X-XSRF-TOKEN',
+    maxContentLength: -1,
+    maxBodyLength: -1,
+    env: { FormData: [Function [FormData]], Blob: [class Blob] },
+    validateStatus: [Function: validateStatus],
+    headers: Object [AxiosHeaders] {
+      Accept: 'application/json, text/plain, */*',
+      'Content-Type': 'application/json',
+      Authorization: 'Basic NTg0MjJiMTYxOTY3NDFkN2JiM2MzMmQ3ZTZlNDM4Mjc6NGNkNThkNWYxZTkwNDY3YWE4NzI2OGFiYmI1ZWViM2I=',
+      'User-Agent': 'axios/1.10.0',
+      'Accept-Encoding': 'gzip, compress, deflate, br'
+    },
+    method: 'get',
+    url: 'https://ssapi.shipstation.com/orders/100002',
+    allowAbsoluteUrls: true,
+    data: undefined
+  },
+  request: <ref *1> ClientRequest {
+    _events: [Object: null prototype] {
+      abort: [Function (anonymous)],
+      aborted: [Function (anonymous)],
+      connect: [Function (anonymous)],
+      error: [Function (anonymous)],
+      socket: [Function (anonymous)],
+      timeout: [Function (anonymous)],
+      finish: [Function: requestOnFinish]
+    },
+    _eventsCount: 7,
+    _maxListeners: undefined,
+    outputData: [],
+    outputSize: 0,
+    writable: true,
+    destroyed: true,
+    _last: true,
+    chunkedEncoding: false,
+    shouldKeepAlive: true,
+    maxRequestsOnConnectionReached: false,
+    _defaultKeepAlive: true,
+    useChunkedEncodingByDefault: false,
+    sendDate: false,
+    _removedConnection: false,
+    _removedContLen: false,
+    _removedTE: false,
+    strictContentLength: false,
+    _contentLength: 0,
+    _hasBody: true,
+    _trailer: '',
+    finished: true,
+    _headerSent: true,
+    _closed: true,
+    _header: 'GET /orders/100002 HTTP/1.1\r\n' +
+      'Accept: application/json, text/plain, */*\r\n' +
+      'Content-Type: application/json\r\n' +
+      'Authorization: Basic NTg0MjJiMTYxOTY3NDFkN2JiM2MzMmQ3ZTZlNDM4Mjc6NGNkNThkNWYxZTkwNDY3YWE4NzI2OGFiYmI1ZWViM2I=\r\n' +
+      'User-Agent: axios/1.10.0\r\n' +
+      'Accept-Encoding: gzip, compress, deflate, br\r\n' +
+      'Host: ssapi.shipstation.com\r\n' +
+      'Connection: keep-alive\r\n' +
+      '\r\n',
+    _keepAliveTimeout: 0,
+    _onPendingData: [Function: nop],
+    agent: Agent {
+      _events: [Object: null prototype],
+      _eventsCount: 2,
+      _maxListeners: undefined,
+      defaultPort: 443,
+      protocol: 'https:',
+      options: [Object: null prototype],
+      requests: [Object: null prototype] {},
+      sockets: [Object: null prototype] {},
+      freeSockets: [Object: null prototype],
+      keepAliveMsecs: 1000,
+      keepAlive: true,
+      maxSockets: Infinity,
+      maxFreeSockets: 256,
+      scheduling: 'lifo',
+      maxTotalSockets: Infinity,
+      totalSocketCount: 1,
+      maxCachedSessions: 100,
+      _sessionCache: [Object],
+      [Symbol(shapeMode)]: false,
+      [Symbol(kCapture)]: false
+    },
+    socketPath: undefined,
+    method: 'GET',
+    maxHeaderSize: undefined,
+    insecureHTTPParser: undefined,
+    joinDuplicateHeaders: undefined,
+    path: '/orders/100002',
+    _ended: true,
+    res: IncomingMessage {
+      _events: [Object],
+      _readableState: [ReadableState],
+      _maxListeners: undefined,
+      socket: null,
+      httpVersionMajor: 1,
+      httpVersionMinor: 1,
+      httpVersion: '1.1',
+      complete: true,
+      rawHeaders: [Array],
+      rawTrailers: [],
+      joinDuplicateHeaders: undefined,
+      aborted: false,
+      upgrade: false,
+      url: '',
+      method: null,
+      statusCode: 404,
+      statusMessage: 'Not Found',
+      client: [TLSSocket],
+      _consuming: false,
+      _dumped: false,
+      req: [Circular *1],
+      _eventsCount: 4,
+      responseUrl: 'https://ssapi.shipstation.com/orders/100002',
+      redirects: [],
+      [Symbol(shapeMode)]: true,
+      [Symbol(kCapture)]: false,
+      [Symbol(kHeaders)]: [Object],
+      [Symbol(kHeadersCount)]: 24,
+      [Symbol(kTrailers)]: null,
+      [Symbol(kTrailersCount)]: 0
+    },
+    aborted: false,
+    timeoutCb: null,
+    upgradeOrConnect: false,
+    parser: null,
+    maxHeadersCount: null,
+    reusedSocket: true,
+    host: 'ssapi.shipstation.com',
+    protocol: 'https:',
+    _redirectable: Writable {
+      _events: [Object],
+      _writableState: [WritableState],
+      _maxListeners: undefined,
+      _options: [Object],
+      _ended: true,
+      _ending: true,
+      _redirectCount: 0,
+      _redirects: [],
+      _requestBodyLength: 0,
+      _requestBodyBuffers: [],
+      _eventsCount: 3,
+      _onNativeResponse: [Function (anonymous)],
+      _currentRequest: [Circular *1],
+      _currentUrl: 'https://ssapi.shipstation.com/orders/100002',
+      [Symbol(shapeMode)]: true,
+      [Symbol(kCapture)]: false
+    },
+    [Symbol(shapeMode)]: false,
+    [Symbol(kCapture)]: false,
+    [Symbol(kBytesWritten)]: 0,
+    [Symbol(kNeedDrain)]: false,
+    [Symbol(corked)]: 0,
+    [Symbol(kChunkedBuffer)]: [],
+    [Symbol(kChunkedLength)]: 0,
+    [Symbol(kSocket)]: TLSSocket {
+      _tlsOptions: [Object],
+      _secureEstablished: true,
+      _securePending: false,
+      _newSessionPending: false,
+      _controlReleased: true,
+      secureConnecting: false,
+      _SNICallback: null,
+      servername: 'ssapi.shipstation.com',
+      alpnProtocol: false,
+      authorized: true,
+      authorizationError: null,
+      encrypted: true,
+      _events: [Object: null prototype],
+      _eventsCount: 9,
+      connecting: false,
+      _hadError: false,
+      _parent: null,
+      _host: 'ssapi.shipstation.com',
+      _closeAfterHandlingError: false,
+      _readableState: [ReadableState],
+      _writableState: [WritableState],
+      allowHalfOpen: false,
+      _maxListeners: undefined,
+      _sockname: null,
+      _pendingData: null,
+      _pendingEncoding: '',
+      server: undefined,
+      _server: null,
+      ssl: [TLSWrap],
+      _requestCert: true,
+      _rejectUnauthorized: true,
+      timeout: 5000,
+      parser: null,
+      _httpMessage: null,
+      autoSelectFamilyAttemptedAddresses: [Array],
+      [Symbol(alpncallback)]: null,
+      [Symbol(res)]: [TLSWrap],
+      [Symbol(verified)]: true,
+      [Symbol(pendingSession)]: null,
+      [Symbol(async_id_symbol)]: -1,
+      [Symbol(kHandle)]: [TLSWrap],
+      [Symbol(lastWriteQueueSize)]: 0,
+      [Symbol(timeout)]: Timeout {
+        _idleTimeout: 5000,
+        _idlePrev: [TimersList],
+        _idleNext: [TimersList],
+        _idleStart: 2865123,
+        _onTimeout: [Function: bound ],
+        _timerArgs: undefined,
+        _repeat: null,
+        _destroyed: false,
+        [Symbol(refed)]: false,
+        [Symbol(kHasPrimitive)]: false,
+        [Symbol(asyncId)]: 21631,
+        [Symbol(triggerId)]: 21629,
+        [Symbol(kAsyncContextFrame)]: undefined
+      },
+      [Symbol(kBuffer)]: null,
+      [Symbol(kBufferCb)]: null,
+      [Symbol(kBufferGen)]: null,
+      [Symbol(shapeMode)]: true,
+      [Symbol(kCapture)]: false,
+      [Symbol(kSetNoDelay)]: false,
+      [Symbol(kSetKeepAlive)]: true,
+      [Symbol(kSetKeepAliveInitialDelay)]: 1,
+      [Symbol(kBytesRead)]: 0,
+      [Symbol(kBytesWritten)]: 0,
+      [Symbol(connect-options)]: [Object]
+    },
+    [Symbol(kOutHeaders)]: [Object: null prototype] {
+      accept: [Array],
+      'content-type': [Array],
+      authorization: [Array],
+      'user-agent': [Array],
+      'accept-encoding': [Array],
+      host: [Array]
+    },
+    [Symbol(errored)]: null,
+    [Symbol(kHighWaterMark)]: 65536,
+    [Symbol(kRejectNonStandardBodyWrites)]: false,
+    [Symbol(kUniqueHeaders)]: null
+  },
+  response: {
+    status: 404,
+    statusText: 'Not Found',
+    headers: Object [AxiosHeaders] {
+      date: 'Wed, 30 Jul 2025 01:58:09 GMT',
+      'content-length': '0',
+      connection: 'keep-alive',
+      'x-rate-limit-limit': '40',
+      'x-rate-limit-reset': '51',
+      'x-rate-limit-remaining': '39',
+      'cache-control': 'no-cache',
+      pragma: 'no-cache',
+      expires: '-1',
+      server: 'Microsoft-IIS/10.0',
+      'x-aspnet-version': '4.0.30319',
+      'x-powered-by': 'ASP.NET'
+    },
+    config: {
+      transitional: [Object],
+      adapter: [Array],
+      transformRequest: [Array],
+      transformResponse: [Array],
+      timeout: 0,
+      xsrfCookieName: 'XSRF-TOKEN',
+      xsrfHeaderName: 'X-XSRF-TOKEN',
+      maxContentLength: -1,
+      maxBodyLength: -1,
+      env: [Object],
+      validateStatus: [Function: validateStatus],
+      headers: [Object [AxiosHeaders]],
+      method: 'get',
+      url: 'https://ssapi.shipstation.com/orders/100002',
+      allowAbsoluteUrls: true,
+      data: undefined
+    },
+    request: <ref *1> ClientRequest {
+      _events: [Object: null prototype],
+      _eventsCount: 7,
+      _maxListeners: undefined,
+      outputData: [],
+      outputSize: 0,
+      writable: true,
+      destroyed: true,
+      _last: true,
+      chunkedEncoding: false,
+      shouldKeepAlive: true,
+      maxRequestsOnConnectionReached: false,
+      _defaultKeepAlive: true,
+      useChunkedEncodingByDefault: false,
+      sendDate: false,
+      _removedConnection: false,
+      _removedContLen: false,
+      _removedTE: false,
+      strictContentLength: false,
+      _contentLength: 0,
+      _hasBody: true,
+      _trailer: '',
+      finished: true,
+      _headerSent: true,
+      _closed: true,
+      _header: 'GET /orders/100002 HTTP/1.1\r\n' +
+        'Accept: application/json, text/plain, */*\r\n' +
+        'Content-Type: application/json\r\n' +
+        'Authorization: Basic NTg0MjJiMTYxOTY3NDFkN2JiM2MzMmQ3ZTZlNDM4Mjc6NGNkNThkNWYxZTkwNDY3YWE4NzI2OGFiYmI1ZWViM2I=\r\n' +
+        'User-Agent: axios/1.10.0\r\n' +
+        'Accept-Encoding: gzip, compress, deflate, br\r\n' +
+        'Host: ssapi.shipstation.com\r\n' +
+        'Connection: keep-alive\r\n' +
+        '\r\n',
+      _keepAliveTimeout: 0,
+      _onPendingData: [Function: nop],
+      agent: [Agent],
+      socketPath: undefined,
+      method: 'GET',
+      maxHeaderSize: undefined,
+      insecureHTTPParser: undefined,
+      joinDuplicateHeaders: undefined,
+      path: '/orders/100002',
+      _ended: true,
+      res: [IncomingMessage],
+      aborted: false,
+      timeoutCb: null,
+      upgradeOrConnect: false,
+      parser: null,
+      maxHeadersCount: null,
+      reusedSocket: true,
+      host: 'ssapi.shipstation.com',
+      protocol: 'https:',
+      _redirectable: [Writable],
+      [Symbol(shapeMode)]: false,
+      [Symbol(kCapture)]: false,
+      [Symbol(kBytesWritten)]: 0,
+      [Symbol(kNeedDrain)]: false,
+      [Symbol(corked)]: 0,
+      [Symbol(kChunkedBuffer)]: [],
+      [Symbol(kChunkedLength)]: 0,
+      [Symbol(kSocket)]: [TLSSocket],
+      [Symbol(kOutHeaders)]: [Object: null prototype],
+      [Symbol(errored)]: null,
+      [Symbol(kHighWaterMark)]: 65536,
+      [Symbol(kRejectNonStandardBodyWrites)]: false,
+      [Symbol(kUniqueHeaders)]: null
+    },
+    data: ''
+  },
+  status: 404
+}
+Failed to fetch order data from ShipStation
+ShipStation webhook: ORDER_NOTIFY - https://ssapi.shipstation.com/orders/100003
+Processing ShipStation order from: https://ssapi.shipstation.com/orders/100003
+9:58:11 PM [express] POST /api/webhooks/shipstation/orders 200 in 2ms :: {"success":true,"message":"…
+Error fetching order from ShipStation: AxiosError: Request failed with status code 404
+    at settle (file:///Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/axios/lib/core/settle.js:19:12)
+    at IncomingMessage.handleStreamEnd (file:///Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/axios/lib/adapters/http.js:599:11)
+    at IncomingMessage.emit (node:events:530:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+    at Axios.request (file:///Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/axios/lib/core/Axios.js:45:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async ShipStationService.getOrder (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/server/services/shipstation.ts:94:24)
+    at async ShipStationService.getOrderFromResource (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/server/services/shipstation.ts:317:14)
+    at async processShipStationOrder (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/server/routes/webhooks.ts:187:23) {
+  code: 'ERR_BAD_REQUEST',
+  config: {
+    transitional: {
+      silentJSONParsing: true,
+      forcedJSONParsing: true,
+      clarifyTimeoutError: false
+    },
+    adapter: [ 'xhr', 'http', 'fetch' ],
+    transformRequest: [ [Function: transformRequest] ],
+    transformResponse: [ [Function: transformResponse] ],
+    timeout: 0,
+    xsrfCookieName: 'XSRF-TOKEN',
+    xsrfHeaderName: 'X-XSRF-TOKEN',
+    maxContentLength: -1,
+    maxBodyLength: -1,
+    env: { FormData: [Function [FormData]], Blob: [class Blob] },
+    validateStatus: [Function: validateStatus],
+    headers: Object [AxiosHeaders] {
+      Accept: 'application/json, text/plain, */*',
+      'Content-Type': 'application/json',
+      Authorization: 'Basic NTg0MjJiMTYxOTY3NDFkN2JiM2MzMmQ3ZTZlNDM4Mjc6NGNkNThkNWYxZTkwNDY3YWE4NzI2OGFiYmI1ZWViM2I=',
+      'User-Agent': 'axios/1.10.0',
+      'Accept-Encoding': 'gzip, compress, deflate, br'
+    },
+    method: 'get',
+    url: 'https://ssapi.shipstation.com/orders/100003',
+    allowAbsoluteUrls: true,
+    data: undefined
+  },
+  request: <ref *1> ClientRequest {
+    _events: [Object: null prototype] {
+      abort: [Function (anonymous)],
+      aborted: [Function (anonymous)],
+      connect: [Function (anonymous)],
+      error: [Function (anonymous)],
+      socket: [Function (anonymous)],
+      timeout: [Function (anonymous)],
+      finish: [Function: requestOnFinish]
+    },
+    _eventsCount: 7,
+    _maxListeners: undefined,
+    outputData: [],
+    outputSize: 0,
+    writable: true,
+    destroyed: true,
+    _last: true,
+    chunkedEncoding: false,
+    shouldKeepAlive: true,
+    maxRequestsOnConnectionReached: false,
+    _defaultKeepAlive: true,
+    useChunkedEncodingByDefault: false,
+    sendDate: false,
+    _removedConnection: false,
+    _removedContLen: false,
+    _removedTE: false,
+    strictContentLength: false,
+    _contentLength: 0,
+    _hasBody: true,
+    _trailer: '',
+    finished: true,
+    _headerSent: true,
+    _closed: true,
+    _header: 'GET /orders/100003 HTTP/1.1\r\n' +
+      'Accept: application/json, text/plain, */*\r\n' +
+      'Content-Type: application/json\r\n' +
+      'Authorization: Basic NTg0MjJiMTYxOTY3NDFkN2JiM2MzMmQ3ZTZlNDM4Mjc6NGNkNThkNWYxZTkwNDY3YWE4NzI2OGFiYmI1ZWViM2I=\r\n' +
+      'User-Agent: axios/1.10.0\r\n' +
+      'Accept-Encoding: gzip, compress, deflate, br\r\n' +
+      'Host: ssapi.shipstation.com\r\n' +
+      'Connection: keep-alive\r\n' +
+      '\r\n',
+    _keepAliveTimeout: 0,
+    _onPendingData: [Function: nop],
+    agent: Agent {
+      _events: [Object: null prototype],
+      _eventsCount: 2,
+      _maxListeners: undefined,
+      defaultPort: 443,
+      protocol: 'https:',
+      options: [Object: null prototype],
+      requests: [Object: null prototype] {},
+      sockets: [Object: null prototype] {},
+      freeSockets: [Object: null prototype],
+      keepAliveMsecs: 1000,
+      keepAlive: true,
+      maxSockets: Infinity,
+      maxFreeSockets: 256,
+      scheduling: 'lifo',
+      maxTotalSockets: Infinity,
+      totalSocketCount: 1,
+      maxCachedSessions: 100,
+      _sessionCache: [Object],
+      [Symbol(shapeMode)]: false,
+      [Symbol(kCapture)]: false
+    },
+    socketPath: undefined,
+    method: 'GET',
+    maxHeaderSize: undefined,
+    insecureHTTPParser: undefined,
+    joinDuplicateHeaders: undefined,
+    path: '/orders/100003',
+    _ended: true,
+    res: IncomingMessage {
+      _events: [Object],
+      _readableState: [ReadableState],
+      _maxListeners: undefined,
+      socket: null,
+      httpVersionMajor: 1,
+      httpVersionMinor: 1,
+      httpVersion: '1.1',
+      complete: true,
+      rawHeaders: [Array],
+      rawTrailers: [],
+      joinDuplicateHeaders: undefined,
+      aborted: false,
+      upgrade: false,
+      url: '',
+      method: null,
+      statusCode: 404,
+      statusMessage: 'Not Found',
+      client: [TLSSocket],
+      _consuming: false,
+      _dumped: false,
+      req: [Circular *1],
+      _eventsCount: 4,
+      responseUrl: 'https://ssapi.shipstation.com/orders/100003',
+      redirects: [],
+      [Symbol(shapeMode)]: true,
+      [Symbol(kCapture)]: false,
+      [Symbol(kHeaders)]: [Object],
+      [Symbol(kHeadersCount)]: 24,
+      [Symbol(kTrailers)]: null,
+      [Symbol(kTrailersCount)]: 0
+    },
+    aborted: false,
+    timeoutCb: null,
+    upgradeOrConnect: false,
+    parser: null,
+    maxHeadersCount: null,
+    reusedSocket: true,
+    host: 'ssapi.shipstation.com',
+    protocol: 'https:',
+    _redirectable: Writable {
+      _events: [Object],
+      _writableState: [WritableState],
+      _maxListeners: undefined,
+      _options: [Object],
+      _ended: true,
+      _ending: true,
+      _redirectCount: 0,
+      _redirects: [],
+      _requestBodyLength: 0,
+      _requestBodyBuffers: [],
+      _eventsCount: 3,
+      _onNativeResponse: [Function (anonymous)],
+      _currentRequest: [Circular *1],
+      _currentUrl: 'https://ssapi.shipstation.com/orders/100003',
+      [Symbol(shapeMode)]: true,
+      [Symbol(kCapture)]: false
+    },
+    [Symbol(shapeMode)]: false,
+    [Symbol(kCapture)]: false,
+    [Symbol(kBytesWritten)]: 0,
+    [Symbol(kNeedDrain)]: false,
+    [Symbol(corked)]: 0,
+    [Symbol(kChunkedBuffer)]: [],
+    [Symbol(kChunkedLength)]: 0,
+    [Symbol(kSocket)]: TLSSocket {
+      _tlsOptions: [Object],
+      _secureEstablished: true,
+      _securePending: false,
+      _newSessionPending: false,
+      _controlReleased: true,
+      secureConnecting: false,
+      _SNICallback: null,
+      servername: 'ssapi.shipstation.com',
+      alpnProtocol: false,
+      authorized: true,
+      authorizationError: null,
+      encrypted: true,
+      _events: [Object: null prototype],
+      _eventsCount: 9,
+      connecting: false,
+      _hadError: false,
+      _parent: null,
+      _host: 'ssapi.shipstation.com',
+      _closeAfterHandlingError: false,
+      _readableState: [ReadableState],
+      _writableState: [WritableState],
+      allowHalfOpen: false,
+      _maxListeners: undefined,
+      _sockname: null,
+      _pendingData: null,
+      _pendingEncoding: '',
+      server: undefined,
+      _server: null,
+      ssl: [TLSWrap],
+      _requestCert: true,
+      _rejectUnauthorized: true,
+      timeout: 5000,
+      parser: null,
+      _httpMessage: null,
+      autoSelectFamilyAttemptedAddresses: [Array],
+      [Symbol(alpncallback)]: null,
+      [Symbol(res)]: [TLSWrap],
+      [Symbol(verified)]: true,
+      [Symbol(pendingSession)]: null,
+      [Symbol(async_id_symbol)]: -1,
+      [Symbol(kHandle)]: [TLSWrap],
+      [Symbol(lastWriteQueueSize)]: 0,
+      [Symbol(timeout)]: Timeout {
+        _idleTimeout: 5000,
+        _idlePrev: [TimersList],
+        _idleNext: [TimersList],
+        _idleStart: 2867068,
+        _onTimeout: [Function: bound ],
+        _timerArgs: undefined,
+        _repeat: null,
+        _destroyed: false,
+        [Symbol(refed)]: false,
+        [Symbol(kHasPrimitive)]: false,
+        [Symbol(asyncId)]: 21664,
+        [Symbol(triggerId)]: 21662,
+        [Symbol(kAsyncContextFrame)]: undefined
+      },
+      [Symbol(kBuffer)]: null,
+      [Symbol(kBufferCb)]: null,
+      [Symbol(kBufferGen)]: null,
+      [Symbol(shapeMode)]: true,
+      [Symbol(kCapture)]: false,
+      [Symbol(kSetNoDelay)]: false,
+      [Symbol(kSetKeepAlive)]: true,
+      [Symbol(kSetKeepAliveInitialDelay)]: 1,
+      [Symbol(kBytesRead)]: 0,
+      [Symbol(kBytesWritten)]: 0,
+      [Symbol(connect-options)]: [Object]
+    },
+    [Symbol(kOutHeaders)]: [Object: null prototype] {
+      accept: [Array],
+      'content-type': [Array],
+      authorization: [Array],
+      'user-agent': [Array],
+      'accept-encoding': [Array],
+      host: [Array]
+    },
+    [Symbol(errored)]: null,
+    [Symbol(kHighWaterMark)]: 65536,
+    [Symbol(kRejectNonStandardBodyWrites)]: false,
+    [Symbol(kUniqueHeaders)]: null
+  },
+  response: {
+    status: 404,
+    statusText: 'Not Found',
+    headers: Object [AxiosHeaders] {
+      date: 'Wed, 30 Jul 2025 01:58:11 GMT',
+      'content-length': '0',
+      connection: 'keep-alive',
+      'x-rate-limit-limit': '40',
+      'x-rate-limit-reset': '49',
+      'x-rate-limit-remaining': '38',
+      'cache-control': 'no-cache',
+      pragma: 'no-cache',
+      expires: '-1',
+      server: 'Microsoft-IIS/10.0',
+      'x-aspnet-version': '4.0.30319',
+      'x-powered-by': 'ASP.NET'
+    },
+    config: {
+      transitional: [Object],
+      adapter: [Array],
+      transformRequest: [Array],
+      transformResponse: [Array],
+      timeout: 0,
+      xsrfCookieName: 'XSRF-TOKEN',
+      xsrfHeaderName: 'X-XSRF-TOKEN',
+      maxContentLength: -1,
+      maxBodyLength: -1,
+      env: [Object],
+      validateStatus: [Function: validateStatus],
+      headers: [Object [AxiosHeaders]],
+      method: 'get',
+      url: 'https://ssapi.shipstation.com/orders/100003',
+      allowAbsoluteUrls: true,
+      data: undefined
+    },
+    request: <ref *1> ClientRequest {
+      _events: [Object: null prototype],
+      _eventsCount: 7,
+      _maxListeners: undefined,
+      outputData: [],
+      outputSize: 0,
+      writable: true,
+      destroyed: true,
+      _last: true,
+      chunkedEncoding: false,
+      shouldKeepAlive: true,
+      maxRequestsOnConnectionReached: false,
+      _defaultKeepAlive: true,
+      useChunkedEncodingByDefault: false,
+      sendDate: false,
+      _removedConnection: false,
+      _removedContLen: false,
+      _removedTE: false,
+      strictContentLength: false,
+      _contentLength: 0,
+      _hasBody: true,
+      _trailer: '',
+      finished: true,
+      _headerSent: true,
+      _closed: true,
+      _header: 'GET /orders/100003 HTTP/1.1\r\n' +
+        'Accept: application/json, text/plain, */*\r\n' +
+        'Content-Type: application/json\r\n' +
+        'Authorization: Basic NTg0MjJiMTYxOTY3NDFkN2JiM2MzMmQ3ZTZlNDM4Mjc6NGNkNThkNWYxZTkwNDY3YWE4NzI2OGFiYmI1ZWViM2I=\r\n' +
+        'User-Agent: axios/1.10.0\r\n' +
+        'Accept-Encoding: gzip, compress, deflate, br\r\n' +
+        'Host: ssapi.shipstation.com\r\n' +
+        'Connection: keep-alive\r\n' +
+        '\r\n',
+      _keepAliveTimeout: 0,
+      _onPendingData: [Function: nop],
+      agent: [Agent],
+      socketPath: undefined,
+      method: 'GET',
+      maxHeaderSize: undefined,
+      insecureHTTPParser: undefined,
+      joinDuplicateHeaders: undefined,
+      path: '/orders/100003',
+      _ended: true,
+      res: [IncomingMessage],
+      aborted: false,
+      timeoutCb: null,
+      upgradeOrConnect: false,
+      parser: null,
+      maxHeadersCount: null,
+      reusedSocket: true,
+      host: 'ssapi.shipstation.com',
+      protocol: 'https:',
+      _redirectable: [Writable],
+      [Symbol(shapeMode)]: false,
+      [Symbol(kCapture)]: false,
+      [Symbol(kBytesWritten)]: 0,
+      [Symbol(kNeedDrain)]: false,
+      [Symbol(corked)]: 0,
+      [Symbol(kChunkedBuffer)]: [],
+      [Symbol(kChunkedLength)]: 0,
+      [Symbol(kSocket)]: [TLSSocket],
+      [Symbol(kOutHeaders)]: [Object: null prototype],
+      [Symbol(errored)]: null,
+      [Symbol(kHighWaterMark)]: 65536,
+      [Symbol(kRejectNonStandardBodyWrites)]: false,
+      [Symbol(kUniqueHeaders)]: null
+    },
+    data: ''
+  },
+  status: 404
+}
+Failed to fetch order data from ShipStation
+ShipStation webhook: ORDER_NOTIFY - https://ssapi.shipstation.com/orders/100004
+Processing ShipStation order from: https://ssapi.shipstation.com/orders/100004
+9:58:13 PM [express] POST /api/webhooks/shipstation/orders 200 in 1ms :: {"success":true,"message":"…
+Error fetching order from ShipStation: AxiosError: Request failed with status code 404
+    at settle (file:///Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/axios/lib/core/settle.js:19:12)
+    at IncomingMessage.handleStreamEnd (file:///Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/axios/lib/adapters/http.js:599:11)
+    at IncomingMessage.emit (node:events:530:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+    at Axios.request (file:///Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/axios/lib/core/Axios.js:45:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async ShipStationService.getOrder (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/server/services/shipstation.ts:94:24)
+    at async ShipStationService.getOrderFromResource (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/server/services/shipstation.ts:317:14)
+    at async processShipStationOrder (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/server/routes/webhooks.ts:187:23) {
+  code: 'ERR_BAD_REQUEST',
+  config: {
+    transitional: {
+      silentJSONParsing: true,
+      forcedJSONParsing: true,
+      clarifyTimeoutError: false
+    },
+    adapter: [ 'xhr', 'http', 'fetch' ],
+    transformRequest: [ [Function: transformRequest] ],
+    transformResponse: [ [Function: transformResponse] ],
+    timeout: 0,
+    xsrfCookieName: 'XSRF-TOKEN',
+    xsrfHeaderName: 'X-XSRF-TOKEN',
+    maxContentLength: -1,
+    maxBodyLength: -1,
+    env: { FormData: [Function [FormData]], Blob: [class Blob] },
+    validateStatus: [Function: validateStatus],
+    headers: Object [AxiosHeaders] {
+      Accept: 'application/json, text/plain, */*',
+      'Content-Type': 'application/json',
+      Authorization: 'Basic NTg0MjJiMTYxOTY3NDFkN2JiM2MzMmQ3ZTZlNDM4Mjc6NGNkNThkNWYxZTkwNDY3YWE4NzI2OGFiYmI1ZWViM2I=',
+      'User-Agent': 'axios/1.10.0',
+      'Accept-Encoding': 'gzip, compress, deflate, br'
+    },
+    method: 'get',
+    url: 'https://ssapi.shipstation.com/orders/100004',
+    allowAbsoluteUrls: true,
+    data: undefined
+  },
+  request: <ref *1> ClientRequest {
+    _events: [Object: null prototype] {
+      abort: [Function (anonymous)],
+      aborted: [Function (anonymous)],
+      connect: [Function (anonymous)],
+      error: [Function (anonymous)],
+      socket: [Function (anonymous)],
+      timeout: [Function (anonymous)],
+      finish: [Function: requestOnFinish]
+    },
+    _eventsCount: 7,
+    _maxListeners: undefined,
+    outputData: [],
+    outputSize: 0,
+    writable: true,
+    destroyed: true,
+    _last: true,
+    chunkedEncoding: false,
+    shouldKeepAlive: true,
+    maxRequestsOnConnectionReached: false,
+    _defaultKeepAlive: true,
+    useChunkedEncodingByDefault: false,
+    sendDate: false,
+    _removedConnection: false,
+    _removedContLen: false,
+    _removedTE: false,
+    strictContentLength: false,
+    _contentLength: 0,
+    _hasBody: true,
+    _trailer: '',
+    finished: true,
+    _headerSent: true,
+    _closed: true,
+    _header: 'GET /orders/100004 HTTP/1.1\r\n' +
+      'Accept: application/json, text/plain, */*\r\n' +
+      'Content-Type: application/json\r\n' +
+      'Authorization: Basic NTg0MjJiMTYxOTY3NDFkN2JiM2MzMmQ3ZTZlNDM4Mjc6NGNkNThkNWYxZTkwNDY3YWE4NzI2OGFiYmI1ZWViM2I=\r\n' +
+      'User-Agent: axios/1.10.0\r\n' +
+      'Accept-Encoding: gzip, compress, deflate, br\r\n' +
+      'Host: ssapi.shipstation.com\r\n' +
+      'Connection: keep-alive\r\n' +
+      '\r\n',
+    _keepAliveTimeout: 0,
+    _onPendingData: [Function: nop],
+    agent: Agent {
+      _events: [Object: null prototype],
+      _eventsCount: 2,
+      _maxListeners: undefined,
+      defaultPort: 443,
+      protocol: 'https:',
+      options: [Object: null prototype],
+      requests: [Object: null prototype] {},
+      sockets: [Object: null prototype] {},
+      freeSockets: [Object: null prototype],
+      keepAliveMsecs: 1000,
+      keepAlive: true,
+      maxSockets: Infinity,
+      maxFreeSockets: 256,
+      scheduling: 'lifo',
+      maxTotalSockets: Infinity,
+      totalSocketCount: 1,
+      maxCachedSessions: 100,
+      _sessionCache: [Object],
+      [Symbol(shapeMode)]: false,
+      [Symbol(kCapture)]: false
+    },
+    socketPath: undefined,
+    method: 'GET',
+    maxHeaderSize: undefined,
+    insecureHTTPParser: undefined,
+    joinDuplicateHeaders: undefined,
+    path: '/orders/100004',
+    _ended: true,
+    res: IncomingMessage {
+      _events: [Object],
+      _readableState: [ReadableState],
+      _maxListeners: undefined,
+      socket: null,
+      httpVersionMajor: 1,
+      httpVersionMinor: 1,
+      httpVersion: '1.1',
+      complete: true,
+      rawHeaders: [Array],
+      rawTrailers: [],
+      joinDuplicateHeaders: undefined,
+      aborted: false,
+      upgrade: false,
+      url: '',
+      method: null,
+      statusCode: 404,
+      statusMessage: 'Not Found',
+      client: [TLSSocket],
+      _consuming: false,
+      _dumped: false,
+      req: [Circular *1],
+      _eventsCount: 4,
+      responseUrl: 'https://ssapi.shipstation.com/orders/100004',
+      redirects: [],
+      [Symbol(shapeMode)]: true,
+      [Symbol(kCapture)]: false,
+      [Symbol(kHeaders)]: [Object],
+      [Symbol(kHeadersCount)]: 24,
+      [Symbol(kTrailers)]: null,
+      [Symbol(kTrailersCount)]: 0
+    },
+    aborted: false,
+    timeoutCb: null,
+    upgradeOrConnect: false,
+    parser: null,
+    maxHeadersCount: null,
+    reusedSocket: true,
+    host: 'ssapi.shipstation.com',
+    protocol: 'https:',
+    _redirectable: Writable {
+      _events: [Object],
+      _writableState: [WritableState],
+      _maxListeners: undefined,
+      _options: [Object],
+      _ended: true,
+      _ending: true,
+      _redirectCount: 0,
+      _redirects: [],
+      _requestBodyLength: 0,
+      _requestBodyBuffers: [],
+      _eventsCount: 3,
+      _onNativeResponse: [Function (anonymous)],
+      _currentRequest: [Circular *1],
+      _currentUrl: 'https://ssapi.shipstation.com/orders/100004',
+      [Symbol(shapeMode)]: true,
+      [Symbol(kCapture)]: false
+    },
+    [Symbol(shapeMode)]: false,
+    [Symbol(kCapture)]: false,
+    [Symbol(kBytesWritten)]: 0,
+    [Symbol(kNeedDrain)]: false,
+    [Symbol(corked)]: 0,
+    [Symbol(kChunkedBuffer)]: [],
+    [Symbol(kChunkedLength)]: 0,
+    [Symbol(kSocket)]: TLSSocket {
+      _tlsOptions: [Object],
+      _secureEstablished: true,
+      _securePending: false,
+      _newSessionPending: false,
+      _controlReleased: true,
+      secureConnecting: false,
+      _SNICallback: null,
+      servername: 'ssapi.shipstation.com',
+      alpnProtocol: false,
+      authorized: true,
+      authorizationError: null,
+      encrypted: true,
+      _events: [Object: null prototype],
+      _eventsCount: 9,
+      connecting: false,
+      _hadError: false,
+      _parent: null,
+      _host: 'ssapi.shipstation.com',
+      _closeAfterHandlingError: false,
+      _readableState: [ReadableState],
+      _writableState: [WritableState],
+      allowHalfOpen: false,
+      _maxListeners: undefined,
+      _sockname: null,
+      _pendingData: null,
+      _pendingEncoding: '',
+      server: undefined,
+      _server: null,
+      ssl: [TLSWrap],
+      _requestCert: true,
+      _rejectUnauthorized: true,
+      timeout: 5000,
+      parser: null,
+      _httpMessage: null,
+      autoSelectFamilyAttemptedAddresses: [Array],
+      [Symbol(alpncallback)]: null,
+      [Symbol(res)]: [TLSWrap],
+      [Symbol(verified)]: true,
+      [Symbol(pendingSession)]: null,
+      [Symbol(async_id_symbol)]: -1,
+      [Symbol(kHandle)]: [TLSWrap],
+      [Symbol(lastWriteQueueSize)]: 0,
+      [Symbol(timeout)]: Timeout {
+        _idleTimeout: 5000,
+        _idlePrev: [TimersList],
+        _idleNext: [TimersList],
+        _idleStart: 2869079,
+        _onTimeout: [Function: bound ],
+        _timerArgs: undefined,
+        _repeat: null,
+        _destroyed: false,
+        [Symbol(refed)]: false,
+        [Symbol(kHasPrimitive)]: false,
+        [Symbol(asyncId)]: 21697,
+        [Symbol(triggerId)]: 21695,
+        [Symbol(kAsyncContextFrame)]: undefined
+      },
+      [Symbol(kBuffer)]: null,
+      [Symbol(kBufferCb)]: null,
+      [Symbol(kBufferGen)]: null,
+      [Symbol(shapeMode)]: true,
+      [Symbol(kCapture)]: false,
+      [Symbol(kSetNoDelay)]: false,
+      [Symbol(kSetKeepAlive)]: true,
+      [Symbol(kSetKeepAliveInitialDelay)]: 1,
+      [Symbol(kBytesRead)]: 0,
+      [Symbol(kBytesWritten)]: 0,
+      [Symbol(connect-options)]: [Object]
+    },
+    [Symbol(kOutHeaders)]: [Object: null prototype] {
+      accept: [Array],
+      'content-type': [Array],
+      authorization: [Array],
+      'user-agent': [Array],
+      'accept-encoding': [Array],
+      host: [Array]
+    },
+    [Symbol(errored)]: null,
+    [Symbol(kHighWaterMark)]: 65536,
+    [Symbol(kRejectNonStandardBodyWrites)]: false,
+    [Symbol(kUniqueHeaders)]: null
+  },
+  response: {
+    status: 404,
+    statusText: 'Not Found',
+    headers: Object [AxiosHeaders] {
+      date: 'Wed, 30 Jul 2025 01:58:13 GMT',
+      'content-length': '0',
+      connection: 'keep-alive',
+      'x-rate-limit-limit': '40',
+      'x-rate-limit-reset': '47',
+      'x-rate-limit-remaining': '37',
+      'cache-control': 'no-cache',
+      pragma: 'no-cache',
+      expires: '-1',
+      server: 'Microsoft-IIS/10.0',
+      'x-aspnet-version': '4.0.30319',
+      'x-powered-by': 'ASP.NET'
+    },
+    config: {
+      transitional: [Object],
+      adapter: [Array],
+      transformRequest: [Array],
+      transformResponse: [Array],
+      timeout: 0,
+      xsrfCookieName: 'XSRF-TOKEN',
+      xsrfHeaderName: 'X-XSRF-TOKEN',
+      maxContentLength: -1,
+      maxBodyLength: -1,
+      env: [Object],
+      validateStatus: [Function: validateStatus],
+      headers: [Object [AxiosHeaders]],
+      method: 'get',
+      url: 'https://ssapi.shipstation.com/orders/100004',
+      allowAbsoluteUrls: true,
+      data: undefined
+    },
+    request: <ref *1> ClientRequest {
+      _events: [Object: null prototype],
+      _eventsCount: 7,
+      _maxListeners: undefined,
+      outputData: [],
+      outputSize: 0,
+      writable: true,
+      destroyed: true,
+      _last: true,
+      chunkedEncoding: false,
+      shouldKeepAlive: true,
+      maxRequestsOnConnectionReached: false,
+      _defaultKeepAlive: true,
+      useChunkedEncodingByDefault: false,
+      sendDate: false,
+      _removedConnection: false,
+      _removedContLen: false,
+      _removedTE: false,
+      strictContentLength: false,
+      _contentLength: 0,
+      _hasBody: true,
+      _trailer: '',
+      finished: true,
+      _headerSent: true,
+      _closed: true,
+      _header: 'GET /orders/100004 HTTP/1.1\r\n' +
+        'Accept: application/json, text/plain, */*\r\n' +
+        'Content-Type: application/json\r\n' +
+        'Authorization: Basic NTg0MjJiMTYxOTY3NDFkN2JiM2MzMmQ3ZTZlNDM4Mjc6NGNkNThkNWYxZTkwNDY3YWE4NzI2OGFiYmI1ZWViM2I=\r\n' +
+        'User-Agent: axios/1.10.0\r\n' +
+        'Accept-Encoding: gzip, compress, deflate, br\r\n' +
+        'Host: ssapi.shipstation.com\r\n' +
+        'Connection: keep-alive\r\n' +
+        '\r\n',
+      _keepAliveTimeout: 0,
+      _onPendingData: [Function: nop],
+      agent: [Agent],
+      socketPath: undefined,
+      method: 'GET',
+      maxHeaderSize: undefined,
+      insecureHTTPParser: undefined,
+      joinDuplicateHeaders: undefined,
+      path: '/orders/100004',
+      _ended: true,
+      res: [IncomingMessage],
+      aborted: false,
+      timeoutCb: null,
+      upgradeOrConnect: false,
+      parser: null,
+      maxHeadersCount: null,
+      reusedSocket: true,
+      host: 'ssapi.shipstation.com',
+      protocol: 'https:',
+      _redirectable: [Writable],
+      [Symbol(shapeMode)]: false,
+      [Symbol(kCapture)]: false,
+      [Symbol(kBytesWritten)]: 0,
+      [Symbol(kNeedDrain)]: false,
+      [Symbol(corked)]: 0,
+      [Symbol(kChunkedBuffer)]: [],
+      [Symbol(kChunkedLength)]: 0,
+      [Symbol(kSocket)]: [TLSSocket],
+      [Symbol(kOutHeaders)]: [Object: null prototype],
+      [Symbol(errored)]: null,
+      [Symbol(kHighWaterMark)]: 65536,
+      [Symbol(kRejectNonStandardBodyWrites)]: false,
+      [Symbol(kUniqueHeaders)]: null
+    },
+    data: ''
+  },
+  status: 404
+}
+Failed to fetch order data from ShipStation
+9:58:15 PM [express] POST /api/test/enhanced-rate-shopping 200 in 9ms
+9:58:19 PM [express] GET /api/test/rate-comparison-status 200 in 2ms
+9:58:22 PM [express] GET /api/test/rate-comparison-status 200 in 1ms
+10:03:47 PM [express] GET /api/wallet 401 in 1ms :: {"error":"User organization not found"}
+10:03:48 PM [express] GET /api/orders 304 in 18ms :: {"orders":[{"id":11,"organizationId":1,"shipstat…
+10:03:52 PM [express] GET /api/wallet 401 in 0ms :: {"error":"User organization not found"}
+10:03:52 PM [express] GET /api/auth/user 304 in 1ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+10:16:41 PM [express] GET /api/wallet 401 in 2ms :: {"error":"User organization not found"}
+10:16:44 PM [express] GET /api/wallet 401 in 4ms :: {"error":"User organization not found"}
+10:16:44 PM [express] GET /api/auth/user 304 in 1ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+10:16:44 PM [express] GET /api/rate-comparisons/30d 200 in 6ms
+10:16:48 PM [express] GET /api/wallet 401 in 1ms :: {"error":"User organization not found"}
+10:16:48 PM [express] GET /api/orders/all 304 in 11ms :: {"orders":[{"id":11,"organizationId":1,"ship…
+10:16:48 PM [express] GET /api/organizations 304 in 16ms :: [{"id":2,"name":"Demo E-commerce Store","…
+10:16:54 PM [express] GET /api/wallet 401 in 1ms :: {"error":"User organization not found"}
+10:16:54 PM [express] GET /api/orders 304 in 5ms :: {"orders":[{"id":11,"organizationId":1,"shipstati…
+Tracking lookup: Frontend sent QP25USA0U022157442, using GV25USA0U022157442 for API
+Tracking GV25USA0U022157442 using official V3.8 endpoint
+Official tracking response: {
+  "code": 1,
+  "message": "success",
+  "data": [
+    {
+      "trackingNo": "GV25USA0U022157442",
+      "fromDetail": [
+        {
+          "pathTime": "2025-07-28 15:01:21",
+          "flightNo": "",
+          "pathLocation": "UNI DATA CENTER",
+          "timezone": "UTC+00",
+          "pathCode": "315",
+          "pathInfo": "Order received"
+        },
+        {
+          "pathTime": "2025-07-29 03:45:19",
+          "flightNo": "",
+          "pathLocation": "",
+          "timezone": "UTC+8",
+          "pathCode": "120",
+          "pathInfo": "Parcel data received"
+        },
+        {
+          "pathTime": "2025-07-28 22:01:21",
+          "flightNo": "",
+          "pathLocation": "UNI DATA CENTER",
+          "timezone": "UTC+00",
+          "pathCode": "315",
+          "pathInfo": "Order received"
+        }
+      ]
+    }
+  ]
+}
+10:16:57 PM [express] GET /api/tracking/QP25USA0U022157442 200 in 1259ms :: {"code":1,"message":"succ…
+10:16:59 PM [express] GET /api/wallet 401 in 1ms :: {"error":"User organization not found"}
+Looking for order ID: 11, using storage type: DatabaseStorage
+🔧 CUSTOMIZING LABEL: GV25USA0U022157442
+📐 ACTUAL Page dimensions: width=283.46, height=425.21
+🔄 REPLACING: GV25USA0U022157442 -> QP25USA0U022157442
+🎯 Removing logo at: x=30, y=325.21
+🎯 Covering main GV at: y=162.605
+🎯 Covering bottom GV at: y=20
+✍️ Adding main QP at: x=54.12999999999998, y=177.605
+✍️ Adding bottom QP at: x=76.35999999999999, y=35
+Fresh start customized label saved to: /Users/rdevnath/Downloads/ShipmentSync1/Quikpik/temp-labels/fresh_customized_GV25USA0U022157442_1753841821825.pdf
+10:17:01 PM [express] POST /api/shipments/11/print 200 in 1525ms :: {"labelPath":"/api/labels/customi…
+10:17:01 PM [express] GET /api/labels/customized/fresh_customized_GV25USA0U022157442_1753841821825.pd…
+10:17:11 PM [express] GET /api/wallet 401 in 0ms :: {"error":"User organization not found"}
+10:17:30 PM [express] GET /api/wallet 401 in 2ms :: {"error":"User organization not found"}
+10:17:30 PM [express] GET /api/wallet 401 in 1ms :: {"error":"User organization not found"}
+10:17:30 PM [express] GET /api/orders 304 in 8ms :: {"orders":[{"id":11,"organizationId":1,"shipstati…
+10:17:31 PM [express] GET /api/wallet 401 in 3ms :: {"error":"User organization not found"}
+10:17:31 PM [express] GET /api/rate-comparisons/30d 200 in 6ms
+10:17:32 PM [express] GET /api/wallet 401 in 2ms :: {"error":"User organization not found"}
+10:17:34 PM [express] GET /api/wallet 401 in 1ms :: {"error":"User organization not found"}
+10:17:34 PM [express] GET /api/wallet/transactions 401 in 2ms :: {"error":"User organization not foun…
+10:17:34 PM [express] GET /api/api-keys 304 in 3ms :: []
+10:17:34 PM [express] GET /api/carrier-accounts 304 in 11ms :: []
+10:17:36 PM [express] GET /api/auth/user 304 in 0ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+10:17:36 PM [express] GET /api/wallet 401 in 1ms :: {"error":"User organization not found"}
+10:17:36 PM [express] GET /api/orders 304 in 2ms :: {"orders":[{"id":11,"organizationId":1,"shipstati…
+10:17:36 PM [express] GET /api/orders/all 304 in 1ms :: {"orders":[{"id":11,"organizationId":1,"ships…
+10:17:36 PM [express] GET /api/organizations 304 in 5ms :: [{"id":2,"name":"Demo E-commerce Store","s…
+10:24:11 PM [express] GET /api/auth/user 304 in 2ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+10:24:11 PM [express] GET /api/wallet 401 in 30ms :: {"error":"User organization not found"}
+10:24:11 PM [express] GET /api/orders 304 in 122ms :: {"orders":[{"id":11,"organizationId":1,"shipsta…
+10:24:11 PM [express] GET /api/orders/all 304 in 124ms :: {"orders":[{"id":11,"organizationId":1,"shi…
+10:24:11 PM [express] GET /api/organizations 304 in 122ms :: [{"id":2,"name":"Demo E-commerce Store",…
+10:36:32 PM [express] GET /api/wallet 401 in 6ms :: {"error":"User organization not found"}
+10:36:33 PM [express] GET /api/orders 304 in 20ms :: {"orders":[{"id":11,"organizationId":1,"shipstat…
+10:39:26 PM [express] GET /api/wallet 401 in 1ms :: {"error":"User organization not found"}
+10:39:26 PM [express] GET /api/auth/user 304 in 0ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+10:39:27 PM [express] GET /api/wallet 401 in 1ms :: {"error":"User organization not found"}
+10:39:27 PM [express] GET /api/orders 304 in 9ms :: {"orders":[{"id":11,"organizationId":1,"shipstati…
+10:39:28 PM [express] GET /api/wallet 401 in 2ms :: {"error":"User organization not found"}
+10:39:29 PM [express] GET /api/wallet 401 in 2ms :: {"error":"User organization not found"}
+10:39:33 PM [express] GET /api/organizations/2/users 304 in 3ms :: [{"id":2,"email":"demo@client.com"…
+10:39:56 PM [express] GET /api/wallet 401 in 2ms :: {"error":"User organization not found"}
+12:10:24 AM [express] GET /api/auth/user 304 in 1ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+12:10:24 AM [express] GET /api/wallet 401 in 0ms :: {"error":"User organization not found"}
+12:10:24 AM [express] GET /api/orders/all 304 in 56ms :: {"orders":[{"id":11,"organizationId":1,"ship…
+12:10:24 AM [express] GET /api/organizations 304 in 58ms :: [{"id":2,"name":"Demo E-commerce Store","…
+12:10:24 AM [express] GET /api/orders 304 in 60ms :: {"orders":[{"id":11,"organizationId":1,"shipstat…
+8:20:50 AM [express] GET /api/auth/user 304 in 6ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+8:20:50 AM [express] GET /api/wallet 401 in 10ms :: {"error":"User organization not found"}
+8:20:50 AM [express] GET /api/orders 304 in 198ms :: {"orders":[{"id":11,"organizationId":1,"shipsta…
+8:20:50 AM [express] GET /api/orders/all 304 in 194ms :: {"orders":[{"id":11,"organizationId":1,"shi…
+8:20:50 AM [express] GET /api/organizations 304 in 196ms :: [{"id":2,"name":"Demo E-commerce Store",…
+8:21:02 AM [express] GET /api/auth/user 304 in 5ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+8:21:02 AM [express] GET /api/wallet 401 in 4ms :: {"error":"User organization not found"}
+8:21:02 AM [express] GET /api/orders 304 in 10ms :: {"orders":[{"id":11,"organizationId":1,"shipstat…
+8:21:02 AM [express] GET /api/orders/all 304 in 11ms :: {"orders":[{"id":11,"organizationId":1,"ship…
+8:21:02 AM [express] GET /api/organizations 304 in 10ms :: [{"id":2,"name":"Demo E-commerce Store","…
+9:43:04 AM [express] GET /api/auth/user 304 in 1ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+9:43:04 AM [express] GET /api/wallet 401 in 3ms :: {"error":"User organization not found"}
+9:43:04 AM [express] GET /api/orders 304 in 112ms :: {"orders":[{"id":11,"organizationId":1,"shipsta…
+9:43:04 AM [express] GET /api/orders/all 304 in 106ms :: {"orders":[{"id":11,"organizationId":1,"shi…
+9:43:04 AM [express] GET /api/organizations 304 in 111ms :: [{"id":2,"name":"Demo E-commerce Store",…
+10:09:31 AM [express] GET /api/auth/user 304 in 3ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+10:09:31 AM [express] GET /api/wallet 401 in 2ms :: {"error":"User organization not found"}
+10:09:32 AM [express] GET /api/organizations 304 in 48ms :: [{"id":2,"name":"Demo E-commerce Store","…
+10:09:32 AM [express] GET /api/orders 304 in 52ms :: {"orders":[{"id":11,"organizationId":1,"shipstat…
+10:09:32 AM [express] GET /api/orders/all 304 in 50ms :: {"orders":[{"id":11,"organizationId":1,"ship…
+10:09:39 AM [express] GET /api/auth/user 304 in 8ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+10:09:39 AM [express] GET /api/wallet 401 in 12ms :: {"error":"User organization not found"}
+10:09:39 AM [express] GET /api/orders/all 304 in 13ms :: {"orders":[{"id":11,"organizationId":1,"ship…
+10:09:39 AM [express] GET /api/orders 304 in 14ms :: {"orders":[{"id":11,"organizationId":1,"shipstat…
+10:09:39 AM [express] GET /api/organizations 304 in 11ms :: [{"id":2,"name":"Demo E-commerce Store","…
+10:10:09 AM [express] GET /api/auth/user 304 in 2ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+10:10:09 AM [express] GET /api/wallet 401 in 2ms :: {"error":"User organization not found"}
+10:10:09 AM [express] GET /api/orders/all 304 in 63ms :: {"orders":[{"id":11,"organizationId":1,"ship…
+10:10:09 AM [express] GET /api/orders 304 in 68ms :: {"orders":[{"id":11,"organizationId":1,"shipstat…
+10:10:09 AM [express] GET /api/organizations 304 in 68ms :: [{"id":2,"name":"Demo E-commerce Store","…
+10:10:27 AM [express] GET /api/auth/user 304 in 1ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+10:10:28 AM [express] GET /api/wallet 401 in 1ms :: {"error":"User organization not found"}
+10:10:28 AM [express] GET /api/orders 304 in 20ms :: {"orders":[{"id":11,"organizationId":1,"shipstat…
+10:10:28 AM [express] GET /api/orders/all 304 in 20ms :: {"orders":[{"id":11,"organizationId":1,"ship…
+10:10:28 AM [express] GET /api/organizations 304 in 18ms :: [{"id":2,"name":"Demo E-commerce Store","…
+10:10:38 AM [express] GET /api/auth/user 304 in 0ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+10:10:38 AM [express] GET /api/wallet 401 in 1ms :: {"error":"User organization not found"}
+10:10:38 AM [express] GET /api/orders/all 304 in 17ms :: {"orders":[{"id":11,"organizationId":1,"ship…
+10:10:38 AM [express] GET /api/orders 304 in 23ms :: {"orders":[{"id":11,"organizationId":1,"shipstat…
+10:10:38 AM [express] GET /api/organizations 304 in 22ms :: [{"id":2,"name":"Demo E-commerce Store","…
+10:11:02 AM [express] GET /api/auth/user 304 in 12ms :: {"user":{"id":1,"email":"rajan@quikpik.io","f…
+10:11:02 AM [express] GET /api/wallet 401 in 3ms :: {"error":"User organization not found"}
+10:11:02 AM [express] GET /api/orders/all 304 in 54ms :: {"orders":[{"id":11,"organizationId":1,"ship…
+10:11:02 AM [express] GET /api/orders 304 in 64ms :: {"orders":[{"id":11,"organizationId":1,"shipstat…
+10:11:02 AM [express] GET /api/organizations 304 in 63ms :: [{"id":2,"name":"Demo E-commerce Store","…
+10:11:46 AM [express] GET /api/auth/user 304 in 1ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+10:11:46 AM [express] GET /api/wallet 401 in 0ms :: {"error":"User organization not found"}
+10:11:46 AM [express] GET /api/orders 304 in 21ms :: {"orders":[{"id":11,"organizationId":1,"shipstat…
+10:11:46 AM [express] GET /api/orders/all 304 in 19ms :: {"orders":[{"id":11,"organizationId":1,"ship…
+10:11:46 AM [express] GET /api/organizations 304 in 24ms :: [{"id":2,"name":"Demo E-commerce Store","…
+10:11:49 AM [express] GET /api/auth/user 304 in 1ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+10:11:49 AM [express] GET /api/wallet 401 in 4ms :: {"error":"User organization not found"}
+10:11:49 AM [express] GET /api/orders 304 in 6ms :: {"orders":[{"id":11,"organizationId":1,"shipstati…
+10:11:49 AM [express] GET /api/orders/all 304 in 6ms :: {"orders":[{"id":11,"organizationId":1,"ships…
+10:11:49 AM [express] GET /api/organizations 304 in 3ms :: [{"id":2,"name":"Demo E-commerce Store","s…
+12:17:42 PM [express] GET /api/auth/user 304 in 1ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+12:17:42 PM [express] GET /api/wallet 401 in 2ms :: {"error":"User organization not found"}
+12:17:42 PM [express] GET /api/organizations 304 in 120ms :: [{"id":2,"name":"Demo E-commerce Store",…
+12:17:42 PM [express] GET /api/orders 304 in 125ms :: {"orders":[{"id":11,"organizationId":1,"shipsta…
+12:17:42 PM [express] GET /api/orders/all 304 in 123ms :: {"orders":[{"id":11,"organizationId":1,"shi…
+12:36:57 PM [express] GET /api/auth/user 304 in 3ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+12:36:57 PM [express] GET /api/wallet 401 in 7ms :: {"error":"User organization not found"}
+12:36:57 PM [express] GET /api/orders/all 304 in 347ms :: {"orders":[{"id":11,"organizationId":1,"shi…
+12:36:57 PM [express] GET /api/orders 304 in 356ms :: {"orders":[{"id":11,"organizationId":1,"shipsta…
+12:36:57 PM [express] GET /api/organizations 304 in 346ms :: [{"id":2,"name":"Demo E-commerce Store",…
+12:39:56 PM [express] GET /api/auth/user 304 in 1ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+12:39:56 PM [express] GET /api/wallet 401 in 0ms :: {"error":"User organization not found"}
+12:39:56 PM [express] GET /api/orders 304 in 26ms :: {"orders":[{"id":11,"organizationId":1,"shipstat…
+12:39:56 PM [express] GET /api/organizations 304 in 55ms :: [{"id":2,"name":"Demo E-commerce Store","…
+12:39:56 PM [express] GET /api/orders/all 304 in 66ms :: {"orders":[{"id":11,"organizationId":1,"ship…
+1:57:54 PM [express] GET /api/auth/user 304 in 2ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+1:57:54 PM [express] GET /api/wallet 401 in 1ms :: {"error":"User organization not found"}
+1:57:54 PM [express] GET /api/orders/all 304 in 34ms :: {"orders":[{"id":11,"organizationId":1,"ship…
+1:57:54 PM [express] GET /api/orders 304 in 53ms :: {"orders":[{"id":11,"organizationId":1,"shipstat…
+1:57:54 PM [express] GET /api/organizations 304 in 38ms :: [{"id":2,"name":"Demo E-commerce Store","…
+1:58:00 PM [express] POST /api/auth/logout 200 in 2ms :: {"success":true}
+1:58:00 PM [express] GET /api/wallet 401 in 0ms :: {"error":"Authentication required"}
+1:58:00 PM [express] GET /api/auth/user 401 in 1ms :: {"error":"Authentication required"}
+1:58:00 PM [express] GET /api/orders 401 in 0ms :: {"error":"Authentication required"}
+1:58:00 PM [express] GET /api/auth/user 401 in 1ms :: {"error":"Authentication required"}
+Development login successful for: rajan@quikpik.io
+1:58:03 PM [express] POST /api/auth/login 200 in 5ms :: {"success":true,"user":{"id":1,"email":"raja…
+1:58:03 PM [express] GET /api/auth/user 304 in 1ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+1:58:04 PM [express] GET /api/auth/user 304 in 1ms :: {"user":{"id":1,"email":"rajan@quikpik.io","fi…
+1:58:04 PM [express] GET /api/wallet 401 in 1ms :: {"error":"User organization not found"}
+1:58:04 PM [express] GET /api/orders 304 in 2ms :: {"orders":[{"id":11,"organizationId":1,"shipstati…
+1:58:04 PM [express] GET /api/orders/all 304 in 6ms :: {"orders":[{"id":11,"organizationId":1,"ships…
+1:58:04 PM [express] GET /api/organizations 304 in 6ms :: [{"id":2,"name":"Demo E-commerce Store","s…

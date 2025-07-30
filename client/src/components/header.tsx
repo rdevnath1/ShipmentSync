@@ -13,6 +13,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
+import NotificationCenter from "@/components/notification-center";
 
 interface HeaderProps {
   title: string;
@@ -118,65 +119,8 @@ export default function Header({ title, description }: HeaderProps) {
           <h2 className="text-xl lg:text-2xl font-semibold text-foreground">{title}</h2>
         </div>
         <div className="flex items-center space-x-2 lg:space-x-4">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="relative">
-                <Bell className="text-muted-foreground" size={20} />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs text-white font-medium">
-                    {unreadCount}
-                  </span>
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80">
-              <DropdownMenuLabel>
-                <div className="flex items-center justify-between">
-                  <span>Notifications</span>
-                  <div className="flex items-center space-x-2">
-                    {unreadCount > 0 && (
-                      <>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={markAllAsRead}
-                          className="text-xs h-6 px-2 py-1 text-blue-600 hover:text-blue-800"
-                        >
-                          <CheckCheck className="mr-1" size={12} />
-                          Mark all read
-                        </Button>
-                        <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">
-                          {unreadCount} new
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {notifications.map((notification) => (
-                <DropdownMenuItem key={notification.id} className="flex flex-col items-start space-y-1 p-3">
-                  <div className="flex items-start justify-between w-full">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2">
-                        <p className="text-sm font-medium">{notification.title}</p>
-                        {notification.unread && (
-                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1">{notification.description}</p>
-                    </div>
-                    <span className="text-xs text-muted-foreground">{notification.time}</span>
-                  </div>
-                </DropdownMenuItem>
-              ))}
-              {notifications.length === 0 && (
-                <div className="p-3 text-center text-sm text-muted-foreground">
-                  No notifications
-                </div>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/* Enhanced Notification Center */}
+          <NotificationCenter />
           
           {user && (
             <DropdownMenu>
