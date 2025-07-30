@@ -1,6 +1,8 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+import { setupVite, log } from "./vite";
+import fs from "fs";
+import path from "path";
 
 const app = express();
 app.use(express.json());
@@ -53,7 +55,20 @@ app.use((req, res, next) => {
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
-    serveStatic(app);
+    // In production, serve static files from the built client
+    const distPath = path.resolve(import.meta.dirname, "..", "dist", "public");
+    if (fs.existsSync(distPath)) {
+      app.use(express.static(distPath));
+      // fall through to index.html if the file doesn't exist
+      app.use("*", (_req, res) => {
+        res.sendFile(path.resolve(distPath, "index.html"));
+      });
+    } else {
+      // If no build exists, serve a simple message
+      app.use("*", (_req, res) => {
+        res.status(404).json({ error: "Client not built. Run 'npm run build' first." });
+      });
+    }
   }
 
   // serve the app on the specified port (default 5000)

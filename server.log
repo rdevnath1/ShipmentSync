@@ -2548,3 +2548,72 @@ Development login successful for: rajan@quikpik.io
 1:58:04 PM [express] GET /api/orders 304 in 2ms :: {"orders":[{"id":11,"organizationId":1,"shipstati…
 1:58:04 PM [express] GET /api/orders/all 304 in 6ms :: {"orders":[{"id":11,"organizationId":1,"ships…
 1:58:04 PM [express] GET /api/organizations 304 in 6ms :: [{"id":2,"name":"Demo E-commerce Store","s…
+2:21:50 PM [vite] (client) hmr update /src/App.tsx?v=m6A10K_FVpg9lZ30pFQmf, /src/index.css?v=m6A10K_FVpg9lZ30pFQmf
+2:21:50 PM [vite] (client) hmr update /src/components/sidebar.tsx, /src/index.css?v=m6A10K_FVpg9lZ30pFQmf
+2:21:50 PM [vite] Internal server error: /Users/rdevnath/Downloads/ShipmentSync1/Quikpik/client/src/App.tsx: Unexpected token (20:1)
+
+  18 | import RateCalculatorPage from "@/pages/rate-calculator";
+  19 | import LandingPage from "@/pages/landing";
+> 20 | <<<<<<< HEAD
+     |  ^
+  21 | import Reports from "@/pages/reports";
+  22 | =======
+  23 | import CarriersRateShopper from "@/pages/carriers-rate-shopper";
+  Plugin: vite:react-babel
+  File: /Users/rdevnath/Downloads/ShipmentSync1/Quikpik/client/src/App.tsx:20:1
+  18 |  import RateCalculatorPage from "@/pages/rate-calculator";
+  19 |  import LandingPage from "@/pages/landing";
+  20 |  <<<<<<< HEAD
+     |   ^
+  21 |  import Reports from "@/pages/reports";
+  22 |  =======
+      at toParseError (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at raise (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/tokenizer/index.ts:1503:19)
+      at unexpected (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/tokenizer/index.ts:1543:16)
+      at jsxParseIdentifier (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/plugins/jsx/index.ts:278:14)
+      at jsxParseNamespacedName (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/plugins/jsx/index.ts:288:25)
+      at jsxParseElementName (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/plugins/jsx/index.ts:306:14)
+      at jsxParseOpeningElementAt (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/plugins/jsx/index.ts:429:24)
+      at jsxParseElementAt (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/plugins/jsx/index.ts:470:35)
+      at jsxParseElement (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/plugins/jsx/index.ts:559:19)
+      at parseExprAtom (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/plugins/jsx/index.ts:573:21)
+      at parseExprSubscripts (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/parser/expression.ts:734:23)
+      at parseUpdate (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/parser/expression.ts:713:21)
+      at parseMaybeUnary (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/parser/expression.ts:675:23)
+      at parseMaybeUnary (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/plugins/typescript/index.ts:3853:20)
+      at parseMaybeUnaryOrPrivate (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/parser/expression.ts:409:14)
+      at parseExprOps (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/parser/expression.ts:421:23)
+      at parseMaybeConditional (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/parser/expression.ts:376:23)
+      at parseMaybeAssign (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at fn (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/plugins/typescript/index.ts:3706:23)
+      at tryParse (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/parser/util.ts:174:20)
+      at parseMaybeAssign (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/plugins/typescript/index.ts:3705:20)
+      at parseExpressionBase (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/parser/expression.ts:226:23)
+      at callback (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/parser/expression.ts:217:39)
+      at allowInAnd (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/parser/expression.ts:3187:16)
+      at parseExpression (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/parser/expression.ts:217:17)
+      at parseStatementContent (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/parser/statement.ts:683:23)
+      at parseStatementContent (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/plugins/typescript/index.ts:3183:20)
+      at parseStatementLike (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/parser/statement.ts:477:17)
+      at parseModuleItem (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/parser/statement.ts:414:17)
+      at parseBlockOrModuleBlockBody (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/parser/statement.ts:1438:16)
+      at parseBlockBody (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/parser/statement.ts:1412:10)
+      at parseProgram (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/parser/statement.ts:229:10)
+      at parseTopLevel (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/parser/statement.ts:203:25)
+      at parse (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/parser/index.ts:93:10)
+      at parse (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/plugins/typescript/index.ts:4307:20)
+      at parse (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/parser/src/index.ts:92:38)
+      at parser (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/core/src/parser/index.ts:28:19)
+      at parser.next (<anonymous>)
+      at normalizeFile (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/core/src/transformation/normalize-file.ts:49:24)
+      at normalizeFile.next (<anonymous>)
+      at run (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/core/src/transformation/index.ts:40:36)
+      at run.next (<anonymous>)
+      at transform (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/core/src/transform.ts:29:20)
+      at transform.next (<anonymous>)
+      at step (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/gensync/index.js:261:32)
+      at /Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/gensync/index.js:273:13
+      at async.call.result.err.err (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/gensync/index.js:223:11)
+      at /Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/gensync/index.js:189:28
+      at <anonymous> (/Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/@babel/core/src/gensync-utils/async.ts:90:7)
+      at /Users/rdevnath/Downloads/ShipmentSync1/Quikpik/node_modules/gensync/index.js:113:33
