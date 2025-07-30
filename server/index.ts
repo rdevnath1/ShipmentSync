@@ -69,18 +69,40 @@ app.use((req, res, next) => {
         res.sendFile(path.resolve(distPath, "index.html"));
       });
     } else {
-      // If no build exists, serve a simple message
-      console.log("No dist directory found, serving error message");
+      // If no build exists, serve a simple HTML page
+      console.log("No dist directory found, serving fallback HTML");
       app.use("*", (req, res) => {
         console.log("Request for:", req.path);
         if (req.path.startsWith("/api")) {
           res.status(404).json({ error: "API endpoint not found" });
         } else {
-          res.status(404).json({ 
-            error: "Client not built. Run 'npm run build' first.",
-            path: req.path,
-            distPath: distPath
-          });
+          // Serve a simple HTML page instead of JSON
+          res.setHeader('Content-Type', 'text/html');
+          res.send(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <title>Quikpik - Shipment Management</title>
+              <style>
+                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+                .container { max-width: 600px; margin: 0 auto; }
+                .error { color: #e74c3c; }
+                .info { color: #3498db; }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <h1>🚚 Quikpik Shipment Management</h1>
+                <p class="info">Your shipment management platform is being deployed...</p>
+                <p class="error">The client application is not yet built.</p>
+                <p>Please check the Vercel deployment logs for build errors.</p>
+                <hr>
+                <p><strong>Path requested:</strong> ${req.path}</p>
+                <p><strong>Expected build path:</strong> ${distPath}</p>
+              </div>
+            </body>
+            </html>
+          `);
         }
       });
     }

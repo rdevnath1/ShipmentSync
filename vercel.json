@@ -24,5 +24,5 @@
       "maxDuration": 30
     }
   },
-  "buildCommand": "npm run vercel-build"
+  "buildCommand": "npm run build"
 } 
