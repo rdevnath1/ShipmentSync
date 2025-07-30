@@ -5,6 +5,7 @@ import { ShipStationService } from "./services/shipstation";
 import { JiayouService } from "./services/jiayou";
 import { EnhancedJiayouService } from "./services/enhanced-jiayou";
 import { RateShopperService } from "./services/rate-shopper";
+import { FedExService, type FedExShipmentRequest, type FedExCredentials } from "./services/fedex.service";
 import { StatusMapper, StandardTrackingStatus } from "./utils/status-mapper";
 import ratesRouter from "./routes/rates";
 import webhooksRouter from "./routes/webhooks";
@@ -2511,6 +2512,155 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Rate comparison status check failed:", error);
       res.status(500).json({ 
         error: "Rate comparison status check failed",
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // FedEx Direct Integration Routes
+  app.post("/api/fedex/rates", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const { fromZip, toZip, weight, dimensions, credentials } = req.body;
+      
+      if (!fromZip || !toZip || !weight || !dimensions) {
+        return res.status(400).json({ error: "Missing required fields: fromZip, toZip, weight, dimensions" });
+      }
+
+      // Get FedEx credentials from organization's carrier accounts or from request
+      let fedexCreds: FedExCredentials | undefined;
+      
+      if (credentials) {
+        fedexCreds = credentials;
+      } else {
+        const carrierAccount = await storage.getActiveCarrierAccount(req.user!.organizationId, 'fedex');
+        if (carrierAccount && carrierAccount.credentials) {
+          fedexCreds = carrierAccount.credentials as FedExCredentials;
+        }
+      }
+
+      if (!fedexCreds) {
+        return res.status(400).json({ error: "FedEx credentials not found. Please configure FedEx integration in Settings." });
+      }
+
+      const fedexService = new FedExService(fedexCreds);
+      const rates = await fedexService.getRates({
+        fromZip,
+        toZip,
+        weight,
+        dimensions
+      });
+
+      res.json({
+        success: true,
+        rates,
+        carrier: 'FedEx'
+      });
+
+    } catch (error) {
+      console.error("FedEx rates error:", error);
+      res.status(500).json({ 
+        error: "Failed to get FedEx rates",
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  app.post("/api/fedex/shipment", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const shipmentRequest: FedExShipmentRequest & { credentials?: FedExCredentials } = req.body;
+      
+      if (!shipmentRequest.fromAddress || !shipmentRequest.toAddress || !shipmentRequest.weight) {
+        return res.status(400).json({ error: "Missing required fields: fromAddress, toAddress, weight" });
+      }
+
+      // Get FedEx credentials
+      let fedexCreds: FedExCredentials | undefined;
+      
+      if (shipmentRequest.credentials) {
+        fedexCreds = shipmentRequest.credentials;
+      } else {
+        const carrierAccount = await storage.getActiveCarrierAccount(req.user!.organizationId, 'fedex');
+        if (carrierAccount && carrierAccount.credentials) {
+          fedexCreds = carrierAccount.credentials as FedExCredentials;
+        }
+      }
+
+      if (!fedexCreds) {
+        return res.status(400).json({ error: "FedEx credentials not found. Please configure FedEx integration in Settings." });
+      }
+
+      const fedexService = new FedExService(fedexCreds);
+      const shipmentResult = await fedexService.createShipment({
+        fromAddress: shipmentRequest.fromAddress,
+        toAddress: shipmentRequest.toAddress,
+        weight: shipmentRequest.weight,
+        dimensions: shipmentRequest.dimensions || { length: 12, width: 9, height: 3 },
+        serviceType: shipmentRequest.serviceType || 'FEDEX_GROUND',
+        packagingType: shipmentRequest.packagingType || 'YOUR_PACKAGING',
+        labelFormat: shipmentRequest.labelFormat || 'PDF',
+        labelSize: shipmentRequest.labelSize || 'PAPER_4X6'
+      });
+
+      // Create audit log
+      await storage.createAuditLog({
+        userId: req.user!.id,
+        organizationId: req.user!.organizationId,
+        action: 'fedex_shipment_created',
+        resource: 'shipment',
+        resourceId: shipmentResult.trackingNumber,
+        details: {
+          trackingNumber: shipmentResult.trackingNumber,
+          cost: shipmentResult.totalCost,
+          service: shipmentRequest.serviceType || 'FEDEX_GROUND',
+          toAddress: shipmentRequest.toAddress
+        },
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent') || ''
+      });
+
+      res.json({
+        success: true,
+        trackingNumber: shipmentResult.trackingNumber,
+        labelUrl: shipmentResult.labelUrl,
+        totalCost: shipmentResult.totalCost,
+        estimatedDeliveryDate: shipmentResult.estimatedDeliveryDate,
+        carrier: 'FedEx'
+      });
+
+    } catch (error) {
+      console.error("FedEx shipment creation error:", error);
+      res.status(500).json({ 
+        error: "Failed to create FedEx shipment",
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  app.get("/api/fedex/track/:trackingNumber", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const { trackingNumber } = req.params;
+      
+      // Get FedEx credentials
+      const carrierAccount = await storage.getActiveCarrierAccount(req.user!.organizationId, 'fedex');
+      if (!carrierAccount || !carrierAccount.credentials) {
+        return res.status(400).json({ error: "FedEx credentials not found. Please configure FedEx integration in Settings." });
+      }
+
+      const fedexCreds = carrierAccount.credentials as FedExCredentials;
+      const fedexService = new FedExService(fedexCreds);
+      const trackingData = await fedexService.trackShipment(trackingNumber);
+
+      res.json({
+        success: true,
+        trackingNumber,
+        trackingData,
+        carrier: 'FedEx'
+      });
+
+    } catch (error) {
+      console.error("FedEx tracking error:", error);
+      res.status(500).json({ 
+        error: "Failed to track FedEx shipment",
         message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
