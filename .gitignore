@@ -1,6 +1,73 @@
-node_modules
-dist
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build outputs
+dist/
+build/
+.output/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
 .DS_Store
-server/public
-vite.config.ts.*
-*.tar.gz
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+temp-labels/
+*.tmp
+*.temp
+
+# Database
+*.db
+*.sqlite
+
+# Cache
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+
+# Coverage
+coverage/
+*.lcov
+
+# Vercel
+.vercel
+
+# Local development
+.env.local
+.env.development
+.env.production
+
+# Cookie files (these seem to be temporary test files)
+cookies*.txt
+cookie_value.txt
+
+# PDF test files
+test_*.pdf
+latest_customized.pdf
+customized_*.pdf
